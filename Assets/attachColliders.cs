@@ -4,21 +4,20 @@ using UnityEngine;
 
 public class AttachColliders : MonoBehaviour
 {
+
+    public Material[] materials;
+
     void Start()
     {
         foreach (Transform child in transform)
         {
             Debug.Log("Processing: " + child.gameObject.name);
+            AddMaterials(child.gameObject);
             
             if (child.gameObject.GetComponent<BoxCollider>() == null)
             {
                 BoxCollider newCollider = child.gameObject.AddComponent<BoxCollider>();
                 newCollider.size = new Vector3(0.001f, 0.01f, 0.001f);
-                Debug.Log("Added collider to: " + child.gameObject.name + " with size " + newCollider.size);
-            }
-            else
-            {
-                Debug.Log("Collider already exists on: " + child.gameObject.name);
             }
 
             if (child.gameObject.GetComponent<Rigidbody>() == null)
@@ -27,12 +26,19 @@ public class AttachColliders : MonoBehaviour
                 rb.useGravity = false;
                 
                 rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationZ;
-                   // rb.constraints = RigidbodyConstraints.FreezePosition;
-                // rb.isKinematic = true;
                 Debug.Log("Added rigid body " + rb);
             }
         }
     }
 
-     
+    void AddMaterials(GameObject obj) {
+        
+         if(obj.name.Contains("Sharp") == true) {
+            obj.GetComponent<Renderer>().material = materials[1];
+        } else {
+            obj.GetComponent<Renderer>().material.color = new Color(255, 255, 255);
+            obj.GetComponent<Renderer>().material = materials[0];
+        }
+    }
+
 }

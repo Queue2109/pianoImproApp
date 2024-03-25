@@ -4,12 +4,10 @@ using UnityEngine;
 
 public class moveObject : MonoBehaviour
 {
-    
-    Vector3 Vec;  
-    // Start is called before the first frame update
+    Vector3 Vec;   
+    Renderer ren;
     void Start()
     {
-        
     }
 
     // Update is called once per frame
@@ -23,9 +21,27 @@ public class moveObject : MonoBehaviour
         transform.localPosition = Vec;  
   
     }
-   private void OnCollisionEnter(Collision collision)
+
+    private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("Collided");
+        GameObject key = collision.gameObject;
+        ren = key.GetComponent<Renderer>();
+        if(key.name.Contains("Sharp") == true) {
+            ren.material.color = new Color(186, 39, 39);
+        } else {
+            ren.material.color = new Color(186, 39, 39);
+        }
         Debug.Log("Key pressed: " + collision.gameObject.name);
-     }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        GameObject key = collision.gameObject;
+        ren = key.GetComponent<Renderer>();
+        if(key.name.Contains("Sharp") == true) {
+            ren.material.color = new Color(0, 0, 0);
+        } else {
+            ren.material.color = new Color(255, 255, 255);
+        }
+    }
 }
