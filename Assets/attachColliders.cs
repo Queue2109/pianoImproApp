@@ -25,17 +25,14 @@ public class AttachColliders : MonoBehaviour
             {
                 Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
                 rb.useGravity = false;
+                
+                rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationZ;
+                   // rb.constraints = RigidbodyConstraints.FreezePosition;
                 // rb.isKinematic = true;
                 Debug.Log("Added rigid body " + rb);
             }
         }
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Hand"))
-        {
-            Debug.Log("Key pressed: " + other.gameObject.name);
-        }
-    }
+     
 }
