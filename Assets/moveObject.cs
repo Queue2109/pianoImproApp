@@ -26,6 +26,9 @@ public class moveObject : MonoBehaviour
     {
         GameObject key = collision.gameObject;
         ren = key.GetComponent<Renderer>();
+        if(ren == null) {
+            return;
+        }
         if(key.name.Contains("Sharp") == true) {
             ren.material.color = new Color(186, 39, 39);
         } else {
@@ -38,6 +41,9 @@ public class moveObject : MonoBehaviour
     {
         GameObject key = collision.gameObject;
         ren = key.GetComponent<Renderer>();
+        if(ren == null) {
+            return;
+        }
         if(key.name.Contains("Sharp") == true) {
             ren.material.color = new Color(0, 0, 0);
         } else {

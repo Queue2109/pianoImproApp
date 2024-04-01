@@ -35,10 +35,10 @@ public class AttachColliders : MonoBehaviour
         
          if(obj.name.Contains("Sharp") == true) {
             obj.GetComponent<Renderer>().material = materials[1];
-        } else {
-            obj.GetComponent<Renderer>().material.color = new Color(255, 255, 255);
+        } else {   
             obj.GetComponent<Renderer>().material = materials[0];
-        }
+            obj.GetComponent<Renderer>().material.color = new Color(255, 255, 255);
+           }
     }
 
 }
