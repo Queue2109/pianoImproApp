@@ -8,7 +8,7 @@ public class PianoKeyFrequencyDetector : MonoBehaviour
     private AudioClip clip;
     private const int SAMPLE_RATE = 44100;
     private const int FREQUENCY_WINDOW = 1024; // Size of the FFT window
-    public GameObject animation;
+    public GameObject soundAnimation;
     public GameObject button;
     public void StartRecording()
     {
@@ -19,15 +19,15 @@ public class PianoKeyFrequencyDetector : MonoBehaviour
         Invoke("StopRecording", 5); // Stop recording after 5 seconds
         
         button.gameObject.SetActive(false);
-
-        // Start the show animation
+        soundAnimation.gameObject.SetActive(true);
+        // Start the show soundAnimation
     }
  
     void StopRecording()
     {
         if (!isRecording) return;
 
-        Microphone.End(null);
+        Microphone.End(null);   
         isRecording = false;
         Debug.Log("Recording stopped.");
 

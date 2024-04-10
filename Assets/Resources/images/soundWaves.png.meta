@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 399a7ee4f6c14ee49bc390a0f3323f8a
+guid: b7550d3ef48838448a60fe345926f111
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -81,19 +81,6 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 3
-    buildTarget: WebGL
-    maxTextureSize: 2048
-    resizeAlgorithm: 0
-    textureFormat: -1
-    textureCompression: 1
-    compressionQuality: 50
-    crunchedCompression: 0
-    allowsAlphaSplitting: 0
-    overridden: 0
-    ignorePlatformSupport: 0
-    androidETC2FallbackOverride: 0
-    forceMaximumCompressionQuality_BC6H_BC7: 0
-  - serializedVersion: 3
     buildTarget: Standalone
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -123,7 +110,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_0
+      name: soundWaves_0
       rect:
         serializedVersion: 2
         x: 0
@@ -137,14 +124,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 258916d5b213a4f429acfeef3db7409c
-      internalID: 1811221184
+      spriteID: 577d9f5ff2725d345b537ba4b5098084
+      internalID: -972544244
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_1
+      name: soundWaves_1
       rect:
         serializedVersion: 2
         x: 480
@@ -158,14 +145,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: bbcd615fb3ef1fc4597c29f79ff6cc85
-      internalID: 1364151444
+      spriteID: 59b8c60b4dafe5d41acc3d2f6dac31b9
+      internalID: 1318646902
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_2
+      name: soundWaves_2
       rect:
         serializedVersion: 2
         x: 960
@@ -179,14 +166,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f4c30ea5cf88b3046ac8e3cf3984e5b6
-      internalID: -1932637886
+      spriteID: c67908e1f238305439935f2ab88730bc
+      internalID: -576359585
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_3
+      name: soundWaves_3
       rect:
         serializedVersion: 2
         x: 1440
@@ -200,14 +187,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7a11533ce2387af4a9d2bde31b2c34c9
-      internalID: 475503486
+      spriteID: 847955a02b9e18149ad3ec2a0eab3a41
+      internalID: 459957727
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_4
+      name: soundWaves_4
       rect:
         serializedVersion: 2
         x: 0
@@ -221,14 +208,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2995c1009fd58ca47861466d071f9825
-      internalID: 1009149376
+      spriteID: ebaf9c415bf907b4f8a33bd4a9a6f463
+      internalID: -459542526
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_5
+      name: soundWaves_5
       rect:
         serializedVersion: 2
         x: 480
@@ -242,14 +229,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 7a893d025406e6a479e78c5745b87b72
-      internalID: 1759990441
+      spriteID: 4976e1896075beb469f089069a4cfed3
+      internalID: -378768075
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_6
+      name: soundWaves_6
       rect:
         serializedVersion: 2
         x: 960
@@ -263,14 +250,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: c8797fade71a917498df240d48f8ed4f
-      internalID: -1637516077
+      spriteID: 1a1a2bb0e33990f4aa94f5bc48076f36
+      internalID: 1025620413
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_7
+      name: soundWaves_7
       rect:
         serializedVersion: 2
         x: 1440
@@ -284,14 +271,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5b668fe5f9543ca4bb3c0d8f77b17c70
-      internalID: 995632126
+      spriteID: b26b2585416f40242a1081da37d10afc
+      internalID: -1137767606
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_8
+      name: soundWaves_8
       rect:
         serializedVersion: 2
         x: 0
@@ -305,14 +292,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b17b2857300ca704d94d15e9e57f880c
-      internalID: -829477853
+      spriteID: 07fda6285ebaa6f4e87eaf4faa2437c0
+      internalID: -1332041991
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_9
+      name: soundWaves_9
       rect:
         serializedVersion: 2
         x: 480
@@ -326,14 +313,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2c8d5c4b883641d44a50f71916440b4f
-      internalID: 435628887
+      spriteID: e6697388b3b122b43acd2cfe444f8f7d
+      internalID: 194152870
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_10
+      name: soundWaves_10
       rect:
         serializedVersion: 2
         x: 960
@@ -347,14 +334,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: db9a80a54ddc77f4abb5948753e32452
-      internalID: -828847742
+      spriteID: 46679ac65f65017409d85987e853700d
+      internalID: 964845143
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_11
+      name: soundWaves_11
       rect:
         serializedVersion: 2
         x: 1440
@@ -368,14 +355,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 0785be9be0707754ead5a4035a82e2f0
-      internalID: 1023479245
+      spriteID: 1a2a6c4379c21c8409f5429cd7ec35b1
+      internalID: 566059143
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_12
+      name: soundWaves_12
       rect:
         serializedVersion: 2
         x: 0
@@ -389,14 +376,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: b6fab620e506de34dbba86cb17b9c38d
-      internalID: 238452145
+      spriteID: f4e71218332b9fc40a6c79a939a7c422
+      internalID: -229821821
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_13
+      name: soundWaves_13
       rect:
         serializedVersion: 2
         x: 480
@@ -410,14 +397,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 48af6f00c830df84a851c7997547c5ba
-      internalID: -858585731
+      spriteID: 70b8560c323d3264686f5ea74b851d97
+      internalID: -1346106830
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_14
+      name: soundWaves_14
       rect:
         serializedVersion: 2
         x: 960
@@ -431,14 +418,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 55321e3f60179054dad3831de0ed7d29
-      internalID: 173977088
+      spriteID: d9087e8fcf3489544a774bd9a7922211
+      internalID: -1012551333
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_15
+      name: soundWaves_15
       rect:
         serializedVersion: 2
         x: 1440
@@ -452,14 +439,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: ba5d5d312135e0b4daa95a15e3dc1535
-      internalID: -157235046
+      spriteID: dc96748122d5a2443a173a9ea5f63eae
+      internalID: -658281434
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_16
+      name: soundWaves_16
       rect:
         serializedVersion: 2
         x: 0
@@ -473,14 +460,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5dfc86d9a3a22444ab753d8eca1d3a56
-      internalID: -224977027
+      spriteID: 10d2dc8d7e59f02419a9a7afc86dbf6e
+      internalID: 1290229595
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_17
+      name: soundWaves_17
       rect:
         serializedVersion: 2
         x: 480
@@ -494,14 +481,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 74a5f83a23f10ec4aba6539c8dbf56ac
-      internalID: -2136941765
+      spriteID: d32e1803b98673041977c19d73030794
+      internalID: -929186888
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_18
+      name: soundWaves_18
       rect:
         serializedVersion: 2
         x: 960
@@ -515,14 +502,14 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 2d12acd22eafd5a47842033dee297bfe
-      internalID: 51055885
+      spriteID: afa5d7a9edd2b1d41997d845a19a745e
+      internalID: 2036602003
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: ezgif.com-gif-to-sprite-converter_19
+      name: soundWaves_19
       rect:
         serializedVersion: 2
         x: 1440
@@ -536,8 +523,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5830d61370ed4dd4497fd6585d1bfe03
-      internalID: -498461305
+      spriteID: d593a00343a682646bb46b89da764edf
+      internalID: -2113366722
       vertices: []
       indices: 
       edges: []
@@ -545,7 +532,7 @@ TextureImporter:
     outline: []
     physicsShape: []
     bones: []
-    spriteID: 583777890337de943828b0419946298a
+    spriteID: 12cb4f7653f0a23448e2fa602bef5149
     internalID: 0
     vertices: []
     indices: 
@@ -553,26 +540,26 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     nameFileIdTable:
-      ezgif.com-gif-to-sprite-converter_0: 1811221184
-      ezgif.com-gif-to-sprite-converter_1: 1364151444
-      ezgif.com-gif-to-sprite-converter_10: -828847742
-      ezgif.com-gif-to-sprite-converter_11: 1023479245
-      ezgif.com-gif-to-sprite-converter_12: 238452145
-      ezgif.com-gif-to-sprite-converter_13: -858585731
-      ezgif.com-gif-to-sprite-converter_14: 173977088
-      ezgif.com-gif-to-sprite-converter_15: -157235046
-      ezgif.com-gif-to-sprite-converter_16: -224977027
-      ezgif.com-gif-to-sprite-converter_17: -2136941765
-      ezgif.com-gif-to-sprite-converter_18: 51055885
-      ezgif.com-gif-to-sprite-converter_19: -498461305
-      ezgif.com-gif-to-sprite-converter_2: -1932637886
-      ezgif.com-gif-to-sprite-converter_3: 475503486
-      ezgif.com-gif-to-sprite-converter_4: 1009149376
-      ezgif.com-gif-to-sprite-converter_5: 1759990441
-      ezgif.com-gif-to-sprite-converter_6: -1637516077
-      ezgif.com-gif-to-sprite-converter_7: 995632126
-      ezgif.com-gif-to-sprite-converter_8: -829477853
-      ezgif.com-gif-to-sprite-converter_9: 435628887
+      soundWaves_0: -972544244
+      soundWaves_1: 1318646902
+      soundWaves_10: 964845143
+      soundWaves_11: 566059143
+      soundWaves_12: -229821821
+      soundWaves_13: -1346106830
+      soundWaves_14: -1012551333
+      soundWaves_15: -658281434
+      soundWaves_16: 1290229595
+      soundWaves_17: -929186888
+      soundWaves_18: 2036602003
+      soundWaves_19: -2113366722
+      soundWaves_2: -576359585
+      soundWaves_3: 459957727
+      soundWaves_4: -459542526
+      soundWaves_5: -378768075
+      soundWaves_6: 1025620413
+      soundWaves_7: -1137767606
+      soundWaves_8: -1332041991
+      soundWaves_9: 194152870
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
