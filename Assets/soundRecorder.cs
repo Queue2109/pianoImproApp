@@ -1,63 +1,75 @@
 using UnityEngine;
-using System.Linq;
 
-public class PianoKeyFrequencyDetector : MonoBehaviour
+public class SoundRecorder : MonoBehaviour
 {
-    private bool isRecording = false;
-    private float[] audioData;
-    private AudioClip clip;
-    private const int SAMPLE_RATE = 44100;
-    private const int FREQUENCY_WINDOW = 1024; // Size of the FFT window
-    public GameObject soundAnimation;
-    public GameObject button;
+    AudioClip audioClip;
+
+    // Define the standard pitch for A4 (440 Hz)
+    private const float StandardPitchA4 = 440f;
+
+    // Define the number of semitones per octave
+    private const int SemitonesPerOctave = 12;
+
+    // Define the reference pitch class for A
+    private const int ReferencePitchClassA = 9; // A0
+
     public void StartRecording()
     {
-        audioData = new float[SAMPLE_RATE * 5]; // 5 seconds of audio at 44100 samples per second
-        isRecording = true;
-        Microphone.Start(null, false, 5, SAMPLE_RATE);
+        // Get the available microphone devices
+        string[] microphoneDevices = Microphone.devices;
+
+        // Choose a specific microphone device (for example, the first one in the list)
+        string selectedDevice = microphoneDevices.Length > 0 ? microphoneDevices[0] : null;
+
+        // Start recording audio from the selected microphone device
+        audioClip = Microphone.Start(selectedDevice, true, 5, AudioSettings.outputSampleRate);
         Debug.Log("Recording started...");
-        Invoke("StopRecording", 5); // Stop recording after 5 seconds
-        
-        button.gameObject.SetActive(false);
-        soundAnimation.gameObject.SetActive(true);
-        // Start the show soundAnimation
+
+        // Delayed stop recording after 5 seconds
+        Invoke("StopRecording", 5f);
     }
- 
+
     void StopRecording()
     {
-        if (!isRecording) return;
-
-        Microphone.End(null);   
-        isRecording = false;
+        // Stop recording and get the recorded audio data
+        Microphone.End(null);
         Debug.Log("Recording stopped.");
 
-        clip = Microphone.Start(null, false, 5, SAMPLE_RATE);
-        clip.GetData(audioData, 0);
-
+        // Analyze the recorded audio data
         AnalyzeSound();
-        button.gameObject.SetActive(true);
     }
 
     void AnalyzeSound()
     {
-        // This is a very basic frequency analysis using FFT
-        // For more accurate results, consider using a third-party library
+        AudioSource audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.clip = audioClip;
 
-        float maxMagnitude = 0;
+        // Analyze the frequency spectrum
+        float[] spectrumData = new float[1024];
+        audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
+
+        // Find the dominant frequency
+        float maxAmplitude = 0;
         int maxIndex = 0;
-
-        // Perform FFT on the data
-        for (int i = 0; i < audioData.Length; i += FREQUENCY_WINDOW)
+        for (int i = 0; i < spectrumData.Length; i++)
         {
-            float magnitude = audioData.Skip(i).Take(FREQUENCY_WINDOW).Select((val, index) => val * Mathf.Sin(Mathf.PI * index / FREQUENCY_WINDOW)).Sum();
-            if (magnitude > maxMagnitude)
+            if (spectrumData[i] > maxAmplitude)
             {
-                maxMagnitude = magnitude;
+                maxAmplitude = spectrumData[i];
                 maxIndex = i;
             }
         }
 
-        float frequency = maxIndex * SAMPLE_RATE / audioData.Length;
-        Debug.Log($"Detected frequency: {frequency} Hz");
+        // Calculate the frequency corresponding to the dominant index
+        float frequency = maxIndex * AudioSettings.outputSampleRate / spectrumData.Length;
+
+        // Convert frequency to musical pitch (you can use the method described in the previous response)
+        Debug.Log($"Dominant frequency: {frequency} Hz");
+
+        // Optionally, convert frequency to musical pitch
+        // ...
+
+        // Clean up
+        Destroy(audioSource);
     }
 }
