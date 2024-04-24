@@ -12,9 +12,18 @@ public class SoundRecorder : MonoBehaviour
 
     // Define the reference pitch class for A
     private const int ReferencePitchClassA = 9; // A0
+    private GameObject frame1;
+    private GameObject frame2;
+    void Start() {
+        StartRecording();
+    }
 
     public void StartRecording()
     {
+        frame1 = GameObject.Find("Frame1");
+        frame2 = GameObject.Find("Frame2Listening");
+        frame1.SetActive(false);
+        frame2.SetActive(true);
         // Get the available microphone devices
         string[] microphoneDevices = Microphone.devices;
 
