@@ -489,7 +489,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -558,6 +558,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.001, y: 0.01, z: 0.001}
   m_Center: {x: 0.000000007450581, y: 2.3283064e-10, z: 0.0000000027939677}
+--- !u!1 &207071310 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
+  m_PrefabInstance: {fileID: 603454237}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &228220661
 GameObject:
   m_ObjectHideFlags: 0
@@ -634,7 +639,7 @@ GameObject:
   - component: {fileID: 256115612}
   - component: {fileID: 256115611}
   - component: {fileID: 256115615}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: LeftArrowButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -774,7 +779,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5626a0b1dc955a43be59ce7ea116678, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _pointableCanvas: {fileID: 0}
+  _pointableCanvas: {fileID: 1670413085}
   _suppressWhileDragging: 1
   _whenBeginHighlight:
     m_PersistentCalls:
@@ -820,7 +825,7 @@ GameObject:
   - component: {fileID: 261062742}
   - component: {fileID: 261062741}
   - component: {fileID: 261062745}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: RightArrowButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1137,7 +1142,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -1512,7 +1517,7 @@ GameObject:
   - component: {fileID: 440518708}
   - component: {fileID: 440518707}
   - component: {fileID: 440518711}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: RightArrowButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1698,7 +1703,7 @@ GameObject:
   - component: {fileID: 443312515}
   - component: {fileID: 443312514}
   - component: {fileID: 443312518}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: RightArrowButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1960,7 +1965,7 @@ GameObject:
   - component: {fileID: 500242491}
   - component: {fileID: 500242490}
   - component: {fileID: 500242494}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: LeftArrowButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2224,7 +2229,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -2654,7 +2659,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -2723,7 +2728,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2.34
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2735,15 +2740,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -2817,14 +2822,17 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 487254, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 743170202}
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 100004, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 603454245}
   m_SourcePrefab: {fileID: 100100000, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
 --- !u!114 &603454238 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 11400010, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
   m_PrefabInstance: {fileID: 603454237}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 207071310}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: df9f338034892c44ebb62d97894772f1, type: 3}
@@ -2850,6 +2858,36 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 482130, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
   m_PrefabInstance: {fileID: 603454237}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &603454245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 207071310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actions: {fileID: 0}
+  m_NotificationBehavior: 0
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents: []
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: 
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 0}
 --- !u!1 &628948125
 GameObject:
   m_ObjectHideFlags: 0
@@ -3459,7 +3497,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 161.3, y: 0}
+  m_AnchoredPosition: {x: 210, y: 0}
   m_SizeDelta: {x: 30, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &735530790
@@ -3469,7 +3507,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 735530788}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f5626a0b1dc955a43be59ce7ea116678, type: 3}
   m_Name: 
@@ -3953,7 +3991,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -4175,7 +4213,7 @@ GameObject:
   - component: {fileID: 855542235}
   - component: {fileID: 855542234}
   - component: {fileID: 855542238}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: RightArrowButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4852,14 +4890,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1032733669}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.5, z: 0}
+  m_LocalRotation: {x: -0, y: -0.14596477, z: -0, w: 0.98928976}
+  m_LocalPosition: {x: 0.4332037, y: 0, z: 0.06391716}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1670413083}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -16.786, z: 0}
 --- !u!1 &1045896880
 GameObject:
   m_ObjectHideFlags: 0
@@ -5443,7 +5481,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -6042,7 +6080,7 @@ GameObject:
   - component: {fileID: 1412752034}
   - component: {fileID: 1412752033}
   - component: {fileID: 1412752037}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: RightArrowButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6237,6 +6275,7 @@ GameObject:
   - component: {fileID: 1483315773}
   - component: {fileID: 1483315775}
   - component: {fileID: 1483315774}
+  - component: {fileID: 1483315776}
   m_Layer: 0
   m_Name: FramePositionPiano
   m_TagString: Untagged
@@ -6313,6 +6352,21 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1483315776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1483315772}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 257f0a9461bdb3349abc7d6bf3d95c56, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  lowestNote: G3
+  highestNote: B5
+  pianoKeyboard: {fileID: 1614177551}
 --- !u!1 &1491731188
 GameObject:
   m_ObjectHideFlags: 0
@@ -6404,7 +6458,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -6995,55 +7049,59 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.7
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.7
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.7
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -7
+      value: -1.6408188
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.39
+      value: -0.6768889
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.51
+      value: 1.1446495
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0
+      value: 0.12990214
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.0056716534
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.9990483
+      value: 0.99056685
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.043619405
+      value: -0.043249104
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 5
+      value: 4.831
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 180
+      value: 165.003
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: -1.292
+      objectReference: {fileID: 0}
+    - target: {fileID: -2181558357886083142, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -280874484589776623, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -7055,7 +7113,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_TagString
@@ -7284,7 +7342,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 161.3, y: 0}
+  m_AnchoredPosition: {x: 210, y: 0}
   m_SizeDelta: {x: 30, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1719952566
@@ -7580,7 +7638,7 @@ GameObject:
   - component: {fileID: 1771237257}
   - component: {fileID: 1771237256}
   - component: {fileID: 1771237260}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: LeftArrowButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7791,7 +7849,7 @@ Transform:
   m_GameObject: {fileID: 1786189214}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 161.3, y: 0, z: 0}
+  m_LocalPosition: {x: -3.9, y: 0, z: 0}
   m_LocalScale: {x: 10, y: 10, z: 10}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -7961,7 +8019,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -8344,7 +8402,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Listening...
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -8378,7 +8436,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -8512,7 +8570,7 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 1
-  m_HorizontalAlignment: 1
+  m_HorizontalAlignment: 2
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -8563,6 +8621,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 251619012574693790, guid: ef1e9c76a795beb49b32154af4addf0b, type: 3}
+      propertyPath: currentPanelIndex
+      value: 6
+      objectReference: {fileID: 0}
     - target: {fileID: 251619012574693790, guid: ef1e9c76a795beb49b32154af4addf0b, type: 3}
       propertyPath: panels.Array.data[0]
       value: 
