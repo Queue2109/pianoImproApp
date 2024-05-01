@@ -11,7 +11,6 @@ public class AttachColliders : MonoBehaviour
     {
         foreach (Transform child in transform)
         {
-            Debug.Log("Processing: " + child.gameObject.name);
             AddMaterials(child.gameObject);
             
             if (child.gameObject.GetComponent<BoxCollider>() == null)
@@ -26,7 +25,6 @@ public class AttachColliders : MonoBehaviour
                 rb.useGravity = false;
                 
                 rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationZ;
-                Debug.Log("Added rigid body " + rb);
             }
         }
     }

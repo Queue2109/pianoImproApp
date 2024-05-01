@@ -5,8 +5,8 @@ using UnityEngine;
 
 public class PianoSetup : MonoBehaviour
 {
-    public string lowestNote = "A1";  // Set the lowest note in the Unity inspector
-    public string highestNote = "C6";  // Set the highest note in the Unity inspector
+    public string lowestNote = "A1";
+    public string highestNote = "C6";
     public GameObject pianoKeyboard;
     private Transform keyboardTransform;
 
@@ -19,6 +19,7 @@ public class PianoSetup : MonoBehaviour
         keyboardTransform = pianoKeyboard.GetComponent<Transform>();
         DisableLowerKeys(lowestNote);
         DisableHigherKeys(highestNote);
+        AdjustCollider();
     }
 
     void DisableLowerKeys(string lowestNote)
@@ -88,4 +89,25 @@ public class PianoSetup : MonoBehaviour
     {
         return int.Parse(note.Substring(note.Length - 1));
     }
+
+    void AdjustCollider()
+    {
+        BoxCollider collider = pianoKeyboard.GetComponent<BoxCollider>();
+        if (collider == null)
+        {
+            Debug.LogError("BoxCollider component not found on the piano keyboard object.");
+            return;
+        }
+
+        Vector3 lowPos = ((Transform)pianoKeyboard.transform.Find(lowestNote)).localPosition;
+        Vector3 highPos = ((Transform)pianoKeyboard.transform.Find(highestNote)).localPosition;
+        Vector3 midpoint = (lowPos + highPos) / 2;
+
+        float sizeX = Mathf.Abs(highPos.x - lowPos.x);
+        Vector3 size = new Vector3(sizeX, collider.size.y, collider.size.z);
+
+        collider.center = midpoint;
+        collider.size = size;
+    }
+
 }
