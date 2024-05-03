@@ -17,10 +17,26 @@ public class PianoSetup : MonoBehaviour
     {
         pianoKeyboard.SetActive(true);
         keyboardTransform = pianoKeyboard.GetComponent<Transform>();
+
+        // Calculate the new pivot (midpoint) and adjust before disabling keys
+        Vector3 lowPos = keyboardTransform.Find("A0").position;
+        Vector3 highPos = keyboardTransform.Find("B7").position;
+        Vector3 midpoint = (lowPos + highPos) / 2;
+
         DisableLowerKeys(lowestNote);
         DisableHigherKeys(highestNote);
+        PivotTo(midpoint);
         AdjustCollider();
     }
+
+    public void PivotTo(Vector3 position)
+    {
+        Vector3 offset = pianoKeyboard.transform.position - position;
+        foreach (Transform child in pianoKeyboard.transform)
+            child.position += offset;  // Make sure we're adjusting the global position directly.
+        pianoKeyboard.transform.position = position;
+    }
+
 
     void DisableLowerKeys(string lowestNote)
     {
