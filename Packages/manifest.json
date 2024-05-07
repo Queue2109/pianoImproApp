@@ -1,11 +1,11 @@
 {
-    "scopedRegistries": [
-        {
-            "name": "Keijiro",
-            "url": "https://registry.npmjs.com",
-            "scopes": [ "jp.keijiro" ]
-        }
-    ],
+  "scopedRegistries": [
+    {
+        "name": "Keijiro",
+        "url": "https://registry.npmjs.com",
+        "scopes": [ "jp.keijiro" ]
+    }
+  ],
     "dependencies": {
         "com.meta.xr.sdk.interaction.ovr.samples": "63.0.0",
         "com.unity.2d.sprite": "1.0.0",

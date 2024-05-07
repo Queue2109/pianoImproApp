@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PianoSetup : MonoBehaviour
@@ -9,6 +10,8 @@ public class PianoSetup : MonoBehaviour
     public string highestNote = "C6";
     public GameObject pianoKeyboard;
     private Transform keyboardTransform;
+    public Material blackMaterial;
+    public Material whiteMaterial;
 
     // Note ordering from low to high
     private List<string> noteOrder = new List<string> { "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp", "A", "A-Sharp", "B" };
@@ -27,6 +30,8 @@ public class PianoSetup : MonoBehaviour
         DisableHigherKeys(highestNote);
         PivotTo(midpoint);
         AdjustCollider();
+        ScaleSharpKeys();
+        AssignMaterials();
     }
 
     public void PivotTo(Vector3 position)
@@ -126,4 +131,47 @@ public class PianoSetup : MonoBehaviour
         collider.size = size;
     }
 
+    void ScaleSharpKeys()
+    {
+        foreach (Transform key in keyboardTransform)
+        {
+            string keyName = key.name;
+            string keyNoteName = ParseNoteName(keyName);
+            if(keyNoteName.Contains("Sharp"))
+            {
+                key.localScale = new Vector3(60, key.localScale.y, key.localScale.z);
+            }
+
+        }
+    }
+
+    public void AssignMaterials()
+    {
+
+        // Iterate through all children
+        foreach (Transform child in pianoKeyboard.transform)
+        {
+            // Try to get the Renderer component on the child
+            Renderer renderer = child.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                // Check if the child's name contains "sharp"
+                if (child.name.Contains("Sharp"))
+                {
+                    renderer.material = blackMaterial;
+                }
+                else
+                {
+                    renderer.material = whiteMaterial;
+                }
+            }
+            else
+            {
+                Debug.Log("Renderer not found on " + child.name);
+            }
+        }
+
+        Debug.Log("Materials assigned based on children names.");
+    }
 }
+

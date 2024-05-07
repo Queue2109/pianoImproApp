@@ -17,9 +17,12 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/New Scene.unity
     guid: 9e10bf40cbcb7474ab29899efabc2a87
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/PianoSetup.unity
     guid: d7d050061a59e6649994eb21f9414431
+  - enabled: 1
+    path: Assets/USB-Midi-Android/Scenes/Example.unity
+    guid: 2cda990e2423bbf4892e6590ba056729
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 3d8cb04a3e0044a46ae7a779cdc3b5ca, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 0077abc586aaf9b48975fdf968bc9fc0, type: 2}

@@ -12,17 +12,9 @@ public class UnityMidiAndroid
     public UnityMidiAndroid(IMidiEventHandler midiEventHandler)
     {
         _unityMidiAndroidCallBack = new UnityMidiAndroidCallBack(midiEventHandler);
-        AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-        if (unityPlayer != null)
-        {
-            AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-            // You can now safely use 'activity'
+        AndroidJavaClass unityPlayer = new AndroidJavaClass(UnityPlayer);
+        AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
         PluginInstance.Call("ctor", _unityMidiAndroidCallBack, activity);
-        }
-        else
-        {
-            Debug.LogError("Failed to get UnityPlayer class.");
-        }
     }
     private AndroidJavaClass PluginClass => _pluginClass ??= new AndroidJavaClass(PluginName);
 
