@@ -95,9 +95,19 @@ public class PanelManager : MonoBehaviour
         }
 
     }
+
+    public void GetHighestNote()
+    {
+        if (midiScript != null)
+        {
+            midiScript.OnNoteOn += HandleNoteOn;
+            Debug.Log("Neki");
+        }
+
+    }
     private void HandleNoteOn(int noteNumber)
     {
-        if(noteNumber < 60)
+        if(noteNumber < 40)
         {
             pianoSetup.lowestNote = midiScript.NoteNameConverter(noteNumber); // Assuming NoteNameConverter is a valid method
             lowestNoteText.text = pianoSetup.lowestNote.ToString();

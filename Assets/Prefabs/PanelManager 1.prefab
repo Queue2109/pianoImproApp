@@ -85,7 +85,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lowestNote: A1
   highestNote: C6
-  pianoKeyboard: {fileID: 0}
+  pianoKeyboard: {fileID: 919132149155446097, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
   blackMaterial: {fileID: 2100000, guid: ce06624e7fd0af149bc554b6326f0a05, type: 2}
   whiteMaterial: {fileID: 2100000, guid: fef37cbeded96e54b8a93f495dd51a49, type: 2}
-  midiScript: {fileID: 5694839914029714544}

@@ -26,14 +26,24 @@ public class PianoSetup : MonoBehaviour
     {
         pianoKeyboard.SetActive(true);
         keyboardTransform = pianoKeyboard.GetComponent<Transform>();
-
+        if(keyboardTransform == null)
+        {
+            Console.WriteLine("burek");
+            Debug.Log("krneki");
+        }
         // Calculate the new pivot (midpoint) and adjust before disabling keys
         Vector3 lowPos = keyboardTransform.Find(lowestNote).position;
+
+        Debug.Log( "Lowest" + lowestNote);
+        Debug.Log( "Lowest" + lowestNote);
         Vector3 highPos = keyboardTransform.Find(highestNote).position;
         Vector3 midpoint = (lowPos + highPos) / 2;
+        Debug.Log(highestNote);
 
         DisableLowerKeys(lowestNote);
+
         DisableHigherKeys(highestNote);
+
         PivotTo(midpoint);
         AdjustCollider();
         ScaleSharpKeys();

@@ -112,6 +112,7 @@ public class MidiScript : MonoBehaviour
 
         string noteName = this.noteOrder[(midiNote - 21) % 12].ToString();
         noteName += octaveNumber;
+        Debug.Log("Note name" + noteName);
         return noteName;
     }
 
