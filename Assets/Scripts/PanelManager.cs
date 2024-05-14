@@ -64,6 +64,7 @@ public class PanelManager : MonoBehaviour
                 break;
             case 5:
                 pianoSetup.Setup();
+                pianoSetup.AssignMaterials();
                 break;
 
         }

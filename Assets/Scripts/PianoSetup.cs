@@ -1,8 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Oculus.Interaction.Samples;
+using Oculus.Interaction;
 using Unity.VisualScripting;
 using UnityEngine;
+using Oculus.Interaction.HandGrab;
 
 public class PianoSetup : MonoBehaviour
 {
@@ -12,6 +15,7 @@ public class PianoSetup : MonoBehaviour
     private Transform keyboardTransform;
     public Material blackMaterial;
     public Material whiteMaterial;
+    public HandGrabInteractable handGrabInteractable;
 
     // Note ordering from low to high
     private List<string> noteOrder = new List<string> { "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp", "A", "A-Sharp", "B" };
@@ -23,16 +27,49 @@ public class PianoSetup : MonoBehaviour
         {
             pianoKeyboard.SetActive(false);
             keyboardTransform = pianoKeyboard.GetComponent<Transform>();
+            handGrabInteractable.enabled = false;
 
-
-        }else
-        {
-            Debug.Log("Burek olimpija");
+            RemoveAllTransformers();
         }
-
-
+    }
+    public void EnableTranslation()
+    {
+        RemoveAllTransformers();
+        handGrabInteractable.enabled = true;
+        pianoKeyboard.AddComponent<OneGrabTranslateTransformer>();
     }
 
+    public void EnableRotation()
+    {
+        RemoveAllTransformers();
+        handGrabInteractable.enabled = true;
+        pianoKeyboard.AddComponent<TwoGrabRotateTransformer>();
+    }
+
+    public void EnableScaling()
+    {
+        RemoveAllTransformers();
+        handGrabInteractable.enabled = true;
+        pianoKeyboard.AddComponent<OneGrabScaleTransformer>();
+    }
+
+    private void RemoveAllTransformers()
+    {
+        // Remove each transformer component if it exists
+        var translator = pianoKeyboard.GetComponent<OneGrabTranslateTransformer>();
+        if (translator != null)
+            Destroy(translator);
+
+        var rotator = pianoKeyboard.GetComponent<TwoGrabRotateTransformer>();
+        if (rotator != null)
+            Destroy(rotator);
+
+        var scaler = pianoKeyboard.GetComponent<OneGrabScaleTransformer>();
+        if (scaler != null)
+            Destroy(scaler);
+
+        handGrabInteractable.enabled = false;
+    }
     public void Setup()
     {
         pianoKeyboard.SetActive(true);
@@ -168,7 +205,6 @@ public class PianoSetup : MonoBehaviour
 
     public void AssignMaterials()
     {
-
         // Iterate through all children
         foreach (Transform child in pianoKeyboard.transform)
         {
@@ -176,15 +212,18 @@ public class PianoSetup : MonoBehaviour
             Renderer renderer = child.GetComponent<Renderer>();
             if (renderer != null)
             {
-                // Check if the child's name contains "sharp"
-                if (child.name.Contains("Sharp"))
+                Material[] materials = new Material[renderer.materials.Length];
+                for (int i = 0; i < materials.Length; i++)
                 {
-                    renderer.material = blackMaterial;
+                    if (child.gameObject.name.Contains("Sharp"))
+                    {
+                        materials[i] = blackMaterial;
+                    } else
+                    {
+                        materials[i] = whiteMaterial;
+                    }
                 }
-                else
-                {
-                    renderer.material = whiteMaterial;
-                }
+                renderer.materials = materials;  // Apply the new material to all sub-meshes
             }
             else
             {
