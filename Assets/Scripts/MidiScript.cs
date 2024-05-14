@@ -10,18 +10,17 @@ public class MidiScript : MonoBehaviour
 {
     // midi note number of lowest key in your midi device
     // 21: A0
-    int keyOffset = 21;
-    PianoSetup pianoSetup;
     public delegate void MidiNoteEvent(int noteNumber);
     public event MidiNoteEvent OnNoteOn;
     public event MidiNoteEvent OnNoteOff;
-    private List<string> noteOrder = new List<string> { "A", "A-Sharp", "B", "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp" };
+    private List<string> noteOrder = new List<string> { "A", "A-Sharp", "B", "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp" };     
 
     // this is used for visualizing the notes
     //[SerializeField] GameObject barManager;
 
     void Start()
     {
+
         InputSystem.onDeviceChange += (device, change) =>
         {
             if (change != InputDeviceChange.Added) return;

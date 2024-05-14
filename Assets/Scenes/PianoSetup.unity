@@ -828,7 +828,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 256115613}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 752545387}
+        m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
+        m_MethodName: SetPanel
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &256115613
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -890,7 +902,7 @@ MonoBehaviour:
   _whenSelectedHovered:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7601900130224311552}
+      - m_Target: {fileID: 752545387}
         m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
         m_MethodName: SetPanel
         m_Mode: 3
@@ -1015,13 +1027,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+      - m_Target: {fileID: 752545387}
+        m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
+        m_MethodName: NextPanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -1088,7 +1100,7 @@ MonoBehaviour:
   _whenSelectedHovered:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7601900130224311552}
+      - m_Target: {fileID: 752545387}
         m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
         m_MethodName: NextPanel
         m_Mode: 1
@@ -1352,7 +1364,7 @@ GameObject:
   - component: {fileID: 385484949}
   m_Layer: 0
   m_Name: FrameDetectedLowest
-  m_TagString: Untagged
+  m_TagString: Panel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1727,13 +1739,13 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
+      - m_Target: {fileID: 752545387}
+        m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
+        m_MethodName: NextPanel
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -1799,7 +1811,19 @@ MonoBehaviour:
       m_Calls: []
   _whenSelectedHovered:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 752545387}
+        m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
+        m_MethodName: NextPanel
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   _whenSelectedEmpty:
     m_PersistentCalls:
       m_Calls: []
@@ -1913,7 +1937,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7601900130224311552}
+      - m_Target: {fileID: 752545387}
         m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
         m_MethodName: NextPanel
         m_Mode: 1
@@ -1986,7 +2010,7 @@ MonoBehaviour:
   _whenSelectedHovered:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7601900130224311552}
+      - m_Target: {fileID: 752545387}
         m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
         m_MethodName: NextPanel
         m_Mode: 1
@@ -2019,7 +2043,7 @@ GameObject:
   - component: {fileID: 469154883}
   m_Layer: 0
   m_Name: FrameClickHighest
-  m_TagString: Untagged
+  m_TagString: Panel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2175,7 +2199,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7601900130224311552}
+      - m_Target: {fileID: 752545387}
         m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
         m_MethodName: PreviousPanel
         m_Mode: 1
@@ -2248,7 +2272,7 @@ MonoBehaviour:
   _whenSelectedHovered:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7601900130224311552}
+      - m_Target: {fileID: 752545387}
         m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
         m_MethodName: PreviousPanel
         m_Mode: 1
@@ -2513,7 +2537,7 @@ GameObject:
   - component: {fileID: 591486670}
   m_Layer: 0
   m_Name: FrameClickLowest
-  m_TagString: Untagged
+  m_TagString: Panel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3047,7 +3071,7 @@ GameObject:
   - component: {fileID: 714545775}
   m_Layer: 0
   m_Name: FrameDone
-  m_TagString: Untagged
+  m_TagString: Panel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3382,7 +3406,7 @@ GameObject:
   - component: {fileID: 752545386}
   - component: {fileID: 752545385}
   m_Layer: 0
-  m_Name: PanelManagerCopy
+  m_Name: PanelManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3402,7 +3426,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   lowestNote: A1
   highestNote: C6
-  pianoKeyboard: {fileID: 1614177551}
   blackMaterial: {fileID: 2100000, guid: ce06624e7fd0af149bc554b6326f0a05, type: 2}
   whiteMaterial: {fileID: 2100000, guid: fef37cbeded96e54b8a93f495dd51a49, type: 2}
 --- !u!114 &752545386
@@ -3429,19 +3452,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 20c228372127f4f4494b8386ef8e67ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panels:
-  - {fileID: 803617174}
-  - {fileID: 591486668}
-  - {fileID: 385484947}
-  - {fileID: 469154881}
-  - {fileID: 1821959598}
-  - {fileID: 1483315772}
-  - {fileID: 714545773}
   currentPanelIndex: 0
   midiScript: {fileID: 752545386}
   pianoSetup: {fileID: 752545385}
-  lowestNoteText: {fileID: 1626687906}
-  highestNoteText: {fileID: 1049006597}
+  noteTextLow: {fileID: 1626687906}
+  noteTextHigh: {fileID: 1049006597}
 --- !u!4 &752545388
 Transform:
   m_ObjectHideFlags: 0
@@ -3450,7 +3465,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 752545384}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.34930357, y: 0.67724264, z: 1.5854226}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3469,7 +3484,7 @@ GameObject:
   - component: {fileID: 803617176}
   m_Layer: 0
   m_Name: FrameSetup
-  m_TagString: Untagged
+  m_TagString: Panel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4334,7 +4349,7 @@ GameObject:
   - component: {fileID: 1049006597}
   m_Layer: 5
   m_Name: NoteText
-  m_TagString: Untagged
+  m_TagString: NoteText
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4346,7 +4361,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1049006595}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -4987,7 +5002,7 @@ GameObject:
   - component: {fileID: 1333960313}
   m_Layer: 5
   m_Name: Canvas
-  m_TagString: Untagged
+  m_TagString: IntroCanva
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5444,7 +5459,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7601900130224311552}
+      - m_Target: {fileID: 752545387}
         m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
         m_MethodName: NextPanel
         m_Mode: 1
@@ -5517,7 +5532,7 @@ MonoBehaviour:
   _whenSelectedHovered:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7601900130224311552}
+      - m_Target: {fileID: 752545387}
         m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
         m_MethodName: NextPanel
         m_Mode: 1
@@ -5552,7 +5567,7 @@ GameObject:
   - component: {fileID: 1483315776}
   m_Layer: 0
   m_Name: FramePositionPiano
-  m_TagString: Untagged
+  m_TagString: Panel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5633,14 +5648,13 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1483315772}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 257f0a9461bdb3349abc7d6bf3d95c56, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   lowestNote: G2
   highestNote: A6
-  pianoKeyboard: {fileID: 1614177551}
   blackMaterial: {fileID: 2100000, guid: ce06624e7fd0af149bc554b6326f0a05, type: 2}
   whiteMaterial: {fileID: 2100000, guid: fef37cbeded96e54b8a93f495dd51a49, type: 2}
 --- !u!1 &1491731188
@@ -6077,7 +6091,7 @@ GameObject:
   - component: {fileID: 1626687906}
   m_Layer: 5
   m_Name: NoteText
-  m_TagString: Untagged
+  m_TagString: NoteText
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6526,7 +6540,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_TagString
-      value: Untagged
+      value: Piano
       objectReference: {fileID: 0}
     - target: {fileID: 7250517388893403643, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       propertyPath: m_Materials.Array.size
@@ -6767,7 +6781,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7601900130224311552}
+      - m_Target: {fileID: 752545387}
         m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
         m_MethodName: PreviousPanel
         m_Mode: 1
@@ -6840,7 +6854,7 @@ MonoBehaviour:
   _whenSelectedHovered:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7601900130224311552}
+      - m_Target: {fileID: 752545387}
         m_TargetAssemblyTypeName: PanelManager, Assembly-CSharp
         m_MethodName: PreviousPanel
         m_Mode: 1
@@ -7007,7 +7021,7 @@ GameObject:
   - component: {fileID: 1821959600}
   m_Layer: 0
   m_Name: FrameDetectedHighest
-  m_TagString: Untagged
+  m_TagString: Panel
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7464,126 +7478,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2046060757}
   m_CullTransparentMesh: 1
---- !u!1001 &1110005693730084646
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 164797096974271774, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 164797096974271774, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 164797096974271774, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 164797096974271774, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 164797096974271774, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 164797096974271774, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 164797096974271774, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 164797096974271774, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 164797096974271774, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 164797096974271774, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4605947266490933657, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_Name
-      value: PanelManager
-      objectReference: {fileID: 0}
-    - target: {fileID: 4605947266490933657, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4634951139098522431, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: lowestNote
-      value: C0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4634951139098522431, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: pianoKeyboard
-      value: 
-      objectReference: {fileID: 1614177551}
-    - target: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: lowestNoteText
-      value: 
-      objectReference: {fileID: 1626687906}
-    - target: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: highestNoteText
-      value: 
-      objectReference: {fileID: 1049006597}
-    - target: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: currentPanelIndex
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: panels.Array.data[0]
-      value: 
-      objectReference: {fileID: 803617174}
-    - target: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: panels.Array.data[1]
-      value: 
-      objectReference: {fileID: 591486668}
-    - target: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: panels.Array.data[2]
-      value: 
-      objectReference: {fileID: 385484947}
-    - target: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: panels.Array.data[3]
-      value: 
-      objectReference: {fileID: 469154881}
-    - target: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: panels.Array.data[4]
-      value: 
-      objectReference: {fileID: 1821959598}
-    - target: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: panels.Array.data[5]
-      value: 
-      objectReference: {fileID: 1483315772}
-    - target: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-      propertyPath: panels.Array.data[6]
-      value: 
-      objectReference: {fileID: 714545773}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: a663bbc632e433740b93b60936862996, type: 3}
---- !u!114 &7601900130224311552 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5352319340221329837, guid: a663bbc632e433740b93b60936862996, type: 3}
-  m_PrefabInstance: {fileID: 1110005693730084646}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 20c228372127f4f4494b8386ef8e67ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -7595,5 +7489,4 @@ SceneRoots:
   - {fileID: 1032733672}
   - {fileID: 551634058}
   - {fileID: 603454237}
-  - {fileID: 1110005693730084646}
   - {fileID: 752545388}

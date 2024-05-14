@@ -2,23 +2,38 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using Unity.VisualScripting;
+using UnityEditor.Animations;
+using Oculus.Interaction;
 
 
 public class PanelManager : MonoBehaviour
 {
-    public List<GameObject> panels; // List to hold all your panels
+    List<GameObject> panels; // List to hold all your panels
 
     public int currentPanelIndex = 0; // To keep track of the current panel
     public MidiScript midiScript;
     public PianoSetup pianoSetup; 
     private bool isListeningForNote = false; // To ensure we don't add multiple listeners
-    public TMP_Text lowestNoteText;
-    public TMP_Text highestNoteText;
-
+    [SerializeField] private TMP_Text noteTextLow; 
+    [SerializeField] private TMP_Text noteTextHigh;
 
 
     void Start()
     {
+        GameObject canvas = GameObject.FindWithTag("IntroCanva");
+        panels = new List<GameObject>();
+        if (canvas != null)
+        {
+            foreach (Transform child in canvas.transform)
+            {
+                if(child.gameObject.tag == "Panel")
+                {
+                    panels.Add(child.gameObject);
+
+                }
+            }
+        }
         SetPanelActive();
     }
 
@@ -35,15 +50,15 @@ public class PanelManager : MonoBehaviour
             case 1:
                 if (!isListeningForNote) // Check if we are not already listening
                 {
-                    midiScript.OnNoteOn += HandleNoteOn;
                     isListeningForNote = true; // Set flag to true to avoid multiple subscriptions
+                    midiScript.OnNoteOn += HandleNoteOn;
                 }
                 break;
             case 3: 
                 if (!isListeningForNote)
                 {
-                    midiScript.OnNoteOn += HandleNoteOn;
                     isListeningForNote = true; // Set flag to true to avoid multiple subscriptions
+                    midiScript.OnNoteOn += HandleNoteOn;
 
                 }
                 break;
@@ -107,14 +122,16 @@ public class PanelManager : MonoBehaviour
     }
     private void HandleNoteOn(int noteNumber)
     {
-        if(noteNumber < 40)
+
+        if (noteNumber < 60)
         {
-            pianoSetup.lowestNote = midiScript.NoteNameConverter(noteNumber); // Assuming NoteNameConverter is a valid method
-            lowestNoteText.text = pianoSetup.lowestNote.ToString();
+            pianoSetup.lowestNote = midiScript.NoteNameConverter(noteNumber);
+            noteTextLow.text = pianoSetup.lowestNote;
+         
         } else
         {
             pianoSetup.highestNote = midiScript.NoteNameConverter(noteNumber);
-            highestNoteText.text = pianoSetup.highestNote.ToString();
+            noteTextHigh.text = pianoSetup.highestNote;
         }
         midiScript.OnNoteOn -= HandleNoteOn; // Unsubscribe from the event to prevent repeated calls
         isListeningForNote = false; // Reset the flag

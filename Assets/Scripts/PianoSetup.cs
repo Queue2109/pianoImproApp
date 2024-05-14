@@ -8,7 +8,7 @@ public class PianoSetup : MonoBehaviour
 {
     public string lowestNote = "A1";
     public string highestNote = "C6";
-    public GameObject pianoKeyboard;
+    private GameObject pianoKeyboard;
     private Transform keyboardTransform;
     public Material blackMaterial;
     public Material whiteMaterial;
@@ -18,19 +18,24 @@ public class PianoSetup : MonoBehaviour
 
     void Start()
     {
-        pianoKeyboard.SetActive(false);
+        pianoKeyboard = GameObject.FindWithTag("Piano");
+        if( pianoKeyboard != null )
+        {
+            pianoKeyboard.SetActive(false);
+            keyboardTransform = pianoKeyboard.GetComponent<Transform>();
+
+
+        }else
+        {
+            Debug.Log("Burek olimpija");
+        }
+
 
     }
 
     public void Setup()
     {
         pianoKeyboard.SetActive(true);
-        keyboardTransform = pianoKeyboard.GetComponent<Transform>();
-        if(keyboardTransform == null)
-        {
-            Console.WriteLine("burek");
-            Debug.Log("krneki");
-        }
         // Calculate the new pivot (midpoint) and adjust before disabling keys
         Vector3 lowPos = keyboardTransform.Find(lowestNote).position;
 
