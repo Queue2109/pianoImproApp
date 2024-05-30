@@ -5,6 +5,7 @@ using TMPro;
 using Unity.VisualScripting;
 using UnityEditor.Animations;
 using Oculus.Interaction;
+using UnityEngine.EventSystems;
 
 
 public class PanelManager : MonoBehaviour
@@ -66,6 +67,9 @@ public class PanelManager : MonoBehaviour
                 pianoSetup.Setup();
                 pianoSetup.AssignMaterials();
                 break;
+            case 6:
+                GameObject.FindGameObjectWithTag("Piano").GetComponent<Grabbable>().enabled = false;
+                break;
 
         }
     }
@@ -82,6 +86,8 @@ public class PanelManager : MonoBehaviour
 
     public void NextPanel()
     {
+        //GameObject currentButton = EventSystem.current.currentSelectedGameObject;
+        //Debug.Log(currentButton.name + " " + currentButton.GetComponentsInParent<GameObject>().ToString());
         if (currentPanelIndex < panels.Count - 1)
         {
             currentPanelIndex++;

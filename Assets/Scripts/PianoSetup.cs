@@ -23,53 +23,17 @@ public class PianoSetup : MonoBehaviour
     void Start()
     {
         pianoKeyboard = GameObject.FindWithTag("Piano");
-        if( pianoKeyboard != null )
+        if (pianoKeyboard != null)
         {
             pianoKeyboard.SetActive(false);
             keyboardTransform = pianoKeyboard.GetComponent<Transform>();
-            handGrabInteractable.enabled = false;
-
-            RemoveAllTransformers();
+        }
+        else
+        {
+            Debug.LogError("Piano GameObject not found!");
         }
     }
-    public void EnableTranslation()
-    {
-        RemoveAllTransformers();
-        handGrabInteractable.enabled = true;
-        pianoKeyboard.AddComponent<OneGrabTranslateTransformer>();
-    }
 
-    public void EnableRotation()
-    {
-        RemoveAllTransformers();
-        handGrabInteractable.enabled = true;
-        pianoKeyboard.AddComponent<TwoGrabRotateTransformer>();
-    }
-
-    public void EnableScaling()
-    {
-        RemoveAllTransformers();
-        handGrabInteractable.enabled = true;
-        pianoKeyboard.AddComponent<OneGrabScaleTransformer>();
-    }
-
-    private void RemoveAllTransformers()
-    {
-        // Remove each transformer component if it exists
-        var translator = pianoKeyboard.GetComponent<OneGrabTranslateTransformer>();
-        if (translator != null)
-            Destroy(translator);
-
-        var rotator = pianoKeyboard.GetComponent<TwoGrabRotateTransformer>();
-        if (rotator != null)
-            Destroy(rotator);
-
-        var scaler = pianoKeyboard.GetComponent<OneGrabScaleTransformer>();
-        if (scaler != null)
-            Destroy(scaler);
-
-        handGrabInteractable.enabled = false;
-    }
     public void Setup()
     {
         pianoKeyboard.SetActive(true);
@@ -88,7 +52,7 @@ public class PianoSetup : MonoBehaviour
 
         PivotTo(midpoint);
         AdjustCollider();
-        ScaleSharpKeys();
+        //ScaleSharpKeys();
         AssignMaterials();
     }
 
