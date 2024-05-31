@@ -9,8 +9,8 @@ using Oculus.Interaction.HandGrab;
 
 public class PianoSetup : MonoBehaviour
 {
-    public string lowestNote = "A1";
-    public string highestNote = "C6";
+    public string lowestNote = "C2";
+    public string highestNote = "C5";
     private GameObject pianoKeyboard;
     private Transform keyboardTransform;
     public Material blackMaterial;
@@ -40,11 +40,10 @@ public class PianoSetup : MonoBehaviour
         // Calculate the new pivot (midpoint) and adjust before disabling keys
         Vector3 lowPos = keyboardTransform.Find(lowestNote).position;
 
-        Debug.Log( "Lowest" + lowestNote);
-        Debug.Log( "Lowest" + lowestNote);
         Vector3 highPos = keyboardTransform.Find(highestNote).position;
         Vector3 midpoint = (lowPos + highPos) / 2;
-        Debug.Log(highestNote);
+
+        Debug.Log("Lowest and highest note" + lowestNote + highestNote);
 
         DisableLowerKeys(lowestNote);
 
@@ -64,6 +63,10 @@ public class PianoSetup : MonoBehaviour
         pianoKeyboard.transform.position = position;
     }
 
+    public void DoneSetup()
+    {
+        pianoKeyboard.GetComponent<Grabbable>().enabled = false;
+    }
 
     void DisableLowerKeys(string lowestNote)
     {

@@ -148,3 +148,13 @@ public class MidiScript : MonoBehaviour
     }
 
 }
+
+
+// pofiksaj piano position
+// da dela uvod
+// da se shrani za naprej
+// post call response
+// accompany 
+// piano roll
+// nalozi midi files in da pol ko cez igras da bo kul
+// 
