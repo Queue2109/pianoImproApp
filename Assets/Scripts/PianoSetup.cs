@@ -17,8 +17,9 @@ public class PianoSetup : MonoBehaviour
     public Material whiteMaterial;
     public HandGrabInteractable handGrabInteractable;
 
+
     // Note ordering from low to high
-    private List<string> noteOrder = new List<string> { "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp", "A", "A-Sharp", "B" };
+    private readonly List<string> noteOrder = new List<string> { "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp", "A", "A-Sharp", "B" };
 
     void Start()
     {
@@ -36,40 +37,53 @@ public class PianoSetup : MonoBehaviour
 
     public void Setup()
     {
-        pianoKeyboard.SetActive(true);
-        // Calculate the new pivot (midpoint) and adjust before disabling keys
-        Vector3 lowPos = keyboardTransform.Find(lowestNote).position;
+        if (pianoKeyboard == null) return;
 
+        pianoKeyboard.SetActive(true);
+
+        Vector3 lowPos = keyboardTransform.Find(lowestNote).position;
         Vector3 highPos = keyboardTransform.Find(highestNote).position;
         Vector3 midpoint = (lowPos + highPos) / 2;
 
-        Debug.Log("Lowest and highest note" + lowestNote + highestNote);
-
         DisableLowerKeys(lowestNote);
-
         DisableHigherKeys(highestNote);
 
         PivotTo(midpoint);
         AdjustCollider();
-        //ScaleSharpKeys();
         AssignMaterials();
     }
 
     public void PivotTo(Vector3 position)
     {
+        if (pianoKeyboard == null) return;
+
         Vector3 offset = pianoKeyboard.transform.position - position;
         foreach (Transform child in pianoKeyboard.transform)
-            child.position += offset;  // Make sure we're adjusting the global position directly.
+        {
+            child.position += offset;
+        }
         pianoKeyboard.transform.position = position;
     }
 
     public void DoneSetup()
     {
-        pianoKeyboard.GetComponent<Grabbable>().enabled = false;
+        if (pianoKeyboard != null)
+        {
+            Grabbable grabbable = pianoKeyboard.GetComponent<Grabbable>();
+            if (grabbable != null)
+            {
+                grabbable.enabled = false;
+            }
+            else
+            {
+                Debug.LogError("Grabbable component not found on the piano keyboard object.");
+            }
+        }
     }
 
     void DisableLowerKeys(string lowestNote)
     {
+        if (keyboardTransform == null) return;
         string lowestNoteName = ParseNoteName(lowestNote);
         int lowestOctave = ParseOctave(lowestNote);
 
@@ -88,6 +102,7 @@ public class PianoSetup : MonoBehaviour
 
     void DisableHigherKeys(string highestNote)
     {
+        if (keyboardTransform == null) return;
         string highestNoteName = ParseNoteName(highestNote);
         int highestOctave = ParseOctave(highestNote);
 
@@ -128,12 +143,12 @@ public class PianoSetup : MonoBehaviour
 
     string ParseNoteName(string note)
     {
-        return note.Substring(0, note.Length - 1);
+        return note[..^1];
     }
 
     int ParseOctave(string note)
     {
-        return int.Parse(note.Substring(note.Length - 1));
+        return int.Parse(note[^1..]);
     }
 
     void AdjustCollider()
@@ -150,32 +165,18 @@ public class PianoSetup : MonoBehaviour
         Vector3 midpoint = (lowPos + highPos) / 2;
 
         float sizeX = Mathf.Abs(highPos.x - lowPos.x);
-        Vector3 size = new Vector3(sizeX, collider.size.y, collider.size.z);
+        Vector3 size = new(sizeX, collider.size.y, collider.size.z);
 
         collider.center = midpoint;
         collider.size = size;
     }
 
-    void ScaleSharpKeys()
-    {
-        foreach (Transform key in keyboardTransform)
-        {
-            string keyName = key.name;
-            string keyNoteName = ParseNoteName(keyName);
-            if(keyNoteName.Contains("Sharp"))
-            {
-                key.localScale = new Vector3(60, key.localScale.y, key.localScale.z);
-            }
-
-        }
-    }
-
     public void AssignMaterials()
     {
-        // Iterate through all children
+
         foreach (Transform child in pianoKeyboard.transform)
         {
-            // Try to get the Renderer component on the child
+
             Renderer renderer = child.GetComponent<Renderer>();
             if (renderer != null)
             {
@@ -190,7 +191,7 @@ public class PianoSetup : MonoBehaviour
                         materials[i] = whiteMaterial;
                     }
                 }
-                renderer.materials = materials;  // Apply the new material to all sub-meshes
+                renderer.materials = materials;
             }
             else
             {

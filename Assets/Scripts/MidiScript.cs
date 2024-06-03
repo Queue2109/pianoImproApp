@@ -9,20 +9,22 @@ using UnityEngine.InputSystem.HID;
 
 public class MidiScript : MonoBehaviour
 {
-    // midi note number of lowest key in your midi device
-    // 21: A0
+
     public delegate void MidiNoteEvent(int noteNumber);
     public event MidiNoteEvent OnNoteOn;
     public event MidiNoteEvent OnNoteOff;
-    private List<string> noteOrder = new List<string> { "A", "A-Sharp", "B", "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp" };
+    private readonly List<string> noteOrder = new() { "A", "A-Sharp", "B", "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp" };
     private GameObject pianoKeyboard;
+    private bool _midiDeviceConnected;
+    private float _lastCheckTime;
+    private const float CheckInterval = 1.0f; // Check every second
     // this is used for visualizing the notes
     //[SerializeField] GameObject barManager;
 
     void Start()
     {
         pianoKeyboard = GameObject.FindGameObjectWithTag("Piano");
-        Color colorBlue = new Color(0.545f, 0.769f, 0.910f, 0.33f);
+        Color colorBlue = new(0.545f, 0.769f, 0.910f, 0.33f);
 
         InputSystem.onDeviceChange += (device, change) =>
         {
@@ -35,9 +37,11 @@ public class MidiScript : MonoBehaviour
                 Debug.Log($"Note On: {note.noteNumber}");
                 OnNoteOn?.Invoke(note.noteNumber);
                 string noteName = this.NoteNameConverter(note.noteNumber);
-
-                Renderer renderer = GameObject.Find(noteName)?.GetComponent<Renderer>();
-                if (renderer != null)
+                GameObject noteKey = GameObject.Find(noteName);
+                if(noteKey == null) {
+                    return;
+                }
+                if (noteKey.TryGetComponent<Renderer>(out var renderer))
                 {
                     for (int i = 0; i < renderer.materials.Length; i++)
                     {
@@ -54,8 +58,11 @@ public class MidiScript : MonoBehaviour
                 OnNoteOff?.Invoke(note.noteNumber);
                 string noteName = this.NoteNameConverter(note.noteNumber);
 
-                Renderer renderer = GameObject.Find(noteName)?.GetComponent<Renderer>();
-                if (renderer != null)
+                GameObject noteKey = GameObject.Find(noteName);
+                if(noteKey == null) {
+                    return;
+                }
+                if (noteKey.TryGetComponent<Renderer>(out var renderer))
                 {
                     for (int i = 0; i < renderer.materials.Length; i++)
                     {
@@ -110,6 +117,7 @@ public class MidiScript : MonoBehaviour
         };
     }
 
+
     public bool ListenForDevice()
     {
         // Get all available MIDI devices
@@ -123,17 +131,25 @@ public class MidiScript : MonoBehaviour
                 midiDeviceCount++;
         }
 
-        // Check if there are any MIDI devices connected
-        if (midiDeviceCount > 0)
+        bool midiDeviceCurrentlyConnected = midiDeviceCount > 0;
+
+        // Check if the state has changed or enough time has passed to log again
+        if (Time.time - _lastCheckTime > CheckInterval || _midiDeviceConnected != midiDeviceCurrentlyConnected)
         {
-            Debug.Log("Connected MIDI devices found: " + midiDeviceCount);
-            return true; // There are one or more MIDI devices connected
+            _lastCheckTime = Time.time;
+            _midiDeviceConnected = midiDeviceCurrentlyConnected;
+
+            if (midiDeviceCurrentlyConnected)
+            {
+                Debug.Log("Connected MIDI devices found: " + midiDeviceCount);
+            }
+            else
+            {
+                Debug.Log("No MIDI devices detected.");
+            }
         }
-        else
-        {
-            Debug.Log("No MIDI devices detected.");
-            return false; // No MIDI devices are connected
-        }
+
+        return midiDeviceCurrentlyConnected;
     }
     public string NoteNameConverter(int midiNote)
     {
@@ -150,7 +166,7 @@ public class MidiScript : MonoBehaviour
 }
 
 
-// pofiksaj piano position
+// pofiksaj piano positioning (da od dalec zagrabis)
 // da dela uvod
 // da se shrani za naprej
 // post call response

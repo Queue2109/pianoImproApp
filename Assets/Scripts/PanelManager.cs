@@ -14,14 +14,16 @@ public class PanelManager : MonoBehaviour
     public MidiScript midiScript;
     public PianoSetup pianoSetup;
     private bool isListeningForNote = false; // To ensure we don't add multiple listeners
-    [SerializeField] private TMP_Text noteTextLow;
-    [SerializeField] private TMP_Text noteTextHigh;
-    bool wroteLowerNote = false;
+    private TMP_Text noteTextLow;
+    private TMP_Text noteTextHigh;
     bool setupCompleted = false;
     private Dictionary<int, System.Action> panelActions;
 
     void Start()
     {
+        this.noteTextLow = GameObject.Find("NoteTextLow").GetComponent<TMP_Text>();
+        this.noteTextHigh = GameObject.Find("NoteTextHigh").GetComponent<TMP_Text>();
+
         InitializePanels();
         InitializePanelActions();
         SetPanelActive();
@@ -78,17 +80,16 @@ public class PanelManager : MonoBehaviour
             isListeningForNote = true;
             midiScript.OnNoteOn += HandleNoteOn;
         }
+        setupCompleted = false;
     }
 
     void SetupPiano()
     {
-       
-            //pianoSetup.lowestNote = this.noteTextLow.ToString();
-            //pianoSetup.highestNote = this.noteTextHigh.ToString();
-            pianoSetup.Setup();
         if (!setupCompleted)
         {
-            pianoSetup.AssignMaterials();
+            pianoSetup.lowestNote = this.noteTextLow.text.ToString();
+            pianoSetup.highestNote = this.noteTextHigh.text.ToString();
+            pianoSetup.Setup();
             setupCompleted = true; // Ensure setup only happens once
 
         }
@@ -97,7 +98,7 @@ public class PanelManager : MonoBehaviour
     void DisablePianoInteraction()
     {
         // Uncomment and adapt based on your specific needs
-        pianoSetup.DoneSetup();
+       // pianoSetup.DoneSetup();
     }
 
     public void Done()
@@ -130,14 +131,7 @@ public class PanelManager : MonoBehaviour
         {
             currentPanelIndex--;
             SetPanelActive();
-            if(currentPanelIndex == 1)
-            {
-                wroteLowerNote = false;
-            }
-            if(currentPanelIndex == 3)
-            {
-                wroteLowerNote = true;
-            }
+            setupCompleted = false;
         }
     }
 
@@ -152,12 +146,11 @@ public class PanelManager : MonoBehaviour
 
     private void HandleNoteOn(int noteNumber)
     {
-        if (!wroteLowerNote)
+        if (currentPanelIndex == 1)
         {
             noteTextLow.text = midiScript.NoteNameConverter(noteNumber);
-            wroteLowerNote = true;
         }
-        else
+        else if (currentPanelIndex == 3)
         {
             noteTextHigh.text = midiScript.NoteNameConverter(noteNumber);
         }
