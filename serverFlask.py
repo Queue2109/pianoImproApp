@@ -13,7 +13,7 @@ def analyze():
         
     chordName = music21.chord.Chord(notes).commonName
     print(f"Received notes: {notes}, Chord name: {chordName}")  # Log request details
-    return jsonify({"received": data, "result": chordName})
+    return jsonify({"result": chordName})
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

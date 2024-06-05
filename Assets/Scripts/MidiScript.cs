@@ -18,6 +18,8 @@ public class MidiScript : MonoBehaviour
     private bool _midiDeviceConnected;
     private float _lastCheckTime;
     private const float CheckInterval = 1.0f; // Check every second
+    private List<int> pressedNotes = new List<int>();
+    private HttpHandler httpHandler;
     // this is used for visualizing the notes
     //[SerializeField] GameObject barManager;
 
@@ -25,6 +27,7 @@ public class MidiScript : MonoBehaviour
     {
         pianoKeyboard = GameObject.FindGameObjectWithTag("Piano");
         Color colorBlue = new(0.545f, 0.769f, 0.910f, 0.33f);
+        httpHandler = GameObject.Find("HttpHandler").GetComponent<HttpHandler>();
 
         InputSystem.onDeviceChange += (device, change) =>
         {
@@ -36,6 +39,7 @@ public class MidiScript : MonoBehaviour
             {
                 Debug.Log($"Note On: {note.noteNumber}");
                 OnNoteOn?.Invoke(note.noteNumber);
+                AddNoteToPressedList(note.noteNumber);
                 string noteName = this.NoteNameConverter(note.noteNumber);
                 GameObject noteKey = GameObject.Find(noteName);
                 if(noteKey == null) {
@@ -56,6 +60,7 @@ public class MidiScript : MonoBehaviour
             {
                 Debug.Log($"Note Off: {note.noteNumber}");
                 OnNoteOff?.Invoke(note.noteNumber);
+                RemoveNoteFromPressedList(note.noteNumber);
                 string noteName = this.NoteNameConverter(note.noteNumber);
 
                 GameObject noteKey = GameObject.Find(noteName);
@@ -78,6 +83,26 @@ public class MidiScript : MonoBehaviour
                 }
             };
         };
+    }
+
+    void AddNoteToPressedList(int noteNumber)
+    {
+        if (!pressedNotes.Contains(noteNumber))
+        {
+            pressedNotes.Add(noteNumber);
+            Debug.Log("Note added to pressed list: " + noteNumber);
+            httpHandler.getChordName(pressedNotes);
+        }
+    }
+
+    void RemoveNoteFromPressedList(int noteNumber)
+    {
+        if (pressedNotes.Contains(noteNumber))
+        {
+            pressedNotes.Remove(noteNumber);
+            Debug.Log("Note removed from pressed list: " + noteNumber);
+            httpHandler.getChordName(pressedNotes);
+        }
     }
 
     void Listen()
