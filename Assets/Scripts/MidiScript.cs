@@ -37,7 +37,7 @@ public class MidiScript : MonoBehaviour
 
             midiDevice.onWillNoteOn += (note, velocity) =>
             {
-                Debug.Log($"Note On: {note.noteNumber}");
+                //Debug.Log($"Note On: {note.noteNumber}");
                 OnNoteOn?.Invoke(note.noteNumber);
                 AddNoteToPressedList(note.noteNumber);
                 string noteName = this.NoteNameConverter(note.noteNumber);
@@ -51,14 +51,14 @@ public class MidiScript : MonoBehaviour
                     {
                         renderer.materials[i].SetColor("_Color", new Color(0.545f, 0.769f, 0.910f, 0.33f));
                     }
-                    Debug.Log("Material colors changed to green.");
+                   // Debug.Log("Material colors changed to green.");
                 }
             };
 
 
             midiDevice.onWillNoteOff += (note) =>
             {
-                Debug.Log($"Note Off: {note.noteNumber}");
+              //  Debug.Log($"Note Off: {note.noteNumber}");
                 OnNoteOff?.Invoke(note.noteNumber);
                 RemoveNoteFromPressedList(note.noteNumber);
                 string noteName = this.NoteNameConverter(note.noteNumber);
@@ -79,7 +79,7 @@ public class MidiScript : MonoBehaviour
                             renderer.materials[i].SetColor("_Color", new Color(1, 1, 1, 0.2509f));
                         }
                     }
-                    Debug.Log("Material colors changed to green.");
+                    //Debug.Log("Material colors changed to green.");
                 }
             };
         };
@@ -90,7 +90,7 @@ public class MidiScript : MonoBehaviour
         if (!pressedNotes.Contains(noteNumber))
         {
             pressedNotes.Add(noteNumber);
-            Debug.Log("Note added to pressed list: " + noteNumber);
+            //Debug.Log("Note added to pressed list: " + noteNumber);
             httpHandler.getChordName(pressedNotes);
         }
     }
@@ -100,48 +100,10 @@ public class MidiScript : MonoBehaviour
         if (pressedNotes.Contains(noteNumber))
         {
             pressedNotes.Remove(noteNumber);
-            Debug.Log("Note removed from pressed list: " + noteNumber);
+           // Debug.Log("Note removed from pressed list: " + noteNumber);
             httpHandler.getChordName(pressedNotes);
         }
     }
-
-    void Listen()
-    {
-        InputSystem.onDeviceChange += (device, change) =>
-        {
-            if (change != InputDeviceChange.Added) return;
-            var midiDevice = device as Minis.MidiDevice;
-            if (midiDevice == null) return;
-
-            midiDevice.onWillNoteOn += (note, velocity) => {
-                Debug.Log(string.Format(
-                    "Note On #{0} ({1}) vel:{2:0.00} ch:{3} dev:'{4}'",
-                    note.noteNumber,
-                    note.noteNumber.GetType(),
-                    note.shortDisplayName,
-                    velocity,
-                    velocity.GetType(),
-                    (note.device as Minis.MidiDevice)?.channel,
-                    note.device.description.product
-                ));
-
-                //barManager.GetComponent<BarScript>().onNoteOn(note.noteNumber - keyOffset, velocity);
-            };
-
-            midiDevice.onWillNoteOff += (note) => {
-                Debug.Log(string.Format(
-                    "Note Off #{0} ({1}) ch:{2} dev:'{3}'",
-                    note.noteNumber,
-                    note.shortDisplayName,
-                    (note.device as Minis.MidiDevice)?.channel,
-                    note.device.description.product
-                ));
-
-                //barManager.GetComponent<BarScript>().onNoteOff(note.noteNumber - keyOffset);
-            };
-        };
-    }
-
 
     public bool ListenForDevice()
     {
@@ -184,10 +146,10 @@ public class MidiScript : MonoBehaviour
 
         string noteName = this.noteOrder[(midiNote - 21) % 12].ToString();
         noteName += octaveNumber;
-        Debug.Log("Note name" + noteName);
+       // Debug.Log("Note name" + noteName);
         return noteName;
     }
-
+    
 }
 
 
