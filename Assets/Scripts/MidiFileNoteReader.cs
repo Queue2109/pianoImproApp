@@ -9,14 +9,20 @@ public class MidiFileNoteReader : MonoBehaviour
     private IOutputDevice outputDevice;
     private Playback playback;
     public bool visualizeNotes = true;
+    private PianoFunctions pianoFunctions;
 
     void Start()
     {
+        pianoFunctions = GetComponent<PianoFunctions>();
+        if (pianoFunctions == null)
+        {
+            Debug.LogError("PianoFunctions script not found on the GameObject.");
+        }
     }
 
     public static string FindMidiFile(string fileName, string rootPath)
     {
-        var files = Directory.GetFiles(rootPath, "*.midi", SearchOption.AllDirectories);
+        var files = Directory.GetFiles(rootPath, "*.mid", SearchOption.AllDirectories);
         foreach (var file in files)
         {
             if (Path.GetFileNameWithoutExtension(file).Equals(fileName, System.StringComparison.OrdinalIgnoreCase))
@@ -38,7 +44,7 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.LogError("MIDI file not found: " + filePath);
             return;
         }
-
+        MidiInstrumentChecker.CheckInstruments(filePath);
         Debug.Log("Reading MIDI file: " + filePath);
         MidiFile midiFile = MidiFile.Read(filePath);
         outputDevice = OutputDevice.GetByName("Microsoft GS Wavetable Synth");
@@ -73,22 +79,40 @@ public class MidiFileNoteReader : MonoBehaviour
 
     private void OnNotesPlaybackStarted(object sender, NotesEventArgs e)
     {
-        Debug.Log("Notes playback started");
-        foreach (var note in e.Notes)
+        MainThreadDispatcher.Enqueue(() =>
         {
-            Debug.Log("Note played: " + note.NoteName + note.Octave);
-            // Add your note visualization code here
-        }
+            foreach (var note in e.Notes)
+            {
+                if (MidiInstrumentChecker.PianoChannels.Contains(note.Channel))
+                {
+                    Debug.Log("Note played: " + note.NoteName + note.Octave);
+                    if (visualizeNotes)
+                    {
+                        var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
+                        pianoFunctions.ColorKey(keyName);
+                    }
+                }
+            }
+        });
     }
 
     private void OnNotesPlaybackFinished(object sender, NotesEventArgs e)
     {
-        Debug.Log("Notes playback finished");
-        foreach (var note in e.Notes)
+        MainThreadDispatcher.Enqueue(() =>
         {
-            Debug.Log("Note finished: " + note.NoteName + note.Octave);
-            // Add your note reset code here
-        }
+            foreach (var note in e.Notes)
+            {
+                if (MidiInstrumentChecker.PianoChannels.Contains(note.Channel))
+                {
+                    Debug.Log("Note finished: " + note.NoteName + note.Octave);
+                    if (visualizeNotes)
+                    {
+                        var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
+                        pianoFunctions.ResetKeyColor(keyName);
+                    }
+                }
+            }
+        });
     }
 
     private void OnPlaybackFinished(object sender, System.EventArgs e)

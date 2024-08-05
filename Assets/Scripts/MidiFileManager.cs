@@ -53,13 +53,17 @@ public class MidiFileManager : MonoBehaviour
                 container.SetActive(true);
                 container.transform.Find("Image").transform.Find("SongAuthor").GetComponent<TextMeshProUGUI>().text = author;
                 container.transform.Find("Image").transform.Find("SongTitle").GetComponent<TextMeshProUGUI>().text = fileName;
+                if(fileName == "Fly Me To The Moon")
+                {
                 PlaySong(fileName);
+                    return;
+
+                }
                 Button button = container.GetComponent<Button>();
                 if (button != null)
                 {
                     button.onClick.AddListener(() => PlaySong(fileName));
                 }
-                return;
             }
         }
         else
