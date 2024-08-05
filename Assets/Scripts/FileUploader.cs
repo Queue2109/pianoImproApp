@@ -8,15 +8,12 @@ using TMPro;
 
 public class FileUploader : MonoBehaviour
 {
-    public Button uploadButton; // Button to upload MIDI files
 
     private void Start()
     {
-        uploadButton.onClick.AddListener(OnUploadButtonClick);
-        OnUploadButtonClick();
     }
 
-    private void OnUploadButtonClick()
+    public void OnUploadButtonClick()
     {
         #if UNITY_EDITOR
                 string path = EditorUtility.OpenFilePanel("Upload MIDI File", "", "midi");

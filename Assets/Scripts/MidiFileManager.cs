@@ -4,16 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 
 public class MidiFileManager : MonoBehaviour
 {
     public GameObject songContainerPrefab; // A UI prefab containing NoteImage, SongAuthor, and SongTitle
     public Transform contentPanel; // The content panel of the scroll view to hold song containers
+    public MidiFileNoteReader midiPlayer; // Reference to the MidiPlayer component
 
-    // List of known authors from the provided images
     private HashSet<string> knownAuthors = new HashSet<string>
     {
+        // List of known authors
         "Adam Birnbaum", "Adam Makowicz", "Alan Broadbent", "Alan Farnham", "Alan Pasqua", "Andy Laverne", "Barry Harris",
         "Bill Charlap", "Bill Cunliffe", "Bill Evans", "Bill Mays", "Billy Taylor", "Brad Mehldau", "Bobby Timmons",
         "Buddy Montgomery", "Cedar Walton", "Chick Corea", "Dave McKenna", "David Berkman", "Denny Zeitlin",
@@ -30,9 +30,9 @@ public class MidiFileManager : MonoBehaviour
         "Ryo Fukui", "Stanley Cowell", "Steve Kuhn", "Teddy Wilson", "Tete Montoliu", "Thelonious Monk", "Tigran Hamasyan",
         "Tommy Flanagan", "Vijay Iyer", "Walter Norris"
     };
+
     private void Start()
     {
-  
         LogMidiFiles();
     }
 
@@ -41,15 +41,25 @@ public class MidiFileManager : MonoBehaviour
         string rootPath = Path.Combine(Application.streamingAssetsPath, "MidiFiles");
         if (Directory.Exists(rootPath))
         {
-            var midiFiles = Directory.GetFiles(rootPath, "*.midi", SearchOption.AllDirectories);
+            var midiFiles = new List<string>();
+            midiFiles.AddRange(Directory.GetFiles(rootPath, "*.midi", SearchOption.AllDirectories));
+            midiFiles.AddRange(Directory.GetFiles(rootPath, "*.mid", SearchOption.AllDirectories));
+
             foreach (var midiFile in midiFiles)
             {
-                string author = ExtractAuthorFromPath(midiFile, rootPath); 
+                string author = ExtractAuthorFromPath(midiFile, rootPath);
                 string fileName = Path.GetFileNameWithoutExtension(midiFile);
-                GameObject container = (GameObject)Instantiate(songContainerPrefab, contentPanel);
+                GameObject container = Instantiate(songContainerPrefab, contentPanel);
                 container.SetActive(true);
-                container.transform.Find("Image").transform.Find("SongAuthor").gameObject.GetComponent<TextMeshProUGUI>().text = author;
-                container.transform.Find("Image").transform.Find("SongTitle").gameObject.GetComponent<TextMeshProUGUI>().text = fileName;
+                container.transform.Find("Image").transform.Find("SongAuthor").GetComponent<TextMeshProUGUI>().text = author;
+                container.transform.Find("Image").transform.Find("SongTitle").GetComponent<TextMeshProUGUI>().text = fileName;
+                PlaySong(fileName);
+                Button button = container.GetComponent<Button>();
+                if (button != null)
+                {
+                    button.onClick.AddListener(() => PlaySong(fileName));
+                }
+                return;
             }
         }
         else
@@ -63,7 +73,6 @@ public class MidiFileManager : MonoBehaviour
         string relativePath = filePath.Replace(rootPath, string.Empty).Trim(Path.DirectorySeparatorChar);
         string[] pathParts = relativePath.Split(Path.DirectorySeparatorChar);
 
-        // Check each part of the path to see if it matches a known author
         foreach (var part in pathParts)
         {
             if (knownAuthors.Contains(part))
@@ -73,5 +82,10 @@ public class MidiFileManager : MonoBehaviour
         }
 
         return "Unknown";
+    }
+
+    public void PlaySong(string fileName)
+    {
+        midiPlayer.PlayMidi(fileName);
     }
 }

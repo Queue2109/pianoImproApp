@@ -1,22 +1,46 @@
 using UnityEngine;
 using System.Collections;
-using System.Linq;
 using Melanchall.DryWetMidi.Core;
-using Melanchall.DryWetMidi.Interaction;
-using Melanchall.DryWetMidi.MusicTheory;
 using Melanchall.DryWetMidi.Multimedia;
-using System.Collections.Generic;
+using System.IO;
 
-public class MidiPlayer : MonoBehaviour
+public class MidiFileNoteReader : MonoBehaviour
 {
-    private string midiFileName = "I Hear A Rhapsody - Live At Maybeck Recital Hall  Berkeley, CA.midi"; // Your MIDI file name
-    private MidiFile midiFile;
     private IOutputDevice outputDevice;
     private Playback playback;
+    public bool visualizeNotes = true;
 
     void Start()
     {
-        string filePath = System.IO.Path.Combine(Application.streamingAssetsPath, midiFileName);
+    }
+
+    public static string FindMidiFile(string fileName, string rootPath)
+    {
+        var files = Directory.GetFiles(rootPath, "*.midi", SearchOption.AllDirectories);
+        foreach (var file in files)
+        {
+            if (Path.GetFileNameWithoutExtension(file).Equals(fileName, System.StringComparison.OrdinalIgnoreCase))
+            {
+                Debug.Log("Found file: " + file);
+                return file;
+            }
+        }
+        return null;
+    }
+
+    public void PlayMidi(string fileName)
+    {
+        StopPlayback();
+
+        var filePath = FindMidiFile(fileName, Path.Combine(Application.streamingAssetsPath, "MidiFiles"));
+        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+        {
+            Debug.LogError("MIDI file not found: " + filePath);
+            return;
+        }
+
+        Debug.Log("Reading MIDI file: " + filePath);
+        MidiFile midiFile = MidiFile.Read(filePath);
         outputDevice = OutputDevice.GetByName("Microsoft GS Wavetable Synth");
 
         if (outputDevice == null)
@@ -25,46 +49,77 @@ public class MidiPlayer : MonoBehaviour
             return;
         }
 
-        midiFile = MidiFile.Read(filePath);
         playback = midiFile.GetPlayback(outputDevice);
         playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
+        playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+        playback.Finished += OnPlaybackFinished;
 
-        StartCoroutine(PlayMidi());
+        Debug.Log("Starting playback");
+        StartCoroutine(PlayMidiCoroutine());
     }
 
-    private IEnumerator PlayMidi()
+    private IEnumerator PlayMidiCoroutine()
     {
         playback.Start();
+        Debug.Log("Playback has started");
         while (playback.IsRunning)
         {
             yield return null;
         }
 
-        Debug.Log("Playback stopped or finished.");
-
-        outputDevice.Dispose();
-        playback.Dispose();
+        Debug.Log("Playback coroutine finished");
+        StopPlayback();
     }
 
     private void OnNotesPlaybackStarted(object sender, NotesEventArgs e)
     {
-        var noteNames = e.Notes.Select(n => n.NoteName).ToArray();
-        Debug.Log($"Chord Played: {string.Join(", ", noteNames)}");
+        Debug.Log("Notes playback started");
+        foreach (var note in e.Notes)
+        {
+            Debug.Log("Note played: " + note.NoteName + note.Octave);
+            // Add your note visualization code here
+        }
     }
 
-    private void OnDestroy()
+    private void OnNotesPlaybackFinished(object sender, NotesEventArgs e)
     {
-        // Ensure proper disposal of resources
-        if (playback != null && playback.IsRunning)
+        Debug.Log("Notes playback finished");
+        foreach (var note in e.Notes)
         {
-            playback.Stop();
+            Debug.Log("Note finished: " + note.NoteName + note.Octave);
+            // Add your note reset code here
+        }
+    }
+
+    private void OnPlaybackFinished(object sender, System.EventArgs e)
+    {
+        Debug.Log("Playback finished.");
+        StopPlayback();
+    }
+
+    private void StopPlayback()
+    {
+        if (playback != null)
+        {
+            if (playback.IsRunning)
+            {
+                playback.Stop();
+            }
+            playback.Dispose();
+            playback = null;
+            Debug.Log("Playback stopped and disposed.");
         }
 
         if (outputDevice != null)
         {
             outputDevice.Dispose();
+            outputDevice = null;
+            Debug.Log("Output device disposed.");
         }
     }
+
+    private void OnDestroy()
+    {
+        StopPlayback();
+    }
 }
-
-
