@@ -31,12 +31,8 @@ public class MidiFileManager : MonoBehaviour
         "Tommy Flanagan", "Vijay Iyer", "Walter Norris"
     };
 
-    private void Start()
-    {
-        LogMidiFiles();
-    }
 
-    private void LogMidiFiles()
+    public void LogMidiFiles()
     {
         string rootPath = Path.Combine(Application.streamingAssetsPath, "MidiFiles");
         if (Directory.Exists(rootPath))
@@ -51,18 +47,15 @@ public class MidiFileManager : MonoBehaviour
                 string fileName = Path.GetFileNameWithoutExtension(midiFile);
                 GameObject container = Instantiate(songContainerPrefab, contentPanel);
                 container.SetActive(true);
-                container.transform.Find("Image").transform.Find("SongAuthor").GetComponent<TextMeshProUGUI>().text = author;
-                container.transform.Find("Image").transform.Find("SongTitle").GetComponent<TextMeshProUGUI>().text = fileName;
-                if(fileName == "Fly Me To The Moon")
+                if(author != "Unknown")
                 {
-                PlaySong(fileName);
-                    return;
-
+                    container.transform.Find("Image").transform.Find("SongAuthor").GetComponent<TextMeshProUGUI>().text = author;
                 }
+                container.transform.Find("Image").transform.Find("SongTitle").GetComponent<TextMeshProUGUI>().text = fileName;
                 Button button = container.GetComponent<Button>();
                 if (button != null)
                 {
-                    button.onClick.AddListener(() => PlaySong(fileName));
+                    button.onClick.AddListener(() => PlaySong(fileName, author));
                 }
             }
         }
@@ -88,8 +81,8 @@ public class MidiFileManager : MonoBehaviour
         return "Unknown";
     }
 
-    public void PlaySong(string fileName)
+    public void PlaySong(string fileName, string author)
     {
-        midiPlayer.PlayMidi(fileName);
+        midiPlayer.PlayMidi(fileName, author);
     }
 }

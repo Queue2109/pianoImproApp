@@ -1,49 +1,35 @@
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using UnityEngine;
-using UnityEngine.UI;
-using System.IO;
-using TMPro;
 
 public class FileUploader : MonoBehaviour
 {
+    private AndroidJavaObject activity;
 
-    private void Start()
+    void Start()
     {
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            using (var unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
+            {
+                activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+            }
+        }
     }
 
     public void OnUploadButtonClick()
     {
-        #if UNITY_EDITOR
-                string path = EditorUtility.OpenFilePanel("Upload MIDI File", "", "midi");
-                if (!string.IsNullOrEmpty(path))
-                {
-                    UploadFile(path);
-                }
-        #elif UNITY_STANDALONE_WIN
-                string path = OpenFileDialog();
-                if (!string.IsNullOrEmpty(path))
-                {
-                    UploadFile(path);
-                }
-        #else
-                Debug.Log("File upload is not supported on this platform.");
-        #endif
+        if (Application.platform == RuntimePlatform.Android)
+        {
+            activity.Call("startActivity", new AndroidJavaObject("android.content.Intent", "com.example.filepickerlibrary.FilePickerActivity"));
+        }
+        else
+        {
+            Debug.Log("File upload is not supported on this platform."); 
+        }
     }
 
-    private string OpenFileDialog()
+    public void OnFileSelected(string filePath)
     {
-        // This method should open a file dialog and return the selected file path.
-        // Implement this based on the specific requirements and platform.
-
-        return string.Empty; // Placeholder for actual implementation
-    }
-
-    private void UploadFile(string filePath)
-    {
-        string destinationPath = Path.Combine(Application.persistentDataPath, Path.GetFileName(filePath));
-        File.Copy(filePath, destinationPath, true);
-        Debug.Log($"File uploaded successfully: {destinationPath}");
+        Debug.Log("File selected: " + filePath);
+        // Handle the file path received from the Android activity
     }
 }

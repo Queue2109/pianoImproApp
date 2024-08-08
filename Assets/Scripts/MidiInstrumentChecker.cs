@@ -4,14 +4,21 @@ using Melanchall.DryWetMidi.Common;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
-public class MidiInstrumentChecker
+public static class MidiInstrumentChecker
 {
-    public static List<int> PianoChannels { get; private set; } = new List<int>();
+    private static Transform gridParent;
+    private static GameObject cellPrefab;
+    public static List<int> selectedChannels = new List<int>();
 
     public static void CheckInstruments(string filePath)
     {
-        PianoChannels.Clear();
+        gridParent = GameObject.Find("InstrumentPicker").transform;
+        cellPrefab = GameObject.Find("InstrumentCell");
+        cellPrefab.SetActive(false);
+
         MidiFile midiFile = MidiFile.Read(filePath);
         var programChanges = GetProgramChanges(midiFile);
 
@@ -21,14 +28,15 @@ public class MidiInstrumentChecker
             int programNumber = kvp.Value;
             string instrument = GetInstrumentName(programNumber);
 
-            if (IsPianoInstrument(programNumber))
+            if ((instrument != null))
             {
-                PianoChannels.Add(channel);
+                GameObject cell = GameObject.Instantiate(cellPrefab, gridParent);
+                cell.transform.Find("InstrumentName").GetComponent<TextMeshProUGUI>().text = channel + ": " + instrument.ToString();
+                cell.SetActive(true);
             }
-
-            Debug.Log($"Channel {channel} is using instrument {instrument} (Program number {programNumber})");
         }
     }
+
 
     private static Dictionary<int, int> GetProgramChanges(MidiFile midiFile)
     {

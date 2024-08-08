@@ -3,7 +3,10 @@ guid: d5d3e57f334231e4fb25ef37df8beb89
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - songContainerPrefab: {fileID: 207499218956095935, guid: 34f1306970f26ba449613157bc814368, type: 3}
+  - contentPanel: {instanceID: 0}
+  - midiPlayer: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
