@@ -34,6 +34,7 @@ public class MidiFileManager : MonoBehaviour
 
     public void LogMidiFiles()
     {
+        Debug.Log("In the Log Midi files function");
         string rootPath = Path.Combine(Application.streamingAssetsPath, "MidiFiles");
         if (Directory.Exists(rootPath))
         {
@@ -56,6 +57,7 @@ public class MidiFileManager : MonoBehaviour
                 if (button != null)
                 {
                     button.onClick.AddListener(() => PlaySong(fileName, author));
+
                 }
             }
         }
@@ -83,6 +85,6 @@ public class MidiFileManager : MonoBehaviour
 
     public void PlaySong(string fileName, string author)
     {
-        midiPlayer.PlayMidi(fileName, author);
+        midiPlayer.PlayMidiPreview(fileName, author);
     }
 }

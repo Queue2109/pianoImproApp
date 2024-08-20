@@ -8,10 +8,14 @@ using TMPro;
 using Melanchall.DryWetMidi.Interaction;
 using System.Threading;
 using System.Linq;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO.Enumeration;
+using System;
 
 public class MidiFileNoteReader : MonoBehaviour
 {
-    private IOutputDevice outputDevice;
+    //private IOutputDevice outputDevice;
     private Playback playback;
     public bool visualizeNotes = true;
     private PianoFunctions pianoFunctions;
@@ -19,16 +23,24 @@ public class MidiFileNoteReader : MonoBehaviour
     private TextMeshProUGUI timeText;
     private TextMeshProUGUI songName;
     private float playbackSpeed = 1f;
-    private long currentPlaybackTime;
     public PanelManagerSongList panelManagerSongList;
 
-    private TempoMap tempoMap;
     private bool[] channelSelections;
     private bool isPlaying = false;
+    private string fileName = "fly me";
+    private string author = "";
+    private GameObject logoPause;
+    private GameObject logoPlay;
+    public AudioClip clip;
+    private OutputDevice outputDevice;
 
     void Start()
     {
 
+        foreach (var outputDevice in OutputDevice.GetAll())
+        {
+            Debug.Log( "Outputdevice name " + outputDevice.Name);
+        }
         pianoFunctions = GetComponent<PianoFunctions>();
         if (pianoFunctions == null)
         {
@@ -41,11 +53,17 @@ public class MidiFileNoteReader : MonoBehaviour
         {
             channelSelections[i] = true; // By default, all channels are selected
         }
+
+        songName = GameObject.Find("SongName").GetComponent<TextMeshProUGUI>();
+        timeText = GameObject.Find("Time").GetComponent<TextMeshProUGUI>();
+        logoPause = GameObject.Find("LogoPause");
+        logoPlay = GameObject.Find("LogoPlay");
+        PlayMidiPreview(fileName, author);
     }
 
     void Update()
     {
-        if (isPlaying && playback != null && slider != null)
+        if (isPlaying && playback != null && slider != null && timeText != null)
         {
             double currentTime = playback.GetCurrentTime<MetricTimeSpan>().TotalSeconds;
             double totalTime = playback.GetDuration<MetricTimeSpan>().TotalSeconds;
@@ -75,38 +93,67 @@ public class MidiFileNoteReader : MonoBehaviour
     }
 
 
-    public void PlayMidi(string fileName, string author)
-    {
-        StopPlayback();
-        var filePath = FindMidiFile(fileName, Path.Combine(Application.streamingAssetsPath, "MidiFiles"));
-        if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+        public void PlayMidiPreview(string fileName, string author)
         {
-            Debug.LogError("MIDI file not found: " + filePath);
-            return;
-        }
-        panelManagerSongList.filePath = filePath;
-        MidiInstrumentChecker.CheckInstruments(filePath);
-        Debug.Log("Reading MIDI file: " + filePath);
-        MidiFile midiFile = MidiFile.Read(filePath);
-        tempoMap = midiFile.GetTempoMap();
+            Debug.Log("PlayMidiPreview called with fileName: " + fileName);
+            StopPlayback();
+            this.fileName = fileName;
+            this.author = author;
+            var filePath = FindMidiFile(fileName, Path.Combine(Application.streamingAssetsPath, "MidiFiles"));
+            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+            {
+                Debug.LogError("MIDI file not found: " + filePath);
+                return;
+            }
+            Debug.Log("Reading MIDI file: " + filePath);
+            MidiFile midiFile = MidiFile.Read(filePath);
         outputDevice = OutputDevice.GetByName("Microsoft GS Wavetable Synth");
 
-        if (outputDevice == null)
-        {
-            Debug.LogError("Output device not found.");
-            return;
-        }
-        if(songName != null)
-        songName.text = author == "Unknown" ? fileName : author + " - " + fileName;
 
-        playback = midiFile.GetPlayback(outputDevice);
-        playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
-        playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
-        //playback.Finished += OnPlaybackFinished;
-        playback.Speed = playbackSpeed;
-        playback.Start();
-        isPlaying = true;
+            if (outputDevice == null)
+            {
+                Debug.LogError("Output device not found.");
+                return;
+            }
+        
+
+            playback = midiFile.GetPlayback(outputDevice);
+            playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
+            playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+            //playback.Finished += OnPlaybackFinished;
+            playback.Speed = playbackSpeed;
+            playback.Start();
+
+            if (playback.IsRunning)
+            {
+                Debug.Log("Playback is running.");
+            } else
+            {
+                Debug.Log("Playback is not running.");
+            }
+
+            isPlaying = true;
+            panelManagerSongList.filePath = filePath;
+        }
+
+    public void PlayMidiFunction()
+    {
+
+
+        Debug.Log("In the playMidi function");
+
+        songName.text = author == "Unknown" ? fileName : author + " - " + fileName;
+        logoPlay.SetActive(false);
+        logoPause.SetActive(true);
+
+        if (!playback.IsRunning)
+        {
+            playback.Start();
+            isPlaying = true;
+        }
+        Debug.Log("Is playing is " + isPlaying + ", playback is " + playback + ", timeText is " + timeText + " and slider is" + slider);
     }
+
 
     public void TogglePlayPause()
     {
@@ -119,11 +166,15 @@ public class MidiFileNoteReader : MonoBehaviour
         if (isPlaying)
         {
             playback.Stop();
+            logoPlay.SetActive(true);
+            logoPause.SetActive(false);
         }
         else
         {
             playback.Start();
-        }
+            logoPlay.SetActive(false);
+            logoPause.SetActive(true);
+           }
         isPlaying = !isPlaying;
     }
 
@@ -154,27 +205,9 @@ public class MidiFileNoteReader : MonoBehaviour
         }
     }
 
-    public void SetChannelSelections(bool[] selections)
-    {
-        channelSelections = selections;
-    }
-
     private string FormatTime(MetricTimeSpan timeSpan)
     {
         return string.Format("{0:D2}:{1:D2}", timeSpan.Minutes, timeSpan.Seconds);
-    }
-
-    private IEnumerator PlayMidiCoroutine()
-    {
-        playback.Start();
-        Debug.Log("Playback has started");
-        while (playback.IsRunning)
-        {
-            yield return null;
-        }
-
-        Debug.Log("Playback coroutine finished");
-        playback.Stop();
     }
 
     private void OnNotesPlaybackStarted(object sender, NotesEventArgs e)
@@ -183,6 +216,7 @@ public class MidiFileNoteReader : MonoBehaviour
         {
             foreach (var note in e.Notes)
             {
+                Debug.Log("Channel of the note and channel in the selectedChannels: " + note.Channel + " in selected: " + MidiInstrumentChecker.selectedChannels.ToArray());
                 if (MidiInstrumentChecker.selectedChannels.Contains(note.Channel))
                 {
                     if (visualizeNotes)

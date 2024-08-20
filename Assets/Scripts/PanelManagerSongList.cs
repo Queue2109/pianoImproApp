@@ -7,17 +7,11 @@ public class PanelManagerSongList : MonoBehaviour
     public List<GameObject> panels;
     public int currentPanel;
     public MidiFileManager midiFileManager;
+    public MidiFileNoteReader midiFileNoteReader;
     public string filePath;
     void Start()
     {
         OpenPanel(currentPanel);
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        SetThingsUp();
-        
     }
 
     private void SetThingsUp()
@@ -28,9 +22,10 @@ public class PanelManagerSongList : MonoBehaviour
                 break;
             case 1:
                 MidiInstrumentChecker.CheckInstruments(filePath);
-                break;
+                break; 
             case 2:
-                OpenPanel(2);
+                midiFileNoteReader.PlayMidiFunction();
+                Debug.Log("In the set things up function playmidi");
                 break;
         
         }
@@ -39,11 +34,14 @@ public class PanelManagerSongList : MonoBehaviour
 
     public void OpenPanel(int panelNumber)
     {
+        currentPanel = panelNumber;
         for(int i = 0; i < panels.Count; i++)
         {
             if(i == panelNumber)
             {
                 panels[i].SetActive(true);
+                SetThingsUp();
+                Debug.Log("Panel " + i + " is active.");
             } else
             {
                 panels[i].SetActive(false);

@@ -9,7 +9,7 @@ using Oculus.Interaction.HandGrab;
 
 public class PianoSetup : MonoBehaviour
 {
-    public string lowestNote = "C2";
+    public string lowestNote = "C1";
     public string highestNote = "C5";
     private GameObject pianoKeyboard;
     private Transform keyboardTransform;

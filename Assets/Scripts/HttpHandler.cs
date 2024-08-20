@@ -57,7 +57,7 @@ public class HttpHandler : MonoBehaviour
              { "phrygian hexamirror", "maj\u2079(\u266F\u2075)" }, // c e g h d fis
              { "Hirajoshi pentatonic", "maj\u2077add#11" }, // c e g h fis
          };
-        text = GameObject.Find("ChordName").GetComponent<TMP_Text>();
+       // text = GameObject.Find("ChordName").GetComponent<TMP_Text>();
         
     }
     public void getChordName(List<int> notes)

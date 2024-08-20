@@ -28,12 +28,36 @@ public static class MidiInstrumentChecker
             int programNumber = kvp.Value;
             string instrument = GetInstrumentName(programNumber);
 
-            if ((instrument != null))
+            if (instrument != null)
             {
                 GameObject cell = GameObject.Instantiate(cellPrefab, gridParent);
-                cell.transform.Find("InstrumentName").GetComponent<TextMeshProUGUI>().text = channel + ": " + instrument.ToString();
+                cell.transform.Find("InstrumentName").GetComponent<TextMeshProUGUI>().text = channel + ": " + instrument;
+
+                // Set the channel number on the button click listener
+                Button cellButton = cell.GetComponent<Button>();
+                cellButton.onClick.AddListener(() => OnInstrumentCellClicked(channel));
+
                 cell.SetActive(true);
             }
+        }
+    }
+
+    public static List<int> GetSelectedChannels()
+    {
+        return new List<int>(selectedChannels); // Return a copy of the list
+    }
+
+    private static void OnInstrumentCellClicked(int channel)
+    {
+        if (!selectedChannels.Contains(channel))
+        {
+            selectedChannels.Add(channel);
+            Debug.Log("Channel " + channel + " added to the list.");
+        }
+        else
+        {
+            selectedChannels.Remove(channel);
+            Debug.Log("Channel " + channel + " removed from the list.");
         }
     }
 

@@ -19,7 +19,7 @@ public class MidiScript : MonoBehaviour
     private float _lastCheckTime;
     private const float CheckInterval = 1.0f; // Check every second
     private List<int> pressedNotes = new List<int>();
-    private HttpHandler httpHandler;
+   // private HttpHandler httpHandler;
     // this is used for visualizing the notes
     //[SerializeField] GameObject barManager;
 
@@ -27,7 +27,7 @@ public class MidiScript : MonoBehaviour
     {
         pianoKeyboard = GameObject.FindGameObjectWithTag("Piano");
         Color colorBlue = new(0.545f, 0.769f, 0.910f, 0.33f);
-        httpHandler = GameObject.Find("HttpHandler").GetComponent<HttpHandler>();
+       // httpHandler = GameObject.Find("HttpHandler").GetComponent<HttpHandler>();
 
         InputSystem.onDeviceChange += (device, change) =>
         {
@@ -91,7 +91,7 @@ public class MidiScript : MonoBehaviour
         {
             pressedNotes.Add(noteNumber);
             //Debug.Log("Note added to pressed list: " + noteNumber);
-            httpHandler.getChordName(pressedNotes);
+           // httpHandler.getChordName(pressedNotes);
         }
     }
 
@@ -101,7 +101,7 @@ public class MidiScript : MonoBehaviour
         {
             pressedNotes.Remove(noteNumber);
            // Debug.Log("Note removed from pressed list: " + noteNumber);
-            httpHandler.getChordName(pressedNotes);
+          //  httpHandler.getChordName(pressedNotes);
         }
     }
 
