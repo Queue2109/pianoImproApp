@@ -10,6 +10,7 @@ public class MidiFileManager : MonoBehaviour
     public GameObject songContainerPrefab; // A UI prefab containing NoteImage, SongAuthor, and SongTitle
     public Transform contentPanel; // The content panel of the scroll view to hold song containers
     public MidiFileNoteReader midiPlayer; // Reference to the MidiPlayer component
+    public TMP_InputField searchBar; // Reference to the TMP_InputField for the search bar
 
     private HashSet<string> knownAuthors = new HashSet<string>
     {
@@ -30,6 +31,9 @@ public class MidiFileManager : MonoBehaviour
         "Ryo Fukui", "Stanley Cowell", "Steve Kuhn", "Teddy Wilson", "Tete Montoliu", "Thelonious Monk", "Tigran Hamasyan",
         "Tommy Flanagan", "Vijay Iyer", "Walter Norris"
     };
+
+    private List<GameObject> songContainers = new List<GameObject>(); // Store all song containers
+
 
 
     public void LogMidiFiles()
@@ -53,6 +57,8 @@ public class MidiFileManager : MonoBehaviour
                     container.transform.Find("Image").transform.Find("SongAuthor").GetComponent<TextMeshProUGUI>().text = author;
                 }
                 container.transform.Find("Image").transform.Find("SongTitle").GetComponent<TextMeshProUGUI>().text = fileName;
+
+                songContainers.Add(container);
                 Button button = container.GetComponent<Button>();
                 if (button != null)
                 {
@@ -64,6 +70,28 @@ public class MidiFileManager : MonoBehaviour
         else
         {
             Debug.LogError("MidiFiles directory not found in StreamingAssets.");
+        }
+    }
+
+    public void openKeyboard()
+    {
+        TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default);
+    }
+
+    private void OnSearchValueChanged(string searchText)
+    {
+        // Split the search text into individual words
+        var searchWords = searchText.ToLower().Split(' ');
+
+        // Iterate through each song container and determine if it should be visible or not
+        foreach (var container in songContainers)
+        {
+            var songTitle = container.transform.Find("Image").transform.Find("SongTitle").GetComponent<TextMeshProUGUI>().text.ToLower();
+            var songAuthor = container.transform.Find("Image").transform.Find("SongAuthor").GetComponent<TextMeshProUGUI>().text.ToLower();
+
+            bool isMatch = searchWords.All(word => songTitle.Contains(word) || songAuthor.Contains(word));
+
+            container.SetActive(isMatch);
         }
     }
 
