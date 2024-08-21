@@ -18,7 +18,6 @@ public class MidiFileNoteReader : MonoBehaviour
 {
     //private IOutputDevice outputDevice;
     private Playback playback;
-    public bool visualizeNotes = true;
     private PianoFunctions pianoFunctions;
     public Slider slider;
     private TextMeshProUGUI timeText;
@@ -35,6 +34,7 @@ public class MidiFileNoteReader : MonoBehaviour
     private GameObject logoPlay;
     public AudioClip clip;
     private OutputDevice outputDevice;
+    private FallingBlocksVisualizer fallingBlocksVisualizer;
 
     double totalTime;
     MetricTimeSpan totalDuration;
@@ -66,6 +66,8 @@ public class MidiFileNoteReader : MonoBehaviour
         speedText = GameObject.Find("Speed").GetComponent<TextMeshProUGUI>();
         logoPause = GameObject.Find("LogoPause");
         logoPlay = GameObject.Find("LogoPlay");
+        fallingBlocksVisualizer = GameObject.Find("FallingBlocksVisualizer").GetComponent<FallingBlocksVisualizer>();
+       // PlayMidiPreview("fly me", "");
     }
 
     void Update()
@@ -142,6 +144,7 @@ public class MidiFileNoteReader : MonoBehaviour
         }
 
         isPlaying = true;
+        fallingBlocksVisualizer.playback = playback;
     }
 
     public void PlayMidiFunction()
@@ -150,6 +153,8 @@ public class MidiFileNoteReader : MonoBehaviour
         songName.text = author == "Unknown" ? fileName : author + " - " + fileName;
         logoPlay.SetActive(false);
         logoPause.SetActive(true);
+
+        fallingBlocksVisualizer.InitializeKeyMappings();
     }
 
 
@@ -213,14 +218,17 @@ public class MidiFileNoteReader : MonoBehaviour
         MainThreadDispatcher.Enqueue(() =>
         {
             foreach (var note in e.Notes)
-            {
-               // Debug.Log("Channel of the note and channel in the selectedChannels: " + note.Channel + " in selected: " + MidiInstrumentChecker.selectedChannels.ToArray());
+            {  
+
+                // Debug.Log("Channel of the note and channel in the selectedChannels: " + note.Channel + " in selected: " + MidiInstrumentChecker.selectedChannels.ToArray());
                 if (MidiInstrumentChecker.selectedChannels.Contains(note.Channel))
                 {
-                    if (visualizeNotes)
+                    if (panelManagerSongList.currentPanel == 2)
                     {
                         var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
-                        pianoFunctions.ColorKey(keyName);
+                        pianoFunctions.ColorKey(keyName); 
+                        fallingBlocksVisualizer.ScheduleFallingBlock(keyName);
+                      
                     }
                 }
             }
@@ -235,7 +243,7 @@ public class MidiFileNoteReader : MonoBehaviour
             {
                 if (MidiInstrumentChecker.selectedChannels.Contains(note.Channel))
                 {
-                    if (visualizeNotes)
+                    if (panelManagerSongList.currentPanel == 2)
                     {
                         var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
                         pianoFunctions.ResetKeyColor(keyName);

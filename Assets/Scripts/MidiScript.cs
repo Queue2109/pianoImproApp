@@ -21,7 +21,6 @@ public class MidiScript : MonoBehaviour
     private List<int> pressedNotes = new List<int>();
    // private HttpHandler httpHandler;
     // this is used for visualizing the notes
-    //[SerializeField] GameObject barManager;
 
     void Start()
     {
@@ -159,5 +158,3 @@ public class MidiScript : MonoBehaviour
 // post call response
 // accompany 
 // piano roll
-// nalozi midi files in da pol ko cez igras da bo kul
-// 
