@@ -2636,6 +2636,11 @@ Material:
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
+--- !u!1 &607026304 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6290575946404885972, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
+  m_PrefabInstance: {fileID: 1524063257}
+  m_PrefabAsset: {fileID: 0}
 --- !u!21 &625008680
 Material:
   serializedVersion: 8
@@ -3482,7 +3487,14 @@ MonoBehaviour:
   panelManagerSongList: {fileID: 753940912}
   fileName: 
   author: 
+  logoPause: {fileID: 773495830}
+  logoPlay: {fileID: 607026304}
   clip: {fileID: 8300000, guid: aa9db20d3a797e5458be7b58b5389464, type: 3}
+--- !u!1 &773495830 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7610228819415129071, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
+  m_PrefabInstance: {fileID: 1524063257}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &782409779
 GameObject:
   m_ObjectHideFlags: 0
