@@ -13,7 +13,7 @@ OcclusionCullingSettings:
 --- !u!104 &2
 RenderSettings:
   m_ObjectHideFlags: 0
-  serializedVersion: 9
+  serializedVersion: 10
   m_Fog: 0
   m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
   m_FogMode: 3
@@ -44,7 +44,6 @@ RenderSettings:
 LightmapSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 12
-  m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -67,9 +66,6 @@ LightmapSettings:
     m_LightmapParameters: {fileID: 0}
     m_LightmapsBakeMode: 1
     m_TextureCompression: 1
-    m_FinalGather: 0
-    m_FinalGatherFiltering: 1
-    m_FinalGatherRayCount: 256
     m_ReflectionCompression: 2
     m_MixedBakeMode: 2
     m_BakeBackend: 1
@@ -97,7 +93,7 @@ LightmapSettings:
     m_ExportTrainingData: 0
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
-  m_LightingDataAsset: {fileID: 0}
+  m_LightingDataAsset: {fileID: 20201, guid: 0000000000000000f000000000000000, type: 0}
   m_LightingSettings: {fileID: 0}
 --- !u!196 &4
 NavMeshSettings:
@@ -204,6 +200,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1001 &21488641
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -401,6 +398,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &30435265
 Material:
   serializedVersion: 8
@@ -482,6 +480,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &136247240
 Material:
   serializedVersion: 8
@@ -563,6 +562,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &137985838
 Material:
   serializedVersion: 8
@@ -644,6 +644,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &175615333
 Material:
   serializedVersion: 8
@@ -725,6 +726,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &219876791
 Material:
   serializedVersion: 8
@@ -806,6 +808,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &226235042
 Material:
   serializedVersion: 8
@@ -887,6 +890,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &252484886
 GameObject:
   m_ObjectHideFlags: 0
@@ -1073,6 +1077,8 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1236,6 +1242,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &282488395
 Material:
   serializedVersion: 8
@@ -1332,6 +1339,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &306504389
 Material:
   serializedVersion: 8
@@ -1427,6 +1435,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &308378355
 GameObject:
   m_ObjectHideFlags: 0
@@ -1539,6 +1548,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &382624353
 Material:
   serializedVersion: 8
@@ -1634,6 +1644,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &407259500
 GameObject:
   m_ObjectHideFlags: 0
@@ -1857,6 +1868,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &481348527
 GameObject:
   m_ObjectHideFlags: 0
@@ -2047,6 +2059,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &525400063
 Material:
   serializedVersion: 8
@@ -2142,6 +2155,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &575330090
 Material:
   serializedVersion: 8
@@ -2237,6 +2251,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &578909725
 GameObject:
   m_ObjectHideFlags: 0
@@ -2376,6 +2391,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &612846985
 GameObject:
   m_ObjectHideFlags: 0
@@ -2612,6 +2628,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &680136568
 Material:
   serializedVersion: 8
@@ -2693,6 +2710,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1001 &723538943
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2844,6 +2862,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &751999356
 Material:
   serializedVersion: 8
@@ -2939,6 +2958,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &760531603
 Material:
   serializedVersion: 8
@@ -3034,6 +3054,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &822743798
 Material:
   serializedVersion: 8
@@ -3129,6 +3150,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &935846523
 Material:
   serializedVersion: 8
@@ -3210,6 +3232,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &949805041
 Material:
   serializedVersion: 8
@@ -3305,6 +3328,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &976257809
 Material:
   serializedVersion: 8
@@ -3401,6 +3425,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &976343423
 Material:
   serializedVersion: 8
@@ -3496,6 +3521,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &1036962638
 GameObject:
   m_ObjectHideFlags: 0
@@ -3856,6 +3882,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1097182424
 Material:
   serializedVersion: 8
@@ -3951,6 +3978,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1113311994
 Material:
   serializedVersion: 8
@@ -4046,6 +4074,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1113462851
 Material:
   serializedVersion: 8
@@ -4127,6 +4156,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1001 &1127775941
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4205,7 +4235,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2037080, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: m_CullingMask.m_Bits
-      value: 4294967263
+      value: 87
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
       propertyPath: _trackingOriginType
@@ -4326,9 +4356,8 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1136376898}
   m_Enabled: 1
-  serializedVersion: 10
+  serializedVersion: 11
   m_Type: 1
-  m_Shape: 0
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
   m_Range: 10
@@ -4534,6 +4563,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &1164521753
 GameObject:
   m_ObjectHideFlags: 0
@@ -4696,15 +4726,17 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_enableWordWrapping: 1
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
   m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 1
+  m_ActiveFontFeatures: 6e72656b
   m_enableExtraPadding: 0
   checkPaddingRequired: 0
   m_isRichText: 1
+  m_EmojiFallbackSupport: 1
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -4811,6 +4843,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!65 &1245270247
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4927,6 +4960,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1370799579
 Material:
   serializedVersion: 8
@@ -5022,6 +5056,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1450126878
 Material:
   serializedVersion: 8
@@ -5117,6 +5152,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &1474323613
 GameObject:
   m_ObjectHideFlags: 0
@@ -5331,6 +5367,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1534291039
 Material:
   serializedVersion: 8
@@ -5412,6 +5449,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1535678341
 Material:
   serializedVersion: 8
@@ -5493,6 +5531,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &1537000678
 GameObject:
   m_ObjectHideFlags: 0
@@ -5813,7 +5852,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1609027354
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5826,6 +5865,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d34610f0c3bf7f449968e1c4fc991839, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  slider: {fileID: 0}
+  panelManagerSongList: {fileID: 0}
+  clip: {fileID: 0}
 --- !u!4 &1609027355
 Transform:
   m_ObjectHideFlags: 0
@@ -5936,6 +5978,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1639776743
 Material:
   serializedVersion: 8
@@ -6017,6 +6060,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1663695845
 Material:
   serializedVersion: 8
@@ -6098,6 +6142,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1001 &1677533739
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6299,6 +6344,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1680465265
 Material:
   serializedVersion: 8
@@ -6394,6 +6440,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1001 &1682474420
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6549,6 +6596,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1709584358
 Material:
   serializedVersion: 8
@@ -6630,6 +6678,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1743671960
 Material:
   serializedVersion: 8
@@ -6711,6 +6760,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1772556608
 Material:
   serializedVersion: 8
@@ -6806,6 +6856,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1001 &1789813494
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6819,7 +6870,7 @@ PrefabInstance:
       value: 101.16
       objectReference: {fileID: 0}
     - target: {fileID: -9111325687217218048, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 279059248}
     - target: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
@@ -6875,51 +6926,51 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8593107108786644686, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 137985838}
     - target: {fileID: -7934181088312917679, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1199948498}
     - target: {fileID: -7437991938296246473, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 680136568}
     - target: {fileID: -7404482121336452012, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 306504389}
     - target: {fileID: -7252331237196891584, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1691750813}
     - target: {fileID: -6920362309820561901, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 226235042}
     - target: {fileID: -6823548017687669845, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1965616818}
     - target: {fileID: -6514631022576960909, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 751999356}
     - target: {fileID: -6254122319501626719, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 419939780}
     - target: {fileID: -5904549715101698006, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 498070025}
     - target: {fileID: -5872695885592679857, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2046178872}
     - target: {fileID: -5843632497118488774, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2134897829}
     - target: {fileID: -5651855819390717964, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
@@ -6927,55 +6978,55 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -5651855819390717964, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1514140972}
     - target: {fileID: -5651855819390717964, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
     - target: {fileID: -5610882687219723014, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 219876791}
     - target: {fileID: -5454906838488333141, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1813839010}
     - target: {fileID: -5006277826786106116, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1113462851}
     - target: {fileID: -4894571275490105648, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 592370355}
     - target: {fileID: -4777560826449614006, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2038130976}
     - target: {fileID: -4678612162028414488, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1709584358}
     - target: {fileID: -4055900680893897532, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1966253677}
     - target: {fileID: -4025577709231043670, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1159998313}
     - target: {fileID: -3757130665770508278, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1535678341}
     - target: {fileID: -3350164392604908479, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1818495849}
     - target: {fileID: -2641498013443734469, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 665107256}
     - target: {fileID: -2181558357886083142, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
@@ -6983,7 +7034,7 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -2128055731354919165, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2102560753}
     - target: {fileID: -1658655965864228225, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
@@ -6991,55 +7042,55 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -1658655965864228225, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 575330090}
     - target: {fileID: -1658655965864228225, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ce06624e7fd0af149bc554b6326f0a05, type: 2}
     - target: {fileID: -1631574223914467781, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 822743798}
     - target: {fileID: -1615840551253773714, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1071658061}
     - target: {fileID: -1527184662241148706, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1875838871}
     - target: {fileID: -1043361430312076566, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1663695845}
     - target: {fileID: -784971028298575499, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1955849483}
     - target: {fileID: -688475003892049407, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1450126878}
     - target: {fileID: -280874484589776623, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: -6629797300637803691, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
     - target: {fileID: 186198330868577904, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1629993629}
     - target: {fileID: 301660058734273142, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 976343423}
     - target: {fileID: 439964100386744633, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 382624353}
     - target: {fileID: 696226820012664121, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 346222939}
     - target: {fileID: 919132149155446097, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
@@ -7059,91 +7110,91 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1389037659228680033, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1534291039}
     - target: {fileID: 1389037659228680033, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ce06624e7fd0af149bc554b6326f0a05, type: 2}
     - target: {fileID: 1675956268197313614, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 760531603}
     - target: {fileID: 1713284252930785671, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 04e9362f2d6a1f94c9da79e6371be598, type: 2}
     - target: {fileID: 2724681723162361452, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1844364350}
     - target: {fileID: 2802539809986354984, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1680055393}
     - target: {fileID: 2983535032227325647, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 30435265}
     - target: {fileID: 3380930026831176757, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 136247240}
     - target: {fileID: 3900443588400140332, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1097182424}
     - target: {fileID: 3979523746854767028, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 949805041}
     - target: {fileID: 4445986251694203932, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1253314394}
     - target: {fileID: 5290689831093094911, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 21179901}
     - target: {fileID: 5444095101067425597, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1639776743}
     - target: {fileID: 5889508451451401971, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1743671960}
     - target: {fileID: 6138840354814794892, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1680465265}
     - target: {fileID: 6155204738067573897, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 976257809}
     - target: {fileID: 6184211895607668109, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1113311994}
     - target: {fileID: 6346267838157080833, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 282488395}
     - target: {fileID: 6490926969567290662, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 747834595}
     - target: {fileID: 6533303652432822736, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 27364564}
     - target: {fileID: 6925368545753384804, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1915001401}
     - target: {fileID: 7128746885833691457, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 175615333}
     - target: {fileID: 7250517388893403643, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
@@ -7151,31 +7202,31 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7250517388893403643, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ce06624e7fd0af149bc554b6326f0a05, type: 2}
     - target: {fileID: 7305639205006602271, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 525400063}
     - target: {fileID: 7576803870520267229, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1370799579}
     - target: {fileID: 7945689395825424173, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1821535110}
     - target: {fileID: 8453835714727839201, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2090995225}
     - target: {fileID: 8499626675411175596, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 1772556608}
     - target: {fileID: 8606192899737330232, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
-      propertyPath: m_Materials.Array.data[0]
+      propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 935846523}
     m_RemovedComponents: []
@@ -7392,6 +7443,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1818495849
 Material:
   serializedVersion: 8
@@ -7487,6 +7539,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1821535110
 Material:
   serializedVersion: 8
@@ -7582,6 +7635,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1 &1822481542
 GameObject:
   m_ObjectHideFlags: 0
@@ -7695,6 +7749,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1875838871
 Material:
   serializedVersion: 8
@@ -7790,6 +7845,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1915001401
 Material:
   serializedVersion: 8
@@ -7871,6 +7927,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1955849483
 Material:
   serializedVersion: 8
@@ -7966,6 +8023,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1965616818
 Material:
   serializedVersion: 8
@@ -8061,6 +8119,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &1966253677
 Material:
   serializedVersion: 8
@@ -8156,6 +8215,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!114 &2009010434
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8267,6 +8327,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &2046178872
 Material:
   serializedVersion: 8
@@ -8348,6 +8409,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &2090995225
 Material:
   serializedVersion: 8
@@ -8429,6 +8491,7 @@ Material:
     - _Color: {r: 0, g: 0, b: 0, a: 0.8}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1001 &2097245823
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8590,6 +8653,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!21 &2134897829
 Material:
   serializedVersion: 8
@@ -8685,6 +8749,7 @@ Material:
     - _EmissionColorUI: {r: 0, g: 0, b: 0, a: 1}
     - _EmissionColorWithMapUI: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

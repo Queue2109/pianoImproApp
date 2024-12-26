@@ -10,8 +10,11 @@ public class PanelManagerSongList : MonoBehaviour
     public MidiFileManager midiFileManager;
     public MidiFileNoteReader midiFileNoteReader;
     public string filePath;
-    private GameObject pianoKeyboard;
-    private FallingBlocksVisualizer fallingBlocksVisualizer;
+    public GameObject pianoKeyboard;
+    //public Transform uiPanel;
+    //public Transform vrCamera;
+    public float distanceFromKeyboard = 0.5f; // Distance from the keyboard to place the panel
+    public float distanceFromCamera = 0.3f;
     void Start()
     {
         OpenPanel(currentPanel);
@@ -19,32 +22,35 @@ public class PanelManagerSongList : MonoBehaviour
 
     private void SetThingsUp()
     {
-        switch (currentPanel) {
+        switch (currentPanel)
+        {
             case 0:
                 midiFileManager.LogMidiFiles();
-                PersistentGameObject persistentGameObject = FindObjectOfType<PersistentGameObject>();
-                if (persistentGameObject)
-                {
-                    pianoKeyboard = persistentGameObject.gameObject;
-                    fallingBlocksVisualizer = GameObject.Find("FallingBlocksVisualizer").GetComponent<FallingBlocksVisualizer>();
-                    fallingBlocksVisualizer.pianoKeyboard = pianoKeyboard;
-                }
-                else
-                {
-                    Debug.Log("No PersistentGameObject found in the scene. in the 0");
-                }
-                pianoKeyboard.GetComponent<Grabbable>().enabled = false;
-                pianoKeyboard.SetActive(false);
+                midiFileNoteReader.Setup();
+                GameObject.Find("UI Cylinder Song List").SetActive(true);
+                GameObject.Find("HeroScreen").SetActive(true);
                 break;
             case 1:
                 MidiInstrumentChecker.CheckInstruments(filePath);
-                pianoKeyboard.SetActive(false);
-                break; 
-            case 2:
-                midiFileNoteReader.PlayMidiFunction();
-                pianoKeyboard.SetActive(true);
                 break;
-        
+            case 2:
+                UpdateAndShowPLaySongPanel();
+                GameObject.Find("HeroScreen").SetActive(false);
+                GameObject.Find("UI Cylinder Song List").SetActive(false);
+                panels[2].transform.position = pianoKeyboard.transform.position + new Vector3(0, 0, -0.1f);
+                // Get the current rotation of the panel
+                Quaternion panelRotation = panels[2].transform.rotation;
+
+                // Get the x rotation from the pianoKeyboard
+                float pianoKeyboardRotationY = pianoKeyboard.transform.rotation.eulerAngles.y;
+
+                // Create a new rotation while keeping the panel's original y and z rotations
+                Quaternion newRotation = Quaternion.Euler(panelRotation.eulerAngles.x, pianoKeyboardRotationY - 180, panelRotation.eulerAngles.z);
+
+                // Apply the new rotation to the panel
+                panels[2].transform.rotation = newRotation;
+                break;
+
         }
 
     }
@@ -52,16 +58,25 @@ public class PanelManagerSongList : MonoBehaviour
     public void OpenPanel(int panelNumber)
     {
         currentPanel = panelNumber;
-        for(int i = 0; i < panels.Count; i++)
+        for (int i = 0; i < panels.Count; i++)
         {
-            if(i == panelNumber)
+            if (i == panelNumber)
             {
                 panels[i].SetActive(true);
                 SetThingsUp();
-            } else
+            }
+            else
             {
                 panels[i].SetActive(false);
             }
         }
+    }
+
+    public void UpdateAndShowPLaySongPanel()
+    {
+        midiFileNoteReader.StartPlaybackFromBeginning();
+        pianoKeyboard.SetActive(true);
+        pianoKeyboard.GetComponent<Grabbable>().enabled = false;
+
     }
 }

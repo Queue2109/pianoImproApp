@@ -6,12 +6,11 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/PianoSetup.unity
-    guid: d7d050061a59e6649994eb21f9414431
-  - enabled: 1
-    path: Assets/Scenes/SongList.unity
-    guid: 0aca876b854ff7344875233671825d49
+    path: Assets/Scenes/SampleScene.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 3d8cb04a3e0044a46ae7a779cdc3b5ca, type: 2}
+    com.unity.xr.arfoundation.simulation_settings: {fileID: 11400000, guid: 2359f5871279a754cb15c866ed0833b8, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 0077abc586aaf9b48975fdf968bc9fc0, type: 2}
     com.unity.xr.openxr.settings4: {fileID: 11400000, guid: 769d99c9136a70d4fbe085f08304450c, type: 2}
+  m_UseUCBPForAssetBundles: 0

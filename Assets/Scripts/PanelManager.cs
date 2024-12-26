@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using Unity.VisualScripting;
-using UnityEditor.Animations;
 using Oculus.Interaction;
 using UnityEngine.EventSystems;
 

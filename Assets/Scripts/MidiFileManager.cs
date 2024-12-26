@@ -113,6 +113,7 @@ public class MidiFileManager : MonoBehaviour
 
     public void PlaySong(string fileName, string author)
     {
-        midiPlayer.PlayMidiPreview(fileName, author);
+        midiPlayer.fileName = fileName;
+        midiPlayer.PlaybackPreview();
     }
 }
