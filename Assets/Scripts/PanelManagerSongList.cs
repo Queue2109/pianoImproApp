@@ -31,9 +31,6 @@ public class PanelManagerSongList : MonoBehaviour
                 GameObject.Find("HeroScreen").SetActive(true);
                 break;
             case 1:
-                MidiInstrumentChecker.CheckInstruments(filePath);
-                break;
-            case 2:
                 UpdateAndShowPLaySongPanel();
                 GameObject.Find("HeroScreen").SetActive(false);
                 GameObject.Find("UI Cylinder Song List").SetActive(false);
