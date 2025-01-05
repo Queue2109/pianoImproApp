@@ -1,14 +1,24 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Melanchall.DryWetMidi.MusicTheory;
 using UnityEngine;
 
 public class PianoFunctions : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
 
+    private List<Transform> blackKeys; // Array to hold all the black keys
+    private List<Transform> whiteKeys; // Array to hold all the black keys
+    private GameObject pianoKeyboard;
+
+
+    private void Start()
+    {
+        pianoKeyboard = GameObject.FindGameObjectWithTag("Piano");
+        blackKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => child.name.Contains("Sharp")).ToList();
+        blackKeys = blackKeys.OrderBy(key => key.position.x).ToList();
+        whiteKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => !child.name.Contains("Sharp")).ToList();
+        whiteKeys = whiteKeys.OrderBy(key => key.position.x).ToList();
     }
 
     // Update is called once per frame
@@ -145,46 +155,79 @@ public class PianoFunctions : MonoBehaviour
     {
         transform.localScale *= scaleFactor;
     }
-
     public void ScaleWhiteKeys(float scaleFactor)
     {
-        foreach (Transform child in transform)
+        Debug.Log(scaleFactor);
+        foreach (Transform key in whiteKeys)
         {
-            if (!child.name.Contains("Sharp"))
+
+            Vector3 localScale = key.localScale;
+            if (localScale.y < 0)
             {
-                child.localScale *= scaleFactor;
+                return;
             }
+
+            float newHeight = localScale.y * scaleFactor;
+
+            key.localScale = new Vector3(localScale.x, newHeight, localScale.z);
+
+            float ratioZtoY = 0.08f / 14.01483f;
+
+            float changeInHeight = newHeight - localScale.y;
+
+            float newZPosition = key.localPosition.z + (changeInHeight * ratioZtoY);
+            key.localPosition = new Vector3(key.localPosition.x, key.localPosition.y, newZPosition);
         }
     }
 
     public void ScaleBlackKeys(float scaleFactor)
     {
-        foreach (Transform child in transform)
+        foreach (Transform key in blackKeys)
         {
-            if (child.name.Contains("Sharp"))
-            {
-                child.localScale *= scaleFactor;
-            }
+
+            Vector3 localScale = key.localScale;
+
+            float newHeight = localScale.y * scaleFactor;
+
+            key.localScale = new Vector3(localScale.x, newHeight, localScale.z);
+
+            float ratioZtoY = 0.08f / 14.01483f;
+
+            float changeInHeight = newHeight - localScale.y;
+
+            float newZPosition = key.localPosition.z + (changeInHeight * ratioZtoY);
+            key.localPosition = new Vector3(key.localPosition.x, key.localPosition.y, newZPosition);
         }
     }
 
     public void MoveLeft()
     {
-        MoveObject(Vector3.left * 0.1f);
+        MoveObject(Vector3.left * 0.01f);
     }
 
     public void MoveRight()
     {
-        MoveObject(Vector3.right * 0.1f);
+        MoveObject(Vector3.right * 0.01f);
     }
 
     public void MoveForward()
     {
-        MoveObject(Vector3.forward * 0.1f);
+        MoveObject(Vector3.forward * 0.01f);
     }
 
     public void MoveBackward()
     {
-        MoveObject(Vector3.back * 0.1f);
+        MoveObject(Vector3.back * 0.01f);
+    }
+
+    public void RotateLeft()
+    {
+        transform.Rotate(Vector3.up, -1f, Space.Self);
+    }
+
+    // Function to rotate the object to the right (clockwise)
+    public void RotateRight()
+    {
+        transform.Rotate(Vector3.up, 1f, Space.Self);
     }
 }

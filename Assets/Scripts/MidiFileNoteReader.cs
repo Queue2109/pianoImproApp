@@ -13,7 +13,7 @@ public class MidiFileNoteReader : MonoBehaviour
 {
     //private IOutputDevice outputDevice;
     private Playback playback;
-    private PianoFunctions pianoFunctions;
+    public PianoFunctions pianoFunctions;
     public Slider slider;
     private TextMeshProUGUI timeText;
     private TextMeshProUGUI speedText;
@@ -46,7 +46,6 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.LogError("No output device found.");
             return;
         }
-        pianoFunctions = GetComponent<PianoFunctions>();
         if (pianoFunctions == null)
         {
             Debug.LogError("PianoFunctions script not found on the GameObject.");

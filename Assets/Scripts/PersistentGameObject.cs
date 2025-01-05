@@ -4,6 +4,10 @@ public class PersistentGameObject : MonoBehaviour
 {
     private static PersistentGameObject instance;
 
+    private Vector3 originalPosition;
+    private Vector3 originalRotation;
+    private Vector3 originalScale;
+
     void Awake()
     {
         // Check if an instance of this object already exists
@@ -12,6 +16,11 @@ public class PersistentGameObject : MonoBehaviour
             // If not, set this as the instance, mark it as persistent, and initialize it
             instance = this;
             DontDestroyOnLoad(this.gameObject);
+
+            originalPosition = transform.position;
+            originalRotation = transform.eulerAngles;
+            originalScale = transform.localScale;
+
             LoadState();
         }
         else
@@ -92,5 +101,23 @@ public class PersistentGameObject : MonoBehaviour
             t.eulerAngles = new Vector3(rotX, rotY, rotZ);
             t.localScale = new Vector3(scaleX, scaleY, scaleZ);
         }
+    }
+
+    public void ResetState()
+    {
+        // Reset the object to its original transform values
+        transform.position = originalPosition;
+        transform.eulerAngles = originalRotation;
+        transform.localScale = originalScale;
+
+        // Reset children to their original states as well (if necessary)
+        for (int i = 0; i < transform.childCount; i++)
+        {
+            Transform child = transform.GetChild(i);
+
+            // You can extend this logic if each child also has a persistent original state
+        }
+
+        Debug.Log("Object has been reset to its original state.");
     }
 }

@@ -18,6 +18,8 @@ public class PanelManagerSongList : MonoBehaviour
     void Start()
     {
         OpenPanel(currentPanel);
+        // Reset the object's state from another script
+
     }
 
     private void SetThingsUp()
@@ -25,12 +27,15 @@ public class PanelManagerSongList : MonoBehaviour
         switch (currentPanel)
         {
             case 0:
+
+                break;
+            case 1:
                 midiFileManager.LogMidiFiles();
-                midiFileNoteReader.Setup();
                 GameObject.Find("UI Cylinder Song List").SetActive(true);
                 GameObject.Find("HeroScreen").SetActive(true);
                 break;
-            case 1:
+            case 2:
+                midiFileNoteReader.Setup();
                 UpdateAndShowPLaySongPanel();
                 GameObject.Find("HeroScreen").SetActive(false);
                 GameObject.Find("UI Cylinder Song List").SetActive(false);
@@ -57,6 +62,8 @@ public class PanelManagerSongList : MonoBehaviour
         currentPanel = panelNumber;
         for (int i = 0; i < panels.Count; i++)
         {
+            if (i == 2 && midiFileNoteReader.fileName == "")
+                break;
             if (i == panelNumber)
             {
                 panels[i].SetActive(true);
@@ -74,6 +81,5 @@ public class PanelManagerSongList : MonoBehaviour
         midiFileNoteReader.StartPlaybackFromBeginning();
         pianoKeyboard.SetActive(true);
         pianoKeyboard.GetComponent<Grabbable>().enabled = false;
-
     }
 }
