@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Melanchall.DryWetMidi.MusicTheory;
 using UnityEngine;
+using UnityEngine.XR.ARFoundation;
 
 public class PianoFunctions : MonoBehaviour
 {
