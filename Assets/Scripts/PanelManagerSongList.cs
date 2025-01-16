@@ -9,17 +9,12 @@ public class PanelManagerSongList : MonoBehaviour
     public int currentPanel = 0;
     public MidiFileManager midiFileManager;
     public MidiFileNoteReader midiFileNoteReader;
-    public string filePath;
     public GameObject pianoKeyboard;
-    //public Transform uiPanel;
-    //public Transform vrCamera;
-    public float distanceFromKeyboard = 0.5f; // Distance from the keyboard to place the panel
-    public float distanceFromCamera = 0.3f;
     void Start()
     {
         OpenPanel(currentPanel);
-        // Reset the object's state from another script
-
+        midiFileManager.LogMidiFilesAsync();
+        midiFileNoteReader.Setup();
     }
 
     private void SetThingsUp()
@@ -27,30 +22,11 @@ public class PanelManagerSongList : MonoBehaviour
         switch (currentPanel)
         {
             case 0:
-
                 break;
             case 1:
-                midiFileManager.LogMidiFiles();
-                GameObject.Find("UI Cylinder Song List").SetActive(true);
-                GameObject.Find("HeroScreen").SetActive(true);
                 break;
             case 2:
-                midiFileNoteReader.Setup();
                 UpdateAndShowPLaySongPanel();
-                GameObject.Find("HeroScreen").SetActive(false);
-                GameObject.Find("UI Cylinder Song List").SetActive(false);
-                panels[2].transform.position = pianoKeyboard.transform.position + new Vector3(0, 0, -0.1f);
-                // Get the current rotation of the panel
-                Quaternion panelRotation = panels[2].transform.rotation;
-
-                // Get the x rotation from the pianoKeyboard
-                float pianoKeyboardRotationY = pianoKeyboard.transform.rotation.eulerAngles.y;
-
-                // Create a new rotation while keeping the panel's original y and z rotations
-                Quaternion newRotation = Quaternion.Euler(panelRotation.eulerAngles.x, pianoKeyboardRotationY - 180, panelRotation.eulerAngles.z);
-
-                // Apply the new rotation to the panel
-                panels[2].transform.rotation = newRotation;
                 break;
 
         }

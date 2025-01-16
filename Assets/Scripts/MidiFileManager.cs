@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using TMPro;
+using System.Threading.Tasks;
 
 public class MidiFileManager : MonoBehaviour
 {
     public GameObject songContainerPrefab; // A UI prefab containing NoteImage, SongAuthor, and SongTitle
     public Transform contentPanel; // The content panel of the scroll view to hold song containers
     public MidiFileNoteReader midiPlayer; // Reference to the MidiPlayer component
-    public TMP_InputField searchBar; // Reference to the TMP_InputField for the search bar
 
     private HashSet<string> knownAuthors = new HashSet<string>
     {
@@ -32,39 +32,25 @@ public class MidiFileManager : MonoBehaviour
         "Tommy Flanagan", "Vijay Iyer", "Walter Norris"
     };
 
-    private List<GameObject> songContainers = new List<GameObject>(); // Store all song containers
+    private List<GameObject> songContainers = new List<GameObject>(); // Store all song 
 
-
-
-    public void LogMidiFiles()
+    public async void LogMidiFilesAsync()
     {
         Debug.Log("In the Log Midi files function");
         string rootPath = Path.Combine(Application.streamingAssetsPath, "MidiFiles");
         if (Directory.Exists(rootPath))
         {
-            var midiFiles = new List<string>();
-            midiFiles.AddRange(Directory.GetFiles(rootPath, "*.midi", SearchOption.AllDirectories));
-            midiFiles.AddRange(Directory.GetFiles(rootPath, "*.mid", SearchOption.AllDirectories));
+            var midiFiles = await Task.Run(() =>
+            {
+                var files = new List<string>();
+                files.AddRange(Directory.GetFiles(rootPath, "*.midi", SearchOption.AllDirectories));
+                files.AddRange(Directory.GetFiles(rootPath, "*.mid", SearchOption.AllDirectories));
+                return files;
+            });
 
             foreach (var midiFile in midiFiles)
             {
-                string author = ExtractAuthorFromPath(midiFile, rootPath);
-                string fileName = Path.GetFileNameWithoutExtension(midiFile);
-                GameObject container = Instantiate(songContainerPrefab, contentPanel);
-                container.SetActive(true);
-                if(author != "Unknown")
-                {
-                    container.transform.Find("Image").transform.Find("SongAuthor").GetComponent<TextMeshProUGUI>().text = author;
-                }
-                container.transform.Find("Image").transform.Find("SongTitle").GetComponent<TextMeshProUGUI>().text = fileName;
-
-                songContainers.Add(container);
-                Button button = container.GetComponent<Button>();
-                if (button != null)
-                {
-                    button.onClick.AddListener(() => PlaySong(fileName, author));
-
-                }
+                CreateSongContainer(midiFile, rootPath);
             }
         }
         else
@@ -73,26 +59,29 @@ public class MidiFileManager : MonoBehaviour
         }
     }
 
+    private void CreateSongContainer(string midiFile, string rootPath)
+    {
+        string author = ExtractAuthorFromPath(midiFile, rootPath);
+        string fileName = Path.GetFileNameWithoutExtension(midiFile);
+
+        GameObject container = Instantiate(songContainerPrefab, contentPanel);
+        container.SetActive(true);
+
+        container.transform.Find("Image/SongAuthor").GetComponent<TextMeshProUGUI>().text = author != "Unknown" ? author : string.Empty;
+        container.transform.Find("Image/SongTitle").GetComponent<TextMeshProUGUI>().text = fileName;
+
+        Button button = container.GetComponent<Button>();
+        if (button != null)
+        {
+            button.onClick.AddListener(() => PlaySong(fileName, author));
+        }
+
+        songContainers.Add(container);
+    }
+
     public void openKeyboard()
     {
         TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default);
-    }
-
-    private void OnSearchValueChanged(string searchText)
-    {
-        // Split the search text into individual words
-        var searchWords = searchText.ToLower().Split(' ');
-
-        // Iterate through each song container and determine if it should be visible or not
-        foreach (var container in songContainers)
-        {
-            var songTitle = container.transform.Find("Image").transform.Find("SongTitle").GetComponent<TextMeshProUGUI>().text.ToLower();
-            var songAuthor = container.transform.Find("Image").transform.Find("SongAuthor").GetComponent<TextMeshProUGUI>().text.ToLower();
-
-            bool isMatch = searchWords.All(word => songTitle.Contains(word) || songAuthor.Contains(word));
-
-            container.SetActive(isMatch);
-        }
     }
 
     private string ExtractAuthorFromPath(string filePath, string rootPath)
@@ -102,10 +91,7 @@ public class MidiFileManager : MonoBehaviour
 
         foreach (var part in pathParts)
         {
-            if (knownAuthors.Contains(part))
-            {
-                return part;
-            }
+            return part;
         }
 
         return "Unknown";
