@@ -27,10 +27,6 @@ public class AttachColliders : MonoBehaviour
                 rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationZ;
             }
         }
-        OVRSpatialAnchor spatialAnchor = gameObject.AddComponent<OVRSpatialAnchor>();
-
-        // Save the anchor to make it persistent
-        spatialAnchor.SaveAnchorAsync();
     }
 
     void AddMaterials(GameObject obj) {

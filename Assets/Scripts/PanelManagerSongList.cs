@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Meta.XR.BuildingBlocks;
 using Oculus.Interaction;
 using UnityEngine;
 
@@ -12,9 +13,8 @@ public class PanelManagerSongList : MonoBehaviour
     public GameObject pianoKeyboard;
     void Start()
     {
-        OpenPanel(currentPanel);
+        //OpenPanel(currentPanel);
         midiFileManager.LogMidiFilesAsync();
-        midiFileNoteReader.Setup();
     }
 
     private void SetThingsUp()
@@ -22,11 +22,8 @@ public class PanelManagerSongList : MonoBehaviour
         switch (currentPanel)
         {
             case 0:
-                break;
-            case 1:
-                break;
-            case 2:
                 UpdateAndShowPLaySongPanel();
+                midiFileNoteReader.Setup();
                 break;
 
         }
@@ -38,8 +35,6 @@ public class PanelManagerSongList : MonoBehaviour
         currentPanel = panelNumber;
         for (int i = 0; i < panels.Count; i++)
         {
-            if (i == 2 && midiFileNoteReader.fileName == "")
-                break;
             if (i == panelNumber)
             {
                 panels[i].SetActive(true);

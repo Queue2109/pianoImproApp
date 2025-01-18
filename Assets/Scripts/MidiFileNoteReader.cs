@@ -17,7 +17,6 @@ public class MidiFileNoteReader : MonoBehaviour
     public Slider slider;
     private TextMeshProUGUI timeText;
     private TextMeshProUGUI speedText;
-    private TextMeshProUGUI songName;
     private float playbackSpeed = 1f;
     public PanelManagerSongList panelManagerSongList;
 
@@ -36,6 +35,8 @@ public class MidiFileNoteReader : MonoBehaviour
     double totalTime;
     MetricTimeSpan totalDuration;
     MetricTimeSpan currentTime;
+
+    public TextMeshProUGUI songName;
 
     private bool colorLeftHand = true;
     private bool colorRightHand = true;
@@ -60,7 +61,6 @@ public class MidiFileNoteReader : MonoBehaviour
             channelSelections[i] = true; // By default, all channels are selected
         }
 
-        songName = GameObject.Find("SongName").GetComponent<TextMeshProUGUI>();
         timeText = GameObject.Find("Time").GetComponent<TextMeshProUGUI>();
         speedText = GameObject.Find("Speed").GetComponent<TextMeshProUGUI>();
     }
