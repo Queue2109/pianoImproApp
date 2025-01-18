@@ -51,6 +51,5 @@ public class PanelManagerSongList : MonoBehaviour
     {
         midiFileNoteReader.StartPlaybackFromBeginning();
         pianoKeyboard.SetActive(true);
-        pianoKeyboard.GetComponent<Grabbable>().enabled = false;
     }
 }

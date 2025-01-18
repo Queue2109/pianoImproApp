@@ -232,6 +232,17 @@ public class PianoFunctions : MonoBehaviour
         transform.Rotate(Vector3.up, 1f, Space.Self);
     }
 
+    public void MovePianoUp()
+    {
+        MoveObject(Vector3.up * 0.01f);
+    }
+
+    public void MovePianoDown()
+    {
+        MoveObject(Vector3.down * 0.01f);
+    }
+
+
     public void BringPianoCloser()
     {
 
@@ -255,7 +266,7 @@ public class PianoFunctions : MonoBehaviour
         Vector3 handPosition = ovrHand.position;
 
         // Keep only the desired axis (e.g., Z-axis)
-        currentPosition.z = handPosition.z;
+        currentPosition.z = handPosition.z + 0.2f;
 
         // Apply the updated position
         gameObject.transform.position = currentPosition;
