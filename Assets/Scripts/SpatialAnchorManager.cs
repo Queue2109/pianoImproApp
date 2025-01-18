@@ -116,14 +116,24 @@ public class SpatialAnchorManager : MonoBehaviour
             return;
         }
 
-        if (!spatialAnchor.enabled)
-        {
-            spatialAnchor.enabled = true;
-            Debug.Log("SpatialAnchor was disabled. It has been enabled.");
-        }
-
         targetPrefab.transform.position = newPosition;
         targetPrefab.transform.rotation = newRotation;
+
+        spatialAnchor.Save((success, result) =>
+        {
+            if (success)
+            {
+                Debug.Log("Anchor position and rotation updated successfully.");
+
+                // Re-enable the anchor after saving
+                spatialAnchor.enabled = true;
+                Debug.Log("SpatialAnchor re-enabled.");
+            }
+            else
+            {
+                Debug.LogError($"Failed to save the anchor. Error: {result}");
+            }
+        });
     }
 
 
