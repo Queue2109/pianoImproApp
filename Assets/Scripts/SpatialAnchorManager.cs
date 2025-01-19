@@ -12,89 +12,49 @@ public class SpatialAnchorManager : MonoBehaviour
 
     private void Start()
     {
+        //DeleteAnchor();
+        LoadAnchorUuid(); // Load the saved UUID from PlayerPrefs
+
         if (spatialAnchorCore == null)
         {
             Debug.LogError("SpatialAnchorCoreBuildingBlock not found!");
             return;
         }
 
-        // Attempt to load any existing anchors
-        LoadExistingAnchor();
+        UpdateAnchorFromUI();
     }
 
     private void LoadExistingAnchor()
     {
+        Debug.Log($"Attempting to load anchor with UUID: {currentAnchorUuid}");
+
         if (currentAnchorUuid != Guid.Empty)
         {
             List<Guid> anchorUuids = new List<Guid> { currentAnchorUuid };
+
+            // Load anchors using the target prefab and UUIDs
             spatialAnchorCore.LoadAndInstantiateAnchors(targetPrefab, anchorUuids);
+
+            Debug.Log("Anchor load request sent.");
         }
         else
         {
-            Debug.LogWarning("No valid anchor UUID to load.");
+            Debug.LogWarning("No valid anchor UUID found. Positioning object at default location.");
         }
     }
 
-    private void OnAnchorLoadCompleted(List<OVRSpatialAnchor> loadedAnchors)
+
+    private void AttachAnchorToObject(OVRSpatialAnchor loadedAnchor)
     {
-        if (loadedAnchors.Count > 0)
-        {
-            Debug.Log("Anchor loaded successfully.");
-            OVRSpatialAnchor loadedAnchor = loadedAnchors[0];
+        Debug.Log("Attaching anchor to the existing object.");
 
-            // Update the current anchor UUID
-            currentAnchorUuid = loadedAnchor.Uuid;
+        // Transfer the anchor to the original GameObject
+        loadedAnchor.transform.SetParent(targetPrefab.transform, false);
+        loadedAnchor.transform.localPosition = Vector3.zero;
+        loadedAnchor.transform.localRotation = Quaternion.identity;
 
-            // Transfer the anchor to the original GameObject
-            if (targetPrefab != null)
-            {
-                // Detach the anchor from the clone and attach it to the original
-                loadedAnchor.transform.SetParent(targetPrefab.transform, false);
-                loadedAnchor.transform.localPosition = Vector3.zero;
-                loadedAnchor.transform.localRotation = Quaternion.identity;
 
-                Debug.Log("Anchor successfully attached to the original prefab.");
-            }
-            else
-            {
-                Debug.LogError("Original prefab not found.");
-            }
-        }
-        else
-        {
-            Debug.LogWarning("No anchors found to load.");
-        }
-    }
-
-    public void InstantiateNewAnchor()
-    {
-        if (spatialAnchorCore == null)
-        {
-            Debug.LogError("SpatialAnchorCoreBuildingBlock is not initialized!");
-            return;
-        }
-
-        if (currentAnchorUuid != Guid.Empty)
-        {
-            spatialAnchorCore.EraseAnchorByUuid(currentAnchorUuid);
-            Debug.Log("Existing anchor erased to allow reanchoring.");
-        }
-
-        // Instantiate a new anchor at the prefab's position and rotation
-        spatialAnchorCore.InstantiateSpatialAnchor(targetPrefab, targetPrefab.transform.position, targetPrefab.transform.rotation);
-    }
-
-    public void OnAnchorCreateCompleted(OVRSpatialAnchor newAnchor, OVRSpatialAnchor.OperationResult result)
-    {
-        if (result == OVRSpatialAnchor.OperationResult.Success)
-        {
-            Debug.Log("Anchor created successfully.");
-            currentAnchorUuid = newAnchor.Uuid;
-        }
-        else
-        {
-            Debug.LogError($"Failed to create a new anchor. Result: {result}");
-        }
+        Debug.Log("Anchor successfully attached to the original object.");
     }
 
     public void UpdateAnchorFromUI()
@@ -107,38 +67,98 @@ public class SpatialAnchorManager : MonoBehaviour
 
     public void UpdateAnchor(Vector3 newPosition, Quaternion newRotation)
     {
+        Debug.Log($"Updating anchor position to {newPosition} and rotation to {newRotation}.");
+
         var spatialAnchor = targetPrefab.GetComponent<OVRSpatialAnchor>();
 
         if (spatialAnchor == null)
         {
-            Debug.LogWarning("SpatialAnchor is missing. Creating a new anchor.");
-            InstantiateNewAnchor();
-            return;
+            targetPrefab.AddComponent<OVRSpatialAnchor>();
+            Debug.Log("Added OVRSpatialAnchor to the target prefab.");
         }
 
+
+        // Update the object's position and rotation
         targetPrefab.transform.position = newPosition;
         targetPrefab.transform.rotation = newRotation;
 
-        spatialAnchor.Save((success, result) =>
+        if (spatialAnchor != null && spatialAnchor.Localized)
         {
-            if (success)
-            {
-                Debug.Log("Anchor position and rotation updated successfully.");
 
-                // Re-enable the anchor after saving
-                spatialAnchor.enabled = true;
-                Debug.Log("SpatialAnchor re-enabled.");
+            // Save the updated anchor data
+            spatialAnchor.Save((success, result) =>
+            {
+                if (success)
+                {
+                    Debug.Log("Anchor updated and saved successfully.");
+                    currentAnchorUuid = spatialAnchor.Uuid; // Ensure the UUID is updated
+                    spatialAnchor.enabled = true;
+                    SaveAnchorUuid(); // Persist the UUID
+                }
+                else
+                {
+                    Debug.LogError($"Failed to save the anchor. Error: {result}");
+                }
+            });
+        }
+        else
+        {
+            Debug.LogWarning("SpatialAnchor is not localized or invalid. Skipping save.");
+        }
+    }
+
+    public void DetachOVRSpatialAnchorComponent()
+    {
+        var spatialAnchor = targetPrefab.GetComponent<OVRSpatialAnchor>();
+        if (spatialAnchor != null)
+        {
+            Destroy(spatialAnchor); // Detach the anchor
+            Debug.Log("Anchor detached. Object can now be moved freely.");
+        }
+        else
+        {
+            Debug.LogWarning("No OVRSpatialAnchor component found to detach.");
+        }
+    }
+
+    private void SaveAnchorUuid()
+    {
+        if (currentAnchorUuid != Guid.Empty)
+        {
+            PlayerPrefs.SetString("AnchorUuid", currentAnchorUuid.ToString());
+            PlayerPrefs.Save();
+            Debug.Log($"Anchor UUID {currentAnchorUuid} saved.");
+        }
+        else
+        {
+            Debug.LogWarning("Attempted to save an empty anchor UUID.");
+        }
+    }
+
+    private void LoadAnchorUuid()
+    {
+        if (PlayerPrefs.HasKey("AnchorUuid"))
+        {
+            string savedUuid = PlayerPrefs.GetString("AnchorUuid");
+            if (Guid.TryParse(savedUuid, out Guid uuid))
+            {
+                currentAnchorUuid = uuid;
+                Debug.Log($"Loaded Anchor UUID: {currentAnchorUuid}");
             }
             else
             {
-                Debug.LogError($"Failed to save the anchor. Error: {result}");
+                Debug.LogWarning("Failed to parse saved Anchor UUID.");
             }
-        });
+        }
+        else
+        {
+            Debug.LogWarning("No saved Anchor UUID found.");
+        }
     }
-
 
     public void DeleteAnchor()
     {
+        PlayerPrefs.DeleteKey("AnchorUuid");
         if (spatialAnchorCore == null || currentAnchorUuid == Guid.Empty)
         {
             Debug.LogError("No anchor to delete!");
@@ -158,20 +178,6 @@ public class SpatialAnchorManager : MonoBehaviour
         else
         {
             Debug.LogError("Failed to erase the anchor.");
-        }
-    }
-
-    public void DetachOVRSpatialAnchorComponent()
-    {
-        var spatialAnchor = targetPrefab.GetComponent<OVRSpatialAnchor>();
-        if (spatialAnchor != null && spatialAnchor.enabled)
-        {
-            Destroy(spatialAnchor); // Detach the anchor
-            Debug.Log("Anchor detached. Object can now be moved.");
-        }
-        else
-        {
-            Debug.LogWarning("No active SpatialAnchor component to detach.");
         }
     }
 }

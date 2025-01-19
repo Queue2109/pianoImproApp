@@ -67,7 +67,7 @@ public class MidiFileNoteReader : MonoBehaviour
 
     void Update()
     {
-        if (panelManagerSongList.currentPanel == 2 && isPlaying)
+        if (panelManagerSongList.currentPanel == 0 && isPlaying)
         {
             currentTime = playback.GetCurrentTime<MetricTimeSpan>();
 
@@ -313,19 +313,48 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.Log("Already playing left-hand only.");
             return;
         }
-        TogglePlayPause();
-        playback?.Dispose();
+
+        // Dispose existing playback if running
+        if (playback != null)
+        {
+            playback.Stop();
+            playback.Dispose();
+            playback = null;
+        }
+
+        // Dispose existing output device
+        if (outputDevice != null)
+        {
+            outputDevice.Dispose();
+            outputDevice = null;
+        }
+
+        // Reinitialize the output device
+        outputDevice = OutputDevice.GetAll().FirstOrDefault();
+        if (outputDevice == null)
+        {
+            Debug.LogError("No output device found.");
+            return;
+        }
+
+        // Create new playback for left-hand file
         playback = leftHandFile?.GetPlayback(outputDevice);
 
         if (playback != null)
         {
             playback.Speed = playbackSpeed;
-            playback?.MoveToTime(currentTime);
+            playback.MoveToTime(currentTime);
+            if (!isPlaying)
+            {
+                playback.Start();
+            }
             currentMode = PlaybackMode.LeftHand;
+            isPlaying = true;
 
             Debug.Log("Playing left-hand only.");
         }
     }
+
 
     public void PlayRightHandOnly()
     {
@@ -335,19 +364,45 @@ public class MidiFileNoteReader : MonoBehaviour
             return;
         }
 
-        TogglePlayPause();
-        playback?.Dispose();
+        // Dispose existing playback and output device
+        if (playback != null)
+        {
+            playback.Stop();
+            playback.Dispose();
+            playback = null;
+        }
+        if (outputDevice != null)
+        {
+            outputDevice.Dispose();
+            outputDevice = null;
+        }
+
+        // Reinitialize the output device
+        outputDevice = OutputDevice.GetAll().FirstOrDefault();
+        if (outputDevice == null)
+        {
+            Debug.LogError("No output device found.");
+            return;
+        }
+
+        // Create new playback for right-hand file
         playback = rightHandFile?.GetPlayback(outputDevice);
 
         if (playback != null)
         {
             playback.Speed = playbackSpeed;
-            playback?.MoveToTime(currentTime);
+            playback.MoveToTime(currentTime);
+            if (!isPlaying)
+            {
+                playback.Start();
+            }
             currentMode = PlaybackMode.RightHand;
+            isPlaying = true;
 
             Debug.Log("Playing right-hand only.");
         }
     }
+
 
     public void PlayBothHandsPlayback()
     {
@@ -513,23 +568,24 @@ public class MidiFileNoteReader : MonoBehaviour
         {
             if (playback.IsRunning)
             {
-                playback?.Stop();
+                playback.Stop();
             }
-            playback?.Dispose();
+            playback.Dispose();
             playback = null;
             Debug.Log("Playback stopped and disposed.");
         }
 
         if (outputDevice != null)
         {
-            outputDevice?.Dispose();
+            outputDevice.Dispose();
             outputDevice = null;
             Debug.Log("Output device disposed.");
         }
 
-        isPlaying = false; // Reset play state
-        UpdatePlayPauseButtons(); // Sync buttons
+        isPlaying = false;
+        UpdatePlayPauseButtons();
     }
+
 
     private void OnDestroy()
     {

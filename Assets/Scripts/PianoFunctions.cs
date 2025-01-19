@@ -9,9 +9,8 @@ public class PianoFunctions : MonoBehaviour
 {
 
     private List<Transform> blackKeys; // Array to hold all the black keys
-    private List<Transform> whiteKeys; // Array to hold all the black keys
+    private List<Transform> whiteKeys; // Array to hold all the white keys
     private GameObject pianoKeyboard;
-
 
     private void Start()
     {
@@ -253,7 +252,7 @@ public class PianoFunctions : MonoBehaviour
             return;
         }
 
-        Transform ovrHand = cameraRig.rightControllerAnchor; // Replace with leftControllerAnchor for the left hand
+        Transform ovrHand = cameraRig.leftControllerAnchor;
 
         if (ovrHand == null)
         {
@@ -266,7 +265,7 @@ public class PianoFunctions : MonoBehaviour
         Vector3 handPosition = ovrHand.position;
 
         // Keep only the desired axis (e.g., Z-axis)
-        currentPosition.z = handPosition.z + 0.2f;
+        currentPosition.z = handPosition.z;
 
         // Apply the updated position
         gameObject.transform.position = currentPosition;

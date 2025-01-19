@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MoveObjectsInFrontOfCamera : MonoBehaviour
@@ -27,24 +28,24 @@ public class MoveObjectsInFrontOfCamera : MonoBehaviour
         {
             if (obj == null) continue;
 
-            float distanceFromCamera = 1.5f;
+            // Get the position in front of the camera
+            Vector3 cameraForward = centerEyeAnchor.transform.forward;
+            Vector3 newPanelPosition = centerEyeAnchor.transform.position + cameraForward * 0.5f;
 
-            float heightOffset = 0.5f;
+            // Get the current rotation of the panel
+            Vector3 panelEulerAngles = obj.transform.eulerAngles;
 
-            if (obj.name == "PianoSetup")
-            {
-                heightOffset = -1f;
-                distanceFromCamera = 0.5f;
-            }
-            // Position the object in front of the camera
-            Vector3 forwardPosition = centerEyeAnchor.position + centerEyeAnchor.forward * distanceFromCamera;
-            forwardPosition.y += heightOffset; // Adjust height
+            // Get the Y rotation from the camera's forward direction
+            float targetYRotation = Quaternion.LookRotation(centerEyeAnchor.forward).eulerAngles.y;
 
-            obj.transform.position = forwardPosition;
+            // Preserve X and Z, but update Y
+            Vector3 newRotation = new Vector3(panelEulerAngles.x, targetYRotation, panelEulerAngles.z);
 
-            Vector3 cameraForward = centerEyeAnchor.forward;
-            cameraForward.y = 0; // Zero out the Y component to constrain rotation to the Y-axis
-            obj.transform.rotation = Quaternion.LookRotation(cameraForward, Vector3.up);
+            // Apply the updated rotation
+            obj.transform.eulerAngles = newRotation;
+
+            // Set the position and rotation of the UI panel
+            obj.transform.position = newPanelPosition;
 
         }
     }

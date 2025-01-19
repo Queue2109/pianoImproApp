@@ -79,11 +79,6 @@ public class MidiFileManager : MonoBehaviour
         songContainers.Add(container);
     }
 
-    public void openKeyboard()
-    {
-        TouchScreenKeyboard.Open("", TouchScreenKeyboardType.Default);
-    }
-
     private string ExtractAuthorFromPath(string filePath, string rootPath)
     {
         string relativePath = filePath.Replace(rootPath, string.Empty).Trim(Path.DirectorySeparatorChar);
