@@ -2,6 +2,8 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Meta.XR.BuildingBlocks;
+using System.Collections;
+using UnityEngine.XR.ARFoundation;
 
 public class SpatialAnchorManager : MonoBehaviour
 {
@@ -12,20 +14,23 @@ public class SpatialAnchorManager : MonoBehaviour
 
     private void Start()
     {
-        //DeleteAnchor();
-        LoadAnchorUuid(); // Load the saved UUID from PlayerPrefs
+        ////DeleteAnchor();
+        //LoadAnchorUuid(); // Load the saved UUID from PlayerPrefs
 
-        if (spatialAnchorCore == null)
-        {
-            Debug.LogError("SpatialAnchorCoreBuildingBlock not found!");
-            return;
-        }
+        //if (spatialAnchorCore == null)
+        //{
+        //    Debug.LogError("SpatialAnchorCoreBuildingBlock not found!");
+        //    return;
+        //}
 
-        UpdateAnchorFromUI();
+        //UpdateAnchorFromUI();
+
+        StartCoroutine(TestAnchorFlow());
     }
 
     private void LoadExistingAnchor()
     {
+        LoadAnchorUuid();
         Debug.Log($"Attempting to load anchor with UUID: {currentAnchorUuid}");
 
         if (currentAnchorUuid != Guid.Empty)
@@ -74,17 +79,16 @@ public class SpatialAnchorManager : MonoBehaviour
         if (spatialAnchor == null)
         {
             targetPrefab.AddComponent<OVRSpatialAnchor>();
+            spatialAnchor = targetPrefab.GetComponent<OVRSpatialAnchor>();
             Debug.Log("Added OVRSpatialAnchor to the target prefab.");
         }
-
 
         // Update the object's position and rotation
         targetPrefab.transform.position = newPosition;
         targetPrefab.transform.rotation = newRotation;
 
-        if (spatialAnchor != null && spatialAnchor.Localized)
+        if (spatialAnchor.Localized) // Correct property check
         {
-
             // Save the updated anchor data
             spatialAnchor.Save((success, result) =>
             {
@@ -92,7 +96,6 @@ public class SpatialAnchorManager : MonoBehaviour
                 {
                     Debug.Log("Anchor updated and saved successfully.");
                     currentAnchorUuid = spatialAnchor.Uuid; // Ensure the UUID is updated
-                    spatialAnchor.enabled = true;
                     SaveAnchorUuid(); // Persist the UUID
                 }
                 else
@@ -103,9 +106,10 @@ public class SpatialAnchorManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("SpatialAnchor is not localized or invalid. Skipping save.");
+            Debug.LogWarning("SpatialAnchor is not localized. Skipping save.");
         }
     }
+
 
     public void DetachOVRSpatialAnchorComponent()
     {
@@ -164,6 +168,7 @@ public class SpatialAnchorManager : MonoBehaviour
             Debug.LogError("No anchor to delete!");
             return;
         }
+        Debug.Log("Delete anchor!");
 
         spatialAnchorCore.EraseAnchorByUuid(currentAnchorUuid);
     }
@@ -179,5 +184,52 @@ public class SpatialAnchorManager : MonoBehaviour
         {
             Debug.LogError("Failed to erase the anchor.");
         }
+    }
+
+    private IEnumerator TestAnchorFlow()
+    {
+        Debug.Log("Starting anchor test...");
+
+        // Step 1: Load an existing anchor
+        Debug.Log("Attempting to load existing anchor...");
+        LoadExistingAnchor();
+        LogPianoKeysTransform("After loading anchor");
+
+        yield return new WaitForSeconds(2f); // Give some time to load
+
+        // Step 2: If no anchor exists, create a new one
+        if (PlayerPrefs.HasKey("AnchorUuid"))
+        {
+            Debug.Log("Existing anchor found.");
+        }
+        else
+        {
+            Debug.Log("No existing anchor found. Creating a new one...");
+            UpdateAnchorFromUI();
+            LogPianoKeysTransform("After creating new anchor");
+            yield return new WaitForSeconds(2f);
+        }
+
+        // Step 3: Wait and update the pianoKeys position
+        yield return new WaitForSeconds(3f);
+        targetPrefab.transform.position += new Vector3(0.1f, 0, 0); // Slightly move pianoKeys
+        Debug.Log("Updating anchor with new pianoKeys position...");
+        UpdateAnchorFromUI();
+        LogPianoKeysTransform("After updating anchor");
+
+        yield return new WaitForSeconds(2f); // Allow time for saving
+
+        // Step 4: Reload the anchor
+        Debug.Log("Reloading anchor to verify persistence...");
+        LoadExistingAnchor();
+        yield return new WaitForSeconds(2f);
+        LogPianoKeysTransform("After reloading anchor");
+
+        Debug.Log("Anchor test completed.");
+    }
+
+    private void LogPianoKeysTransform(string context)
+    {
+        Debug.Log($"{context} - PianoKeys Position: {targetPrefab.transform.position}, Rotation: {targetPrefab.transform.rotation}");
     }
 }
