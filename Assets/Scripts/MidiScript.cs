@@ -15,7 +15,7 @@ public class MidiScript : MonoBehaviour
     private GameObject pianoKeyboard;
     private bool _midiDeviceConnected;
     private float _lastCheckTime;
-    private const float CheckInterval = 1.0f; // Check every second
+    private const float CheckInterval = 0.5f; // Check every second
     private List<int> pressedNotes = new List<int>();
     public TextMeshProUGUI textMeshProUGUI;
 
@@ -75,7 +75,7 @@ public class MidiScript : MonoBehaviour
                     Debug.Log($"Note On: {note.noteNumber}, Velocity: {velocity}");
                     OnNoteOn?.Invoke(note.noteNumber);
                     AddNoteToPressedList(note.noteNumber);
-                    ColorKey(note.noteNumber, new Color(0.545f, 0.769f, 0.910f, 0.33f)); // Blue color
+                    //ColorKey(note.noteNumber, new Color(0.545f, 0.769f, 0.910f, 0.33f)); // Blue color
                 };
 
                 midiDevice.onWillNoteOff += (note) =>
@@ -83,7 +83,7 @@ public class MidiScript : MonoBehaviour
                     Debug.Log($"Note Off: {note.noteNumber}");
                     OnNoteOff?.Invoke(note.noteNumber);
                     RemoveNoteFromPressedList(note.noteNumber);
-                    ResetKeyColor(note.noteNumber);
+                    //ResetKeyColor(note.noteNumber);
                 };
 
                 Debug.Log("Listeners registered successfully.");
@@ -117,7 +117,7 @@ public class MidiScript : MonoBehaviour
 
         if (noteKey.TryGetComponent<Renderer>(out var renderer))
         {
-            foreach (var material in renderer.materials)
+            foreach (var material in renderer.sharedMaterials)
             {
                 material.SetColor("_Color", color);
             }
@@ -132,7 +132,7 @@ public class MidiScript : MonoBehaviour
 
         if (noteKey.TryGetComponent<Renderer>(out var renderer))
         {
-            foreach (var material in renderer.materials)
+            foreach (var material in renderer.sharedMaterials)
             {
                 // Set default colors based on sharp/flat keys
                 if (noteName.Contains("Sharp"))
