@@ -8,6 +8,7 @@ public class NewAnchorManager : MonoBehaviour
 {
     [Header("Assign the GameObject to attach the anchor")]
     public GameObject go;
+    public PianoFunctions pianoFunctions;
 
     private Guid anchorUuid = Guid.Empty;
     private OVRSpatialAnchor anchor;
@@ -17,6 +18,7 @@ public class NewAnchorManager : MonoBehaviour
     {
         // Load any existing UUID from PlayerPrefs
         LoadAnchorUuid();
+        pianoFunctions.LoadPianoPropertiesFromPlayerPrefs();
 
         if (anchorUuid != Guid.Empty)
         {
@@ -144,6 +146,7 @@ public class NewAnchorManager : MonoBehaviour
             Debug.LogWarning("No anchor to erase. Clearing saved UUID.");
             anchorUuid = Guid.Empty;
             PlayerPrefs.DeleteKey("AnchorUuid");
+
             return;
         }
 
@@ -204,5 +207,7 @@ public class NewAnchorManager : MonoBehaviour
     {
         await CreateSpatialAnchorAsync();
         await SaveCurrentAnchorAsync();
+        pianoFunctions.SavePianoPropertiesToPlayerPrefs();
+
     }
 }

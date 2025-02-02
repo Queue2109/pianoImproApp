@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using Melanchall.DryWetMidi.MusicTheory;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
@@ -11,8 +12,11 @@ public class PianoFunctions : MonoBehaviour
     private List<Transform> blackKeys; // Array to hold all the black keys
     private List<Transform> whiteKeys; // Array to hold all the white keys
     private GameObject pianoKeyboard;
+    public float blackKeyScaleFactor = 1f;
+    public float whiteKeyScaleFactor = 1f;
+    private int keyNumber = 61;
 
-    private void Start()
+    private void Awake()
     {
         pianoKeyboard = GameObject.FindGameObjectWithTag("Piano");
         blackKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => child.name.Contains("Sharp")).ToList();
@@ -20,11 +24,8 @@ public class PianoFunctions : MonoBehaviour
         whiteKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => !child.name.Contains("Sharp")).ToList();
         whiteKeys = whiteKeys.OrderBy(key => key.position.x).ToList();
     }
-
-    // Update is called once per frame
-    void Update()
+    private void Start()
     {
-
     }
 
     public void ColorKey(string key)
@@ -89,7 +90,7 @@ public class PianoFunctions : MonoBehaviour
             Debug.LogError("Invalid key count! Please provide 49, 61, 72, or 88.");
             return;
         }
-
+        keyNumber = keyCount;
         // Define starting notes for different key counts
         string startNote = keyCount switch
         {
@@ -158,6 +159,7 @@ public class PianoFunctions : MonoBehaviour
     public void ScaleWhiteKeys(float scaleFactor)
     {
         Debug.Log(scaleFactor);
+        whiteKeyScaleFactor *= scaleFactor;
         foreach (Transform key in whiteKeys)
         {
 
@@ -182,6 +184,7 @@ public class PianoFunctions : MonoBehaviour
 
     public void ScaleBlackKeys(float scaleFactor)
     {
+        blackKeyScaleFactor *= scaleFactor;
         foreach (Transform key in blackKeys)
         {
 
@@ -269,5 +272,37 @@ public class PianoFunctions : MonoBehaviour
 
         // Apply the updated position
         gameObject.transform.position = currentPosition;
+    }
+
+    public void SavePianoPropertiesToPlayerPrefs()
+    {
+
+        Vector3 scale = transform.localScale;
+        PlayerPrefs.SetFloat("ObjectScaleX", scale.x);
+        PlayerPrefs.SetFloat("ObjectScaleY", scale.y);
+        PlayerPrefs.SetFloat("ObjectScaleZ", scale.z);
+
+        PlayerPrefs.SetFloat("BlackKeyScale", blackKeyScaleFactor);
+        PlayerPrefs.SetFloat("WhiteKeyScale", whiteKeyScaleFactor);
+        PlayerPrefs.SetInt("KeyNumber", keyNumber);
+
+        // Persist
+        PlayerPrefs.Save();
+    }
+
+    public void LoadPianoPropertiesFromPlayerPrefs()
+    {
+        float sx = PlayerPrefs.GetFloat("ObjectScaleX");
+        float sy = PlayerPrefs.GetFloat("ObjectScaleY");
+        float sz = PlayerPrefs.GetFloat("ObjectScaleZ");
+        transform.localScale = new Vector3(sx, sy, sz);
+
+        SetKeyCount(PlayerPrefs.GetInt("KeyNumber", 61));
+
+        blackKeyScaleFactor = PlayerPrefs.GetFloat("BlackKeyScale", 1f);
+        whiteKeyScaleFactor = PlayerPrefs.GetFloat("WhiteKeyScale", 1f);
+
+        ScaleWhiteKeys(whiteKeyScaleFactor);
+        ScaleBlackKeys(blackKeyScaleFactor);
     }
 }
