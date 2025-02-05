@@ -42,7 +42,7 @@ public class MidiFileNoteReader : MonoBehaviour
     private bool colorRightHand = true;
 
     public void Setup()
-    {   
+    {
         outputDevice = OutputDevice.GetAll().FirstOrDefault();
         if (outputDevice == null)
         {
@@ -83,11 +83,13 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public static string FindMidiFile(string fileName, string rootPath)
     {
-        var files = Directory.GetFiles(rootPath, "*.mid", SearchOption.AllDirectories).Concat(Directory.GetFiles(rootPath, "*.midi", SearchOption.AllDirectories));
+        var files = Directory.GetFiles(rootPath, "*.mid", SearchOption.AllDirectories)
+            .Concat(Directory.GetFiles(rootPath, "*.midi", SearchOption.AllDirectories));
 
         foreach (var file in files)
         {
-            if (Path.GetFileNameWithoutExtension(file).Equals(fileName, System.StringComparison.OrdinalIgnoreCase))
+            if (Path.GetFileNameWithoutExtension(file)
+                .Equals(fileName, System.StringComparison.OrdinalIgnoreCase))
             {
                 Debug.Log("Found file: " + file);
                 return file;
@@ -193,7 +195,6 @@ public class MidiFileNoteReader : MonoBehaviour
         timeText.text = FormatTime(currentTime) + " / " + FormatTime(totalDuration);
     }
 
-
     public void SpeedUp()
     {
         playbackSpeed += 0.1f;
@@ -230,7 +231,6 @@ public class MidiFileNoteReader : MonoBehaviour
     {
         this.colorLeftHand = true;
         this.colorRightHand = false;
-
     }
 
     public void ColorRightKeys()
@@ -243,7 +243,6 @@ public class MidiFileNoteReader : MonoBehaviour
     {
         this.colorLeftHand = true;
         this.colorRightHand = true;
-
     }
 
     private MidiFile FilterNotes(MidiFile midiFile, bool isLeftHand, TempoMap tempoMap)
@@ -342,6 +341,10 @@ public class MidiFileNoteReader : MonoBehaviour
 
         if (playback != null)
         {
+            playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
+            playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+            playback.Finished += OnPlaybackFinished;
+
             playback.Speed = playbackSpeed;
             playback.MoveToTime(currentTime);
             if (!isPlaying)
@@ -354,7 +357,6 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.Log("Playing left-hand only.");
         }
     }
-
 
     public void PlayRightHandOnly()
     {
@@ -390,6 +392,10 @@ public class MidiFileNoteReader : MonoBehaviour
 
         if (playback != null)
         {
+            playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
+            playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+            playback.Finished += OnPlaybackFinished;
+
             playback.Speed = playbackSpeed;
             playback.MoveToTime(currentTime);
             if (!isPlaying)
@@ -402,7 +408,6 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.Log("Playing right-hand only.");
         }
     }
-
 
     public void PlayBothHandsPlayback()
     {
@@ -418,6 +423,10 @@ public class MidiFileNoteReader : MonoBehaviour
 
         if (playback != null)
         {
+            playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
+            playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+            playback.Finished += OnPlaybackFinished;
+
             playback.Speed = playbackSpeed;
             playback?.MoveToTime(currentTime);
 
@@ -430,6 +439,7 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.Log("Playing both hands.");
         }
     }
+
     private void GetFileForPlayback()
     {
         // Get the file path
@@ -467,16 +477,15 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void PlaybackPreview()
     {
-        playback?.Dispose();
+       
+        StopPlayback();
+        
         GetFileForPlayback();
         CacheFilteredFiles();
 
         currentMode = PlaybackMode.Full;
 
         // Attach event handlers
-        playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
-        playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
-        playback.Finished += OnPlaybackFinished;
 
         // Set playback speed and start
         playback.Speed = 1f; // Default speed for preview
@@ -492,9 +501,12 @@ public class MidiFileNoteReader : MonoBehaviour
         playback.MoveToTime(new MetricTimeSpan());
         songName.text = $"{author} {fileName}";
 
-
         // Set playback speed and start from the beginning
         playback.Speed = playbackSpeed;
+
+        playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
+        playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+        playback.Finished += OnPlaybackFinished;
         playback.Start();
 
         // Update total time and duration
@@ -515,24 +527,18 @@ public class MidiFileNoteReader : MonoBehaviour
         playback?.Start();
     }
 
-
     private void OnNotesPlaybackStarted(object sender, NotesEventArgs e)
     {
         MainThreadDispatcher.Enqueue(() =>
         {
             foreach (var note in e.Notes)
             {
+                var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
+                Debug.Log(keyName);
 
-                // Debug.Log("Channel of the note and channel in the selectedChannels: " + note.Channel + " in selected: " + MidiInstrumentChecker.selectedChannels.ToArray());
-                if (MidiInstrumentChecker.selectedChannels.Contains(note.Channel))
-                {
-                    if (panelManagerSongList.currentPanel == 2)
-                    {
-                        var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
-                        if(colorLeftHand && note.NoteNumber < 60 || colorRightHand && note.NoteNumber >= 60)
-                            pianoFunctions.ColorKey(keyName);
-                    }
-                }
+                if (colorLeftHand && note.NoteNumber < 60 || colorRightHand && note.NoteNumber >= 60)
+                    pianoFunctions.ColorKey(keyName);
+                
             }
         });
     }
@@ -543,15 +549,10 @@ public class MidiFileNoteReader : MonoBehaviour
         {
             foreach (var note in e.Notes)
             {
-                if (MidiInstrumentChecker.selectedChannels.Contains(note.Channel))
-                {
-                    if (panelManagerSongList.currentPanel == 2)
-                    {
-                        var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
-                        if (colorLeftHand && note.NoteNumber < 60 || colorRightHand && note.NoteNumber >= 60)
-                            pianoFunctions.ResetKeyColor(keyName);
-                    }
-                }
+                var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
+                if (colorLeftHand && note.NoteNumber < 60 || colorRightHand && note.NoteNumber >= 60)
+                    pianoFunctions.ResetKeyColor(keyName);
+                
             }
         });
     }
@@ -586,7 +587,6 @@ public class MidiFileNoteReader : MonoBehaviour
         UpdatePlayPauseButtons();
     }
 
-
     private void OnDestroy()
     {
         StopPlayback();
@@ -600,5 +600,4 @@ public class MidiFileNoteReader : MonoBehaviour
     }
 
     private PlaybackMode currentMode = PlaybackMode.Full;
-
 }

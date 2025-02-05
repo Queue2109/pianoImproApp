@@ -4,6 +4,7 @@ using Minis;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class MidiScript : MonoBehaviour
 {
@@ -12,22 +13,33 @@ public class MidiScript : MonoBehaviour
     public event MidiNoteEvent OnNoteOff;
 
     private readonly List<string> noteOrder = new() { "A", "A-Sharp", "B", "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp" };
-    private GameObject pianoKeyboard;
     private bool _midiDeviceConnected;
-    private float _lastCheckTime;
     private const float CheckInterval = 0.5f; // Check every second
     private List<int> pressedNotes = new List<int>();
     public TextMeshProUGUI textMeshProUGUI;
+    private TextMeshProUGUI midiButtonText;
+    public Button button;
 
     void Start()
     {
-        pianoKeyboard = GameObject.FindGameObjectWithTag("Piano");
+        midiButtonText = button.GetComponentInChildren<TextMeshProUGUI>();
         textMeshProUGUI.text = "MIDI device not detected. Make sure your cable is connected and press any key on your piano keyboard";
+        midiButtonText.text = "Start listening";
+        button.enabled = true;
+    }
+
+    public void ListenForMIDIDevice()
+    {
         StartCoroutine(CheckForMidiDeviceConnection());
     }
 
     IEnumerator CheckForMidiDeviceConnection()
     {
+        float timeElapsed = 0f;
+        float timeout = 10f;
+
+        textMeshProUGUI.text = "Listening for MIDI device. Make sure you are pressing keys on your piano keyboard.";
+        button.enabled = false;
         while (!_midiDeviceConnected)
         {
             // Check for MIDI devices
@@ -38,12 +50,23 @@ public class MidiScript : MonoBehaviour
                 textMeshProUGUI.text = "MIDI device detected.";
                 Debug.Log("MIDI device connected. Starting to listen for notes.");
                 EnableMidiListeners();
+                yield break;
             }
 
-            yield return new WaitForSeconds(CheckInterval); // Check every second
+            // If we're here, no device yet. Wait then accumulate elapsed time.
+            yield return new WaitForSeconds(CheckInterval);
+            timeElapsed += CheckInterval;
+
+            // Stop looking after 10 seconds
+            if (timeElapsed >= timeout)
+            {
+                textMeshProUGUI.text = "No MIDI device detected within 10 seconds. Try again";
+                button.enabled = true;
+                Debug.LogWarning("Stopping MIDI device check after 10 seconds.");
+                yield break;
+            }
         }
     }
-
     public bool ListenForDevice()
     {
         // Get all available MIDI devices
@@ -106,44 +129,6 @@ public class MidiScript : MonoBehaviour
         if (pressedNotes.Contains(noteNumber))
         {
             pressedNotes.Remove(noteNumber);
-        }
-    }
-
-    void ColorKey(int noteNumber, Color color)
-    {
-        string noteName = NoteNameConverter(noteNumber);
-        GameObject noteKey = GameObject.Find(noteName);
-        if (noteKey == null) return;
-
-        if (noteKey.TryGetComponent<Renderer>(out var renderer))
-        {
-            foreach (var material in renderer.sharedMaterials)
-            {
-                material.SetColor("_Color", color);
-            }
-        }
-    }
-
-    void ResetKeyColor(int noteNumber)
-    {
-        string noteName = NoteNameConverter(noteNumber);
-        GameObject noteKey = GameObject.Find(noteName);
-        if (noteKey == null) return;
-
-        if (noteKey.TryGetComponent<Renderer>(out var renderer))
-        {
-            foreach (var material in renderer.sharedMaterials)
-            {
-                // Set default colors based on sharp/flat keys
-                if (noteName.Contains("Sharp"))
-                {
-                    material.SetColor("_Color", new Color(0, 0, 0, 0.8f)); // Black
-                }
-                else
-                {
-                    material.SetColor("_Color", new Color(1, 1, 1, 0.2509f)); // White
-                }
-            }
         }
     }
 

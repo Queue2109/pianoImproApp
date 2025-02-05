@@ -16,6 +16,14 @@ public class PianoFunctions : MonoBehaviour
     public float whiteKeyScaleFactor = 1f;
     private int keyNumber = 61;
 
+    [SerializeField] private Color whiteKeyDefaultColor = Color.white;
+    [SerializeField] private Color blackKeyDefaultColor = Color.black;
+
+    // A nice blue with partial transparency
+    [SerializeField] private Color whiteKeyHighlightColor = new Color(0.0f, 0.4f, 1.0f, 0.5f);
+    // A darker blue-black with partial transparency for sharps
+    [SerializeField] private Color blackKeyHighlightColor = new Color(0.0f, 0.0f, 0.3f, 0.5f);
+
     private void Awake()
     {
         pianoKeyboard = GameObject.FindGameObjectWithTag("Piano");
@@ -35,37 +43,39 @@ public class PianoFunctions : MonoBehaviour
         {
             return;
         }
+
         if (noteKey.TryGetComponent<Renderer>(out var renderer))
         {
-            for (int i = 0; i < renderer.materials.Length; i++)
+            // Decide which highlight color to use: black key or white key?
+            Color highlightColor = key.Contains("Sharp")
+                ? blackKeyHighlightColor
+                : whiteKeyHighlightColor;
+
+            foreach (var mat in renderer.materials)
             {
-                renderer.materials[i].SetColor("_Color", new Color(0.545f, 0.769f, 0.910f, 0.33f));
+                mat.SetColor("_Color", highlightColor);
             }
         }
     }
 
     public void ResetKeyColor(string key)
     {
-
         GameObject noteKey = GameObject.Find(key);
         if (noteKey == null)
         {
             return;
         }
+
         if (noteKey.TryGetComponent<Renderer>(out var renderer))
         {
-            for (int i = 0; i < renderer.materials.Length; i++)
+            // Decide which default color to use: black key or white key?
+            Color defaultColor = key.Contains("Sharp")
+                ? blackKeyDefaultColor
+                : whiteKeyDefaultColor;
+
+            foreach (var mat in renderer.materials)
             {
-                if (key.Contains("Sharp"))
-                {
-                    renderer.materials[i].SetColor("_Color", new Color(0f, 0f, 0f, 1f));
-
-                }
-                else
-                {
-                    renderer.materials[i].SetColor("_Color", new Color(1f, 1f, 1f, 1f));
-
-                }
+                mat.SetColor("_Color", defaultColor);
             }
         }
     }

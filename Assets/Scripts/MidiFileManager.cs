@@ -12,26 +12,6 @@ public class MidiFileManager : MonoBehaviour
     public Transform contentPanel; // The content panel of the scroll view to hold song containers
     public MidiFileNoteReader midiPlayer; // Reference to the MidiPlayer component
 
-    private HashSet<string> knownAuthors = new HashSet<string>
-    {
-        // List of known authors
-        "Adam Birnbaum", "Adam Makowicz", "Alan Broadbent", "Alan Farnham", "Alan Pasqua", "Andy Laverne", "Barry Harris",
-        "Bill Charlap", "Bill Cunliffe", "Bill Evans", "Bill Mays", "Billy Taylor", "Brad Mehldau", "Bobby Timmons",
-        "Buddy Montgomery", "Cedar Walton", "Chick Corea", "Dave McKenna", "David Berkman", "Denny Zeitlin",
-        "Dick Hyman", "Don Friedman", "Donald Brown", "Duke Jordan", "Earl Hines", "Edward Simon", "Ellis Larkins",
-        "Ellis Marsalis", "Eric Reed", "Erroll Garner", "Ethan Iverson", "Fred Hersch", "Gene Harris", "Geoffrey Keezer",
-        "George Cables", "George Colligan", "George Shearing", "Gerald Clayton", "Geri Allen", "Hal Galper", "Hank Jones",
-        "Harold Mabern", "Herbie Hancock", "Hiromi", "Jacky Terrasson", "Jaki Byard", "Jason Moran", "Jessica Williams",
-        "Jim McNeely", "Joanne Brackeen", "John Campbell", "John Colianni", "John Hicks", "John Taylor", "Johnny O'Neal",
-        "Junior Mance", "Justin Kauflin", "Keith Jarrett", "Kenny Barron", "Kenny Drew", "Kenny Drew Jr", "Kenny Werner",
-        "Kirk Lightsey", "Larry Goldings", "Lennie Tristano", "Marian McPartland", "Marcus Roberts", "Makoto Ozone",
-        "Mary Lou Williams", "McCoy Tyner", "Michel Camilo", "Michel Legrand", "Michel Petrucciani", "Mike Wofford",
-        "Mulgrew Miller", "Monty Alexander", "Oscar Peterson", "Phineas Newborn Jr", "Ramsey Lewis", "Randy Weston",
-        "Ray Bryant", "Red Garland", "Renee Rosnes", "Richard Beirach", "Robi Botos", "Roger Kellaway", "Roland Hanna",
-        "Ryo Fukui", "Stanley Cowell", "Steve Kuhn", "Teddy Wilson", "Tete Montoliu", "Thelonious Monk", "Tigran Hamasyan",
-        "Tommy Flanagan", "Vijay Iyer", "Walter Norris"
-    };
-
     private List<GameObject> songContainers = new List<GameObject>(); // Store all song 
 
     public async void LogMidiFilesAsync()

@@ -12,6 +12,11 @@ public class PlayControlPanelManager : MonoBehaviour
         MovePanelPosition();
     }
 
+    private void Awake()
+    {
+        MovePanelPosition();
+    }
+
     public void MovePanelPosition()
     {
         // Preserve the original X-axis rotation of the gameObject
