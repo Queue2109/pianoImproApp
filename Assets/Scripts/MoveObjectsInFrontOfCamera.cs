@@ -9,6 +9,10 @@ public class MoveObjectsInFrontOfCamera : MonoBehaviour
     [Tooltip("The OVRCameraRig in your scene.")]
     public Transform centerEyeAnchor;
 
+    [Header("Settings")]
+    public float distanceFromCamera = 2f;
+
+
     void Start()
     {
 
@@ -35,7 +39,7 @@ public class MoveObjectsInFrontOfCamera : MonoBehaviour
             // Get the current rotation of the panel
             Vector3 panelEulerAngles = obj.transform.eulerAngles;
 
-            // Get the Y rotation from the camera's forward direction
+            // Get the Y rotation from the camera's forward directionx
             float targetYRotation = Quaternion.LookRotation(centerEyeAnchor.forward).eulerAngles.y;
 
             // Preserve X and Z, but update Y
@@ -48,5 +52,20 @@ public class MoveObjectsInFrontOfCamera : MonoBehaviour
             obj.transform.position = newPanelPosition;
 
         }
+    }
+    private void LateUpdate()
+    {
+        if (centerEyeAnchor == null) return;
+
+        transform.position = centerEyeAnchor.position + centerEyeAnchor.forward * distanceFromCamera;
+
+        transform.LookAt(centerEyeAnchor);
+
+
+        Vector3 euler = transform.eulerAngles;
+        euler.x = 0f;
+        //if (lockYRotation) euler.y = 0f;
+        //if (lockZRotation) euler.z = 0f;
+        transform.eulerAngles = euler;
     }
 }

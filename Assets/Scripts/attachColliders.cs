@@ -12,20 +12,7 @@ public class AttachColliders : MonoBehaviour
         foreach (Transform child in transform)
         {
             AddMaterials(child.gameObject);
-            
-            if (child.gameObject.GetComponent<BoxCollider>() == null)
-            {
-                BoxCollider newCollider = child.gameObject.AddComponent<BoxCollider>();
-                newCollider.size = new Vector3(0.001f, 0.01f, 0.001f);
-            }
-
-            if (child.gameObject.GetComponent<Rigidbody>() == null)
-            {
-                Rigidbody rb = child.gameObject.AddComponent<Rigidbody>();
-                rb.useGravity = false;
-                
-                rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotationZ;
-            }
+          
         }
     }
 

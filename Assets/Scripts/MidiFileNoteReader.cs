@@ -100,7 +100,6 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void PlayMidiFunction()
     {
-        CacheFilteredFiles();
         switch (currentMode)
         {
             case PlaybackMode.LeftHand:
@@ -307,56 +306,69 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void PlayLeftHandOnly()
     {
+        // 1. Check if already in left-hand mode
         if (playback != null && currentMode == PlaybackMode.LeftHand)
         {
-            Debug.Log("Already playing left-hand only.");
+            Debug.Log("Already playing left-hand only. No action taken.");
             return;
         }
 
-        // Dispose existing playback if running
+        // 2. If currently playing something, stop it first
+        if (isPlaying)
+        {
+            Debug.Log("Stopping current playback before switching to left-hand only.");
+            playback.Stop();
+            isPlaying = false;
+        }
+
+        // 3. If there's an old playback object, unsubscribe and dispose it
         if (playback != null)
         {
-            playback.Stop();
+            Debug.Log("Unsubscribing events from old playback.");
+            playback.NotesPlaybackStarted -= OnNotesPlaybackStarted;
+            playback.NotesPlaybackFinished -= OnNotesPlaybackFinished;
+            playback.Finished -= OnPlaybackFinished;
+
+            Debug.Log("Disposing old playback object. " + playback);
             playback.Dispose();
             playback = null;
         }
 
-        // Dispose existing output device
-        if (outputDevice != null)
-        {
-            outputDevice.Dispose();
-            outputDevice = null;
-        }
-
-        // Reinitialize the output device
-        outputDevice = OutputDevice.GetAll().FirstOrDefault();
-        if (outputDevice == null)
-        {
-            Debug.LogError("No output device found.");
-            return;
-        }
-
-        // Create new playback for left-hand file
+        // 4. Create a new playback for the left-hand file
         playback = leftHandFile?.GetPlayback(outputDevice);
+        Debug.Log("Creating new playback for leftHandFile." + playback);
 
+
+        // 5. If successful, subscribe events, set up, and start
         if (playback != null)
         {
+            Debug.Log("Subscribing events to new left-hand playback.");
             playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
             playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
             playback.Finished += OnPlaybackFinished;
 
+            Debug.Log("Configuring playback speed and time position." + playback);
             playback.Speed = playbackSpeed;
             playback.MoveToTime(currentTime);
+
+            currentMode = PlaybackMode.LeftHand;
+
             if (!isPlaying)
             {
-                playback.Start();
+                Debug.Log("Starting left-hand playback." + playback);
+                playback?.Start();
+                isPlaying = true;
+                UpdatePlayPauseButtons();
             }
-            currentMode = PlaybackMode.LeftHand;
-            isPlaying = true;
 
-            Debug.Log("Playing left-hand only.");
+            Debug.Log("PlayLeftHandOnly() finished: now playing left-hand only.");
+        }
+        else
+        {
+            Debug.LogError("Unable to create playback for leftHandFile. Playback is null.");
         }
     }
+
 
     public void PlayRightHandOnly()
     {
@@ -372,19 +384,6 @@ public class MidiFileNoteReader : MonoBehaviour
             playback.Stop();
             playback.Dispose();
             playback = null;
-        }
-        if (outputDevice != null)
-        {
-            outputDevice.Dispose();
-            outputDevice = null;
-        }
-
-        // Reinitialize the output device
-        outputDevice = OutputDevice.GetAll().FirstOrDefault();
-        if (outputDevice == null)
-        {
-            Debug.LogError("No output device found.");
-            return;
         }
 
         // Create new playback for right-hand file
@@ -477,9 +476,9 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void PlaybackPreview()
     {
-       
+
         StopPlayback();
-        
+
         GetFileForPlayback();
         CacheFilteredFiles();
 
@@ -538,7 +537,7 @@ public class MidiFileNoteReader : MonoBehaviour
 
                 if (colorLeftHand && note.NoteNumber < 60 || colorRightHand && note.NoteNumber >= 60)
                     pianoFunctions.ColorKey(keyName);
-                
+
             }
         });
     }
@@ -552,7 +551,7 @@ public class MidiFileNoteReader : MonoBehaviour
                 var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
                 if (colorLeftHand && note.NoteNumber < 60 || colorRightHand && note.NoteNumber >= 60)
                     pianoFunctions.ResetKeyColor(keyName);
-                
+
             }
         });
     }
@@ -576,13 +575,6 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.Log("Playback stopped and disposed.");
         }
 
-        if (outputDevice != null)
-        {
-            outputDevice.Dispose();
-            outputDevice = null;
-            Debug.Log("Output device disposed.");
-        }
-
         isPlaying = false;
         UpdatePlayPauseButtons();
     }
@@ -590,6 +582,12 @@ public class MidiFileNoteReader : MonoBehaviour
     private void OnDestroy()
     {
         StopPlayback();
+        if (outputDevice != null)
+        {
+            outputDevice.Dispose();
+            outputDevice = null;
+            Debug.Log("Output device disposed.");
+        }
     }
 
     private enum PlaybackMode

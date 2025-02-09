@@ -14,6 +14,14 @@ public class MidiFileManager : MonoBehaviour
 
     private List<GameObject> songContainers = new List<GameObject>(); // Store all song 
 
+    public Color normalColor;
+    public Color highlightColor;
+
+    // Keep track of the last selected container’s Image, to revert color when a new container is clicked
+    private Image lastSelectedContainerImage;
+    public Color blinkColor;
+
+
     public async void LogMidiFilesAsync()
     {
         Debug.Log("In the Log Midi files function");
@@ -53,10 +61,51 @@ public class MidiFileManager : MonoBehaviour
         Button button = container.GetComponent<Button>();
         if (button != null)
         {
-            button.onClick.AddListener(() => PlaySong(fileName, author));
+            button.onClick.AddListener(() =>
+            {
+                OnContainerClicked(container);
+                PlaySong(fileName, author);
+            });
         }
 
         songContainers.Add(container);
+    }
+
+    public void OnStartPlayingClicked()
+    {
+        StopCoroutine(BlinkColorRoutine(GameObject.Find("StartPlayingButton").GetComponent<Image>()));
+        lastSelectedContainerImage = null;
+        GameObject.Find("StartPlayingText").GetComponent<TextMeshProUGUI>().text = "Choose another song to switch it up!";
+    }
+
+    private void OnContainerClicked(GameObject clickedContainer)
+    {
+        if (lastSelectedContainerImage != null)
+        {
+            lastSelectedContainerImage.color = normalColor;
+        }
+
+        Image newImage = clickedContainer.GetComponent<Image>();
+        if (newImage != null)
+        {
+            newImage.color = highlightColor;
+            lastSelectedContainerImage = newImage;
+        }
+        StartCoroutine(BlinkColorRoutine(GameObject.Find("StartPlayingButton").GetComponent<Image>()));
+    }
+
+    private System.Collections.IEnumerator BlinkColorRoutine(Image targetImage)
+    {
+        bool toggle = false;
+
+        while (true)
+        {
+            toggle = !toggle;
+            // Alternate between blinkColor and normalColor
+            targetImage.color = toggle ? blinkColor : normalColor;
+
+            yield return new WaitForSeconds(0.5f);
+        }
     }
 
     private string ExtractAuthorFromPath(string filePath, string rootPath)

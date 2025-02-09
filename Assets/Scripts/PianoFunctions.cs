@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using Melanchall.DryWetMidi.MusicTheory;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 
@@ -16,13 +17,13 @@ public class PianoFunctions : MonoBehaviour
     public float whiteKeyScaleFactor = 1f;
     private int keyNumber = 61;
 
-    [SerializeField] private Color whiteKeyDefaultColor = Color.white;
-    [SerializeField] private Color blackKeyDefaultColor = Color.black;
+    public Color whiteKeyDefaultColor;
+    public Color blackKeyDefaultColor;
 
     // A nice blue with partial transparency
-    [SerializeField] private Color whiteKeyHighlightColor = new Color(0.0f, 0.4f, 1.0f, 0.5f);
+    public Color whiteKeyHighlightColor;
     // A darker blue-black with partial transparency for sharps
-    [SerializeField] private Color blackKeyHighlightColor = new Color(0.0f, 0.0f, 0.3f, 0.5f);
+    public Color blackKeyHighlightColor;
 
     private void Awake()
     {
@@ -76,6 +77,33 @@ public class PianoFunctions : MonoBehaviour
             foreach (var mat in renderer.materials)
             {
                 mat.SetColor("_Color", defaultColor);
+            }
+        }
+    }
+
+    public void ResetAllKeysToDefaultColors()
+    {
+        // Reset black keys
+        foreach (Transform keyTransform in blackKeys)
+        {
+            if (keyTransform.TryGetComponent<Renderer>(out var renderer))
+            {
+                foreach (var mat in renderer.materials)
+                {
+                    mat.SetColor("_Color", blackKeyDefaultColor);
+                }
+            }
+        }
+
+        // Reset white keys
+        foreach (Transform keyTransform in whiteKeys)
+        {
+            if (keyTransform.TryGetComponent<Renderer>(out var renderer))
+            {
+                foreach (var mat in renderer.materials)
+                {
+                    mat.SetColor("_Color", whiteKeyDefaultColor);
+                }
             }
         }
     }
