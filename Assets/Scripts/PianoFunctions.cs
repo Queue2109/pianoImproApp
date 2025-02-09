@@ -27,6 +27,7 @@ public class PianoFunctions : MonoBehaviour
 
     private void Awake()
     {
+        SaveDefaultPianoPropertiesToPlayerPrefs();
         pianoKeyboard = GameObject.FindGameObjectWithTag("Piano");
         blackKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => child.name.Contains("Sharp")).ToList();
         blackKeys = blackKeys.OrderBy(key => key.position.x).ToList();
@@ -342,5 +343,21 @@ public class PianoFunctions : MonoBehaviour
 
         ScaleWhiteKeys(whiteKeyScaleFactor);
         ScaleBlackKeys(blackKeyScaleFactor);
+    }
+
+    public void SaveDefaultPianoPropertiesToPlayerPrefs()
+    {
+
+        Vector3 scale = transform.localScale;
+        PlayerPrefs.SetFloat("ObjectScaleX", 0.08f);
+        PlayerPrefs.SetFloat("ObjectScaleY", 0.06f);
+        PlayerPrefs.SetFloat("ObjectScaleZ", 0.1f);
+
+        PlayerPrefs.SetFloat("BlackKeyScale", 1f);
+        PlayerPrefs.SetFloat("WhiteKeyScale", 1f);
+        PlayerPrefs.SetInt("KeyNumber", 61);
+
+        // Persist
+        PlayerPrefs.Save();
     }
 }

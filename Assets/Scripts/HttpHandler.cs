@@ -13,7 +13,7 @@ public class HttpHandler : MonoBehaviour
     // Start is called before the first frame update
 
     string url = "http://localhost:5000/analyze";
-    TMP_Text text;
+    public TextMeshProUGUI text;
     Dictionary<string, string> chordDictionary;
     void Start()
     {
@@ -92,10 +92,6 @@ public class HttpHandler : MonoBehaviour
             var responseData = JsonUtility.FromJson<ResponseData>(responseText);
             if(chordDictionary.ContainsKey(responseData.result)) {
                 text.text = responseData.rootNote + chordDictionary[responseData.result];
-            } else
-            {
-
-                text.text = "Weird chord ddetected";
             }
 
             Debug.Log("Result: " + responseData.result);

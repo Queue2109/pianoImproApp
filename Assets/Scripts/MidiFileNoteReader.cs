@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 public class MidiFileNoteReader : MonoBehaviour
 {
-    //private IOutputDevice outputDevice;
+    public HttpHandler httpHandler;
     private Playback playback;
     public PianoFunctions pianoFunctions;
     public Slider slider;
@@ -39,7 +39,8 @@ public class MidiFileNoteReader : MonoBehaviour
     public TextMeshProUGUI songName;
 
     private bool colorLeftHand = true;
-    private bool colorRightHand = true;
+    private bool colorRightHand = true; 
+    private HashSet<int> activeNotes = new HashSet<int>();
 
     public void Setup()
     {
@@ -534,6 +535,8 @@ public class MidiFileNoteReader : MonoBehaviour
             {
                 var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
                 Debug.Log(keyName);
+                activeNotes.Add(note.NoteNumber);
+                IdentifyCurrentChord();
 
                 if (colorLeftHand && note.NoteNumber < 60 || colorRightHand && note.NoteNumber >= 60)
                     pianoFunctions.ColorKey(keyName);
@@ -549,11 +552,25 @@ public class MidiFileNoteReader : MonoBehaviour
             foreach (var note in e.Notes)
             {
                 var keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
+                activeNotes.Remove(note.NoteNumber);
+                IdentifyCurrentChord();
+
                 if (colorLeftHand && note.NoteNumber < 60 || colorRightHand && note.NoteNumber >= 60)
                     pianoFunctions.ResetKeyColor(keyName);
 
             }
         });
+    }
+
+    private void IdentifyCurrentChord()
+    {
+
+        // Convert the activeNotes HashSet to a List<int> 
+        List<int> currentNotes = activeNotes.ToList();
+
+        // Pass them to your chord analyzer (HTTP or direct).
+        httpHandler.getChordName(currentNotes);
+        // or chordAnalyzer.IdentifyChord(currentNotes);
     }
 
     private void OnPlaybackFinished(object sender, System.EventArgs e)

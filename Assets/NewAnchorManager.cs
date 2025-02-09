@@ -29,6 +29,7 @@ public class NewAnchorManager : MonoBehaviour
         else
         {
             // No previously saved anchor, so create a new one and save it
+            pianoFunctions.BringPianoCloser();
             await CreateSpatialAnchorAsync();
             await SaveCurrentAnchorAsync();
         }
