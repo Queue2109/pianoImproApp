@@ -70,7 +70,7 @@ public class SpatialAnchorManager : MonoBehaviour
         UpdateAnchor(newAnchorPosition, newAnchorRotation);
     }
 
-    public void UpdateAnchor(Vector3 newPosition, Quaternion newRotation)
+    public async void UpdateAnchor(Vector3 newPosition, Quaternion newRotation)
     {
         Debug.Log($"Updating anchor position to {newPosition} and rotation to {newRotation}.");
 
@@ -87,22 +87,21 @@ public class SpatialAnchorManager : MonoBehaviour
         targetPrefab.transform.position = newPosition;
         targetPrefab.transform.rotation = newRotation;
 
-        if (spatialAnchor.Localized) // Correct property check
+        if (spatialAnchor.Localized)
         {
-            // Save the updated anchor data
-            spatialAnchor.Save((success, result) =>
+            try
             {
-                if (success)
-                {
-                    Debug.Log("Anchor updated and saved successfully.");
-                    currentAnchorUuid = spatialAnchor.Uuid; // Ensure the UUID is updated
-                    SaveAnchorUuid(); // Persist the UUID
-                }
-                else
-                {
-                    Debug.LogError($"Failed to save the anchor. Error: {result}");
-                }
-            });
+                // Await the new SaveAsync API
+                await spatialAnchor.SaveAnchorAsync();
+
+                Debug.Log("Anchor updated and saved successfully.");
+                currentAnchorUuid = spatialAnchor.Uuid; // Make sure we store the updated UUID
+                SaveAnchorUuid();                       // Persist the UUID (e.g., PlayerPrefs or custom storage)
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to save the anchor via SaveAsync: {ex.Message}");
+            }
         }
         else
         {

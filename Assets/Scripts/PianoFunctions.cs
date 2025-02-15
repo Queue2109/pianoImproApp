@@ -27,17 +27,13 @@ public class PianoFunctions : MonoBehaviour
 
     private void Awake()
     {
-        SaveDefaultPianoPropertiesToPlayerPrefs();
+        //SaveDefaultPianoPropertiesToPlayerPrefs();
         pianoKeyboard = GameObject.FindGameObjectWithTag("Piano");
         blackKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => child.name.Contains("Sharp")).ToList();
         blackKeys = blackKeys.OrderBy(key => key.position.x).ToList();
         whiteKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => !child.name.Contains("Sharp")).ToList();
         whiteKeys = whiteKeys.OrderBy(key => key.position.x).ToList();
     }
-    private void Start()
-    {
-    }
-
     public void ColorKey(string key)
     {
         GameObject noteKey = GameObject.Find(key);
@@ -82,28 +78,34 @@ public class PianoFunctions : MonoBehaviour
         }
     }
 
-    public void ResetAllKeysToDefaultColors()
+    public void ResetSelectedKeysToDefaultColors(HashSet<int> keyIndices)
     {
         // Reset black keys
-        foreach (Transform keyTransform in blackKeys)
+        for (int i = 0; i < blackKeys.Count; i++)
         {
-            if (keyTransform.TryGetComponent<Renderer>(out var renderer))
+            if (keyIndices.Contains(i)) // Only reset keys in the provided list
             {
-                foreach (var mat in renderer.materials)
+                if (blackKeys[i].TryGetComponent<Renderer>(out var renderer))
                 {
-                    mat.SetColor("_Color", blackKeyDefaultColor);
+                    foreach (var mat in renderer.materials)
+                    {
+                        mat.SetColor("_Color", blackKeyDefaultColor);
+                    }
                 }
             }
         }
 
         // Reset white keys
-        foreach (Transform keyTransform in whiteKeys)
+        for (int i = 0; i < whiteKeys.Count; i++)
         {
-            if (keyTransform.TryGetComponent<Renderer>(out var renderer))
+            if (keyIndices.Contains(i)) // Only reset keys in the provided list
             {
-                foreach (var mat in renderer.materials)
+                if (whiteKeys[i].TryGetComponent<Renderer>(out var renderer))
                 {
-                    mat.SetColor("_Color", whiteKeyDefaultColor);
+                    foreach (var mat in renderer.materials)
+                    {
+                        mat.SetColor("_Color", whiteKeyDefaultColor);
+                    }
                 }
             }
         }
@@ -155,6 +157,8 @@ public class PianoFunctions : MonoBehaviour
                 child.gameObject.SetActive(false);
             }
         }
+
+        AdjustCollider();
 
         Debug.Log($"Piano adjusted to {keyCount} keys starting from {startNote}.");
     }
@@ -283,11 +287,59 @@ public class PianoFunctions : MonoBehaviour
         MoveObject(Vector3.down * 0.01f);
     }
 
+    void AdjustCollider()
+    {
+        if (pianoKeyboard == null)
+        {
+            Debug.LogError("Piano GameObject not found!");
+            return;
+        }
+
+        BoxCollider collider = pianoKeyboard.GetComponent<BoxCollider>();
+        if (collider == null)
+        {
+            Debug.LogError("BoxCollider component not found on the piano keyboard object.");
+            return;
+        }
+
+        // 1. Get ALL active keys (white or black).
+        //    Exclude the root piano transform itself, just child keys.
+        List<Transform> activeKeys = pianoKeyboard.GetComponentsInChildren<Transform>()
+            .Where(t => t != pianoKeyboard.transform && t.gameObject.activeSelf)
+            .OrderBy(t => t.localPosition.x)
+            .ToList();
+
+        // 2. Ensure we have something to measure.
+        if (activeKeys.Count == 0)
+        {
+            Debug.LogError("No active keys found. Cannot adjust collider.");
+            return;
+        }
+
+        // 3. Identify the leftmost and rightmost active key in local space.
+        Transform firstKey = activeKeys.First();  // lowest x
+        Transform lastKey = activeKeys.Last();   // highest x
+
+        // 4. Calculate midpoint + new width (sizeX) in local space.
+        Vector3 lowPos = firstKey.localPosition;
+        Vector3 highPos = lastKey.localPosition;
+        Vector3 midpoint = (lowPos + highPos) * 0.5f;
+
+        float sizeX = Mathf.Abs(highPos.x - lowPos.x);
+        float sizeY = collider.size.y; // keep original Y (height)
+        float sizeZ = collider.size.z; // keep original Z (depth)
+
+        // 5. Assign new center & size to the BoxCollider
+        collider.center = midpoint;
+        collider.size = new Vector3(sizeX, sizeY, sizeZ);
+
+        Debug.Log($"Adjusted collider to active keys. Count={activeKeys.Count}, Width={sizeX}");
+    }
 
     public void BringPianoCloser()
     {
 
-        OVRCameraRig cameraRig = FindObjectOfType<OVRCameraRig>();
+        OVRCameraRig cameraRig = FindAnyObjectByType<OVRCameraRig>();
         if (cameraRig == null)
         {
             Debug.LogError("OVRCameraRig not found in the scene!");

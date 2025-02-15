@@ -12,7 +12,7 @@ public class HttpHandler : MonoBehaviour
 {
     // Start is called before the first frame update
 
-    string url = "http://localhost:5000/analyze";
+    string url = "http://127.0.0.1:5000/analyze";
     public TextMeshProUGUI text;
     Dictionary<string, string> chordDictionary;
     void Start()
@@ -112,7 +112,4 @@ public class HttpHandler : MonoBehaviour
     {
         public int[] notes;
     }
-
-    
-
 }

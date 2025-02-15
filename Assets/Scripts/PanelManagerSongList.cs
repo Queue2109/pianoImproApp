@@ -11,10 +11,10 @@ public class PanelManagerSongList : MonoBehaviour
     public MidiFileManager midiFileManager;
     public MidiFileNoteReader midiFileNoteReader;
     public GameObject pianoKeyboard;
-    public PlayControlPanelManager panelManager;
     void Start()
     {
         //OpenPanel(currentPanel);
+        panels[0].SetActive(false);
         midiFileManager.LogMidiFilesAsync();
     }
 
@@ -23,7 +23,6 @@ public class PanelManagerSongList : MonoBehaviour
         switch (currentPanel)
         {
             case 0:
-                panelManager.MovePanelPosition();
                 midiFileNoteReader.Setup();
                 UpdateAndShowPLaySongPanel();
                 break;
@@ -55,7 +54,7 @@ public class PanelManagerSongList : MonoBehaviour
 
     public void UpdateAndShowPLaySongPanel()
     {
-        midiFileNoteReader.StartPlaybackFromBeginning();
+        midiFileNoteReader.StartFullSongPlayback();
         pianoKeyboard.SetActive(true);
     }
 }
