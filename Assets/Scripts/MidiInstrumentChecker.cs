@@ -30,7 +30,7 @@ public static class MidiInstrumentChecker
             int programNumber = kvp.Value; // GM instrument program
 
             // Skip channel 9 (drums) and non-piano instruments
-            if (channel == 9 || !IsPianoInstrument(programNumber))
+            if (channel == 9)
                 continue;
 
             // Add to list of piano channels (avoid duplicates)

@@ -7,16 +7,6 @@ public class PlayControlPanelManager : MonoBehaviour
 
     public GameObject pianoKeyboard;
 
-    void Start()
-    {
-        MovePanelPosition();
-    }
-
-    private void Awake()
-    {
-        MovePanelPosition();
-    }
-
     public void MovePanelPosition()
     {
         // Preserve the original X-axis rotation of the gameObject

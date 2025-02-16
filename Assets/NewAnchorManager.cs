@@ -17,8 +17,8 @@ public class NewAnchorManager : MonoBehaviour
     private async void Start()
     {
         // Load any existing UUID from PlayerPrefs
-        LoadAnchorUuid();
         pianoFunctions.LoadPianoPropertiesFromPlayerPrefs();
+        LoadAnchorUuid();
 
         if (anchorUuid != Guid.Empty)
         {
@@ -154,7 +154,8 @@ public class NewAnchorManager : MonoBehaviour
         var result = await anchor.EraseAnchorAsync();
         if (result.Success)
         {
-            Destroy(anchor);
+            
+            Destroy(go.GetComponent<OVRSpatialAnchor>());
             anchor = null;
             anchorUuid = Guid.Empty;
             PlayerPrefs.DeleteKey("AnchorUuid");
@@ -209,6 +210,5 @@ public class NewAnchorManager : MonoBehaviour
         await CreateSpatialAnchorAsync();
         await SaveCurrentAnchorAsync();
         pianoFunctions.SavePianoPropertiesToPlayerPrefs();
-
     }
 }

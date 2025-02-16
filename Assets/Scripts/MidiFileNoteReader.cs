@@ -66,11 +66,6 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void Setup()
     {
-        // Called once at scene load or whenever.
-        // If you want to retrieve the channel selections from the MidiInstrumentChecker,
-        // do so here (though we typically do that AFTER we read the file).
-        // channelSelections = MidiInstrumentChecker.GetPianoChannels();
-
         // Make sure the UI references exist
         if (!timeText) timeText = GameObject.Find("Time")?.GetComponent<TextMeshProUGUI>();
         if (!speedText) speedText = GameObject.Find("Speed")?.GetComponent<TextMeshProUGUI>();
@@ -107,7 +102,7 @@ public class MidiFileNoteReader : MonoBehaviour
     /// </summary>
     public void StartFullSongPlayback()
     {
-        if (currentMode == PlaybackMode.Full)
+        if (currentMode == PlaybackMode.Full && isSongReady == true)
         {
             return;
         }
@@ -347,9 +342,10 @@ public class MidiFileNoteReader : MonoBehaviour
         currentTime = new MetricTimeSpan();
         playback.MoveToTime(currentTime);
 
-        // If you want to track totalTime for left hand, do so:
         totalTime = playback.GetDuration<MetricTimeSpan>().TotalSeconds;
         totalDuration = playback.GetDuration<MetricTimeSpan>();
+        // Optionally set a flag so Update() recognizes we can show time
+        isSongReady = true;
 
         playback.Start();
         isPlaying = true;
@@ -398,6 +394,11 @@ public class MidiFileNoteReader : MonoBehaviour
         totalTime = playback.GetDuration<MetricTimeSpan>().TotalSeconds;
         totalDuration = playback.GetDuration<MetricTimeSpan>();
 
+        totalTime = playback.GetDuration<MetricTimeSpan>().TotalSeconds;
+        totalDuration = playback.GetDuration<MetricTimeSpan>();
+        // Optionally set a flag so Update() recognizes we can show time
+        isSongReady = true;
+
         playback.Start();
         isPlaying = true;
         currentMode = PlaybackMode.RightHand;
@@ -433,7 +434,7 @@ public class MidiFileNoteReader : MonoBehaviour
         MidiInstrumentChecker.CheckInstruments(fullFile);
         channelSelections = MidiInstrumentChecker.GetPianoChannels();
 
-        Debug.Log("Filtered left, right, full files, plus updated channelSelections from instrument checker.");
+        Debug.Log("Filtered left, right, full files, plus updated channelSelections from instrument checker." + channelSelections);
     }
 
     private MidiFile FilterNotes(MidiFile source, bool isLeftHand)
@@ -498,22 +499,25 @@ public class MidiFileNoteReader : MonoBehaviour
         {
             foreach (var note in e.Notes)
             {
-                string keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
-                activeNotes.Add(note.NoteNumber);
-
-                // Re-analyze chord if needed
-                IdentifyCurrentChord();
+                string keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());  
 
                 // Only color if channel is in the selected set,
                 // AND it belongs to left or right hand as we prefer.
                 if (channelSelections.Contains(note.Channel))
                 {
+                    Debug.Log("Note " + note.NoteName);
                     // left-hand if note < 60
                     // right-hand if note >= 60
                     if ((colorLeftHand && note.NoteNumber < 60) ||
                         (colorRightHand && note.NoteNumber >= 60))
                     {
                         pianoFunctions.ColorKey(keyName);
+                    }
+
+                    if (note.NoteNumber < 60)
+                    {
+                        activeNotes.Add(note.NoteNumber);
+                        IdentifyCurrentChord();
                     }
                 }
             }
@@ -527,9 +531,6 @@ public class MidiFileNoteReader : MonoBehaviour
             foreach (var note in e.Notes)
             {
                 string keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
-                activeNotes.Remove(note.NoteNumber);
-
-                IdentifyCurrentChord();
 
                 if (channelSelections.Contains(note.Channel))
                 {
@@ -537,6 +538,12 @@ public class MidiFileNoteReader : MonoBehaviour
                         (colorRightHand && note.NoteNumber >= 60))
                     {
                         pianoFunctions.ResetKeyColor(keyName);
+                    }
+
+                    if (note.NoteNumber < 60)
+                    {
+                        activeNotes.Remove(note.NoteNumber);
+                        IdentifyCurrentChord();
                     }
                 }
             }

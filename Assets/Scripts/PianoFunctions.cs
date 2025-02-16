@@ -24,7 +24,7 @@ public class PianoFunctions : MonoBehaviour
     public Color whiteKeyHighlightColor;
     // A darker blue-black with partial transparency for sharps
     public Color blackKeyHighlightColor;
-
+     
     private void Awake()
     {
         //SaveDefaultPianoPropertiesToPlayerPrefs();
@@ -33,10 +33,16 @@ public class PianoFunctions : MonoBehaviour
         blackKeys = blackKeys.OrderBy(key => key.position.x).ToList();
         whiteKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => !child.name.Contains("Sharp")).ToList();
         whiteKeys = whiteKeys.OrderBy(key => key.position.x).ToList();
+
+        Debug.Log(whiteKeys);
+        Debug.Log(blackKeys);
+
+        AdjustCollider();
     }
     public void ColorKey(string key)
     {
         GameObject noteKey = GameObject.Find(key);
+        Debug.Log("Key name is " + noteKey);
         if (noteKey == null)
         {
             return;
@@ -148,7 +154,7 @@ public class PianoFunctions : MonoBehaviour
         // Set keys active or inactive based on required key count
         foreach (Transform child in transform)
         {
-            if (allKeys.Contains(child.name))
+            if (allKeys.Contains(child.name) || child.name.Contains("Hand"))
             {
                 child.gameObject.SetActive(true);
             }
@@ -198,10 +204,10 @@ public class PianoFunctions : MonoBehaviour
     public void ScaleObject(float scaleFactor)
     {
         transform.localScale *= scaleFactor;
+        AdjustCollider();
     }
     public void ScaleWhiteKeys(float scaleFactor)
     {
-        Debug.Log(scaleFactor);
         whiteKeyScaleFactor *= scaleFactor;
         foreach (Transform key in whiteKeys)
         {
@@ -222,6 +228,7 @@ public class PianoFunctions : MonoBehaviour
 
             float newZPosition = key.localPosition.z + (changeInHeight * ratioZtoY);
             key.localPosition = new Vector3(key.localPosition.x, key.localPosition.y, newZPosition);
+            AdjustCollider();
         }
     }
 
@@ -244,6 +251,7 @@ public class PianoFunctions : MonoBehaviour
             float newZPosition = key.localPosition.z + (changeInHeight * ratioZtoY);
             key.localPosition = new Vector3(key.localPosition.x, key.localPosition.y, newZPosition);
         }
+        AdjustCollider();
     }
 
     public void MoveLeft()
@@ -305,7 +313,7 @@ public class PianoFunctions : MonoBehaviour
         // 1. Get ALL active keys (white or black).
         //    Exclude the root piano transform itself, just child keys.
         List<Transform> activeKeys = pianoKeyboard.GetComponentsInChildren<Transform>()
-            .Where(t => t != pianoKeyboard.transform && t.gameObject.activeSelf)
+            .Where(t => t != pianoKeyboard.transform && t.gameObject.activeSelf && !t.name.Contains("Hand"))
             .OrderBy(t => t.localPosition.x)
             .ToList();
 
@@ -327,7 +335,7 @@ public class PianoFunctions : MonoBehaviour
 
         float sizeX = Mathf.Abs(highPos.x - lowPos.x);
         float sizeY = collider.size.y; // keep original Y (height)
-        float sizeZ = collider.size.z; // keep original Z (depth)
+        float sizeZ = collider.size.z * whiteKeyScaleFactor; // keep original Z (depth)
 
         // 5. Assign new center & size to the BoxCollider
         collider.center = midpoint;
@@ -392,9 +400,44 @@ public class PianoFunctions : MonoBehaviour
 
         blackKeyScaleFactor = PlayerPrefs.GetFloat("BlackKeyScale", 1f);
         whiteKeyScaleFactor = PlayerPrefs.GetFloat("WhiteKeyScale", 1f);
+        ApplyWhiteKeyScale();
+        ApplyBlackKeyScale();
+    }
 
-        ScaleWhiteKeys(whiteKeyScaleFactor);
-        ScaleBlackKeys(blackKeyScaleFactor);
+    private void ApplyWhiteKeyScale()
+    {
+        foreach (var key in whiteKeys)
+        {
+            // Start from the original Y scale we captured in Awake()
+            float originalY = key.localScale.y;
+            float newY = originalY * whiteKeyScaleFactor;
+
+            key.localScale = new Vector3(key.localScale.x, newY, key.localScale.z);
+
+            // If you want to re-calculate localPosition the same way:
+            // because we've gone from originalY -> newY
+            float ratioZtoY = 0.08f / 14.01483f;
+            float changeInHeight = newY - originalY;
+            float newZPosition = key.localPosition.z + (changeInHeight * ratioZtoY);
+            key.localPosition = new Vector3(key.localPosition.x, key.localPosition.y, newZPosition);
+        }
+    }
+
+    private void ApplyBlackKeyScale()
+    {
+        foreach (var key in blackKeys)
+        {
+            float originalY = key.localScale.y;
+            float newY = originalY * blackKeyScaleFactor;
+
+            key.localScale = new Vector3(key.localScale.x, newY, key.localScale.z);
+
+            // Position offset
+            float ratioZtoY = 0.08f / 14.01483f;
+            float changeInHeight = newY - originalY;
+            float newZPosition = key.localPosition.z + (changeInHeight * ratioZtoY);
+            key.localPosition = new Vector3(key.localPosition.x, key.localPosition.y, newZPosition);
+        }
     }
 
     public void SaveDefaultPianoPropertiesToPlayerPrefs()
