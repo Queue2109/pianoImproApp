@@ -154,7 +154,7 @@ public class PianoFunctions : MonoBehaviour
         // Set keys active or inactive based on required key count
         foreach (Transform child in transform)
         {
-            if (allKeys.Contains(child.name) || child.name.Contains("Hand"))
+            if (allKeys.Contains(child.name) || child.name.Contains("Hand") || child.name.Contains("Chord") || child.name.Contains("PlayControl"))
             {
                 child.gameObject.SetActive(true);
             }
@@ -313,7 +313,7 @@ public class PianoFunctions : MonoBehaviour
         // 1. Get ALL active keys (white or black).
         //    Exclude the root piano transform itself, just child keys.
         List<Transform> activeKeys = pianoKeyboard.GetComponentsInChildren<Transform>()
-            .Where(t => t != pianoKeyboard.transform && t.gameObject.activeSelf && !t.name.Contains("Hand"))
+            .Where(t => t != pianoKeyboard.transform && t.gameObject.activeSelf && !t.name.Contains("Hand") && !t.name.Contains("PlayControl") && !t.name.Contains("Chord"))
             .OrderBy(t => t.localPosition.x)
             .ToList();
 
@@ -391,9 +391,9 @@ public class PianoFunctions : MonoBehaviour
 
     public void LoadPianoPropertiesFromPlayerPrefs()
     {
-        float sx = PlayerPrefs.GetFloat("ObjectScaleX");
-        float sy = PlayerPrefs.GetFloat("ObjectScaleY");
-        float sz = PlayerPrefs.GetFloat("ObjectScaleZ");
+        float sx = PlayerPrefs.GetFloat("ObjectScaleX", 0.08f);
+        float sy = PlayerPrefs.GetFloat("ObjectScaleY", 0.06f);
+        float sz = PlayerPrefs.GetFloat("ObjectScaleZ", 0.1f);
         transform.localScale = new Vector3(sx, sy, sz);
 
         SetKeyCount(PlayerPrefs.GetInt("KeyNumber", 61));
@@ -438,21 +438,5 @@ public class PianoFunctions : MonoBehaviour
             float newZPosition = key.localPosition.z + (changeInHeight * ratioZtoY);
             key.localPosition = new Vector3(key.localPosition.x, key.localPosition.y, newZPosition);
         }
-    }
-
-    public void SaveDefaultPianoPropertiesToPlayerPrefs()
-    {
-
-        Vector3 scale = transform.localScale;
-        PlayerPrefs.SetFloat("ObjectScaleX", 0.08f);
-        PlayerPrefs.SetFloat("ObjectScaleY", 0.06f);
-        PlayerPrefs.SetFloat("ObjectScaleZ", 0.1f);
-
-        PlayerPrefs.SetFloat("BlackKeyScale", 1f);
-        PlayerPrefs.SetFloat("WhiteKeyScale", 1f);
-        PlayerPrefs.SetInt("KeyNumber", 61);
-
-        // Persist
-        PlayerPrefs.Save();
     }
 }

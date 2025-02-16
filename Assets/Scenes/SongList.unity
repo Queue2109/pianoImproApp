@@ -294,21 +294,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 502012016}
-        m_TargetAssemblyTypeName: PlayControlPanelManager, Assembly-CSharp
-        m_MethodName: MovePanelPosition
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 502012016}
-        m_TargetAssemblyTypeName: PlayControlPanelManager, Assembly-CSharp
-        m_MethodName: MovePanelPosition
+      - m_Target: {fileID: 1755280943}
+        m_TargetAssemblyTypeName: PanelFollowPiano, Assembly-CSharp
+        m_MethodName: UpdatePosition
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2497,9 +2485,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-      - m_Target: {fileID: 502012016}
-        m_TargetAssemblyTypeName: PlayControlPanelManager, Assembly-CSharp
-        m_MethodName: MovePanelPosition
+      - m_Target: {fileID: 1755280943}
+        m_TargetAssemblyTypeName: PanelFollowPiano, Assembly-CSharp
+        m_MethodName: UpdatePosition
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -3982,19 +3970,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 8152114143891302370, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
   m_PrefabInstance: {fileID: 1524063257}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &502012016
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 499793425}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3701f676324fc7c41916cd4799d4c251, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pianoKeyboard: {fileID: 1964558728}
 --- !u!1 &504547510
 GameObject:
   m_ObjectHideFlags: 0
@@ -8343,7 +8318,6 @@ GameObject:
   - component: {fileID: 1104816685}
   - component: {fileID: 1104816684}
   - component: {fileID: 1104816683}
-  - component: {fileID: 1104816687}
   m_Layer: 0
   m_Name: ChordNameCanvas
   m_TagString: Untagged
@@ -8421,32 +8395,19 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1104816682}
-  m_LocalRotation: {x: 0.38268343, y: -0, z: -0, w: 0.92387956}
-  m_LocalPosition: {x: 0, y: 0, z: 0.608}
-  m_LocalScale: {x: 0.005, y: 0.005, z: 0.005}
+  m_LocalRotation: {x: 0, y: -0.92387956, z: 0.38268343, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.23999989}
+  m_LocalScale: {x: 0.062499985, y: 0.062499993, z: 0.06249999}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 271289072}
-  m_Father: {fileID: 1575723556}
+  m_Father: {fileID: 1964558729}
   m_LocalEulerAnglesHint: {x: 45, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0.61, y: 0.569}
+  m_AnchoredPosition: {x: -7.6249995, y: 1.1500003}
   m_SizeDelta: {x: 70, y: 15}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1104816687
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1104816682}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97e067a6383ca824dadbd8f9f24b3715, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pianoTransform: {fileID: 1964558729}
 --- !u!1 &1110536725
 GameObject:
   m_ObjectHideFlags: 0
@@ -11704,7 +11665,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 1575723556}
+    m_TransformParent: {fileID: 1764352164}
     m_Modifications:
     - target: {fileID: 168457645872911486, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       propertyPath: m_UseGravity
@@ -11855,16 +11816,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1808208275399139142, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.49999988
+      objectReference: {fileID: 0}
+    - target: {fileID: 1808208275399139142, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.37499997
+      objectReference: {fileID: 0}
+    - target: {fileID: 1808208275399139142, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.62499994
+      objectReference: {fileID: 0}
+    - target: {fileID: 1808208275399139142, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.108
+      value: 1.0594968
       objectReference: {fileID: 0}
     - target: {fileID: 1808208275399139142, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.69266915
+      value: -0.15980417
       objectReference: {fileID: 0}
     - target: {fileID: 1808208275399139142, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.6043199
+      value: 1.1031989
       objectReference: {fileID: 0}
     - target: {fileID: 1808208275399139142, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       propertyPath: m_LocalRotation.w
@@ -12609,10 +12582,10 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 8152114143891302370, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 502012016}
+      addedObject: {fileID: 1755280942}
     - targetCorrespondingSourceObject: {fileID: 8152114143891302370, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1755280942}
+      addedObject: {fileID: 1755280943}
     - targetCorrespondingSourceObject: {fileID: 8668335517219923342, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1524063265}
@@ -13333,8 +13306,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1964558729}
-  - {fileID: 1524063259}
-  - {fileID: 1104816686}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1599725061
@@ -14937,8 +14908,22 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1.0598571, y: 0.010224873, z: 0.48209223}
-  m_Center: {x: -0.002511859, y: -0.005308816, z: 0.12960137}
+  m_Size: {x: 1.064303, y: 0.008950711, z: 0.7204935}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1755280943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 499793425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 97e067a6383ca824dadbd8f9f24b3715, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 1964558729}
+  offset: {x: 1, y: 0.15, z: 0.5}
 --- !u!1 &1757335862
 GameObject:
   m_ObjectHideFlags: 0
@@ -15017,6 +15002,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1524063259}
   - {fileID: 318071942}
   - {fileID: 916844272}
   m_Father: {fileID: 0}
@@ -18304,6 +18290,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       insertIndex: 0
       addedObject: {fileID: 982349270}
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1104816686}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 004d4695ccb70444fa6657a0cc22442e, type: 3}
       insertIndex: -1

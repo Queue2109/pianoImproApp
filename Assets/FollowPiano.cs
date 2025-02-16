@@ -4,26 +4,25 @@ using UnityEngine;
 
 public class PanelFollowPiano : MonoBehaviour
 {
-    public Transform pianoTransform;   // drag 'customPianoKeys' here in Inspector
-    private Vector3 offset;
-    private Quaternion rotationOffset;
+    public Transform target; // assign the piano's transform in the Inspector
+    public Vector3 offset;   // desired positional offset relative to the piano
 
-    void Start()
+    private void Start()
     {
-        // Record the initial difference between panel and piano
-        offset = transform.position - pianoTransform.position;
-
-        // (Optional) If you also want the same relative rotation:
-        rotationOffset = Quaternion.Inverse(pianoTransform.rotation) * transform.rotation;
+        UpdatePosition();
     }
-
-    void LateUpdate()
+    public void UpdatePosition()
     {
-        // Keep the same offset position
-        transform.position = pianoTransform.position + offset;
+        if (target != null)
+        {
+            // Update panel position relative to the target (piano)
+            transform.position = target.position + offset;
 
-        // (Optional) Keep the same relative rotation
-        transform.rotation = pianoTransform.rotation * rotationOffset;
+            // Optional: match rotation (or only certain axes)
+            float targetY = target.rotation.eulerAngles.y;
+            float targetZ = target.rotation.eulerAngles.z;
+            transform.rotation = Quaternion.Euler(-45, 0, - targetZ);
+        }
     }
 }
 
