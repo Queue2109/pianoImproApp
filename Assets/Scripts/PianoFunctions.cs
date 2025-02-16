@@ -21,10 +21,16 @@ public class PianoFunctions : MonoBehaviour
     public Color blackKeyDefaultColor;
 
     // A nice blue with partial transparency
-    public Color whiteKeyHighlightColor;
+    public Color whiteKeyHighlightColorRight;
     // A darker blue-black with partial transparency for sharps
-    public Color blackKeyHighlightColor;
-     
+    public Color blackKeyHighlightColorRight;
+
+
+    // A nice blue with partial transparency
+    public Color whiteKeyHighlightColorLeft;
+    // A darker blue-black with partial transparency for sharps
+    public Color blackKeyHighlightColorLeft;
+
     private void Awake()
     {
         //SaveDefaultPianoPropertiesToPlayerPrefs();
@@ -39,7 +45,7 @@ public class PianoFunctions : MonoBehaviour
 
         AdjustCollider();
     }
-    public void ColorKey(string key)
+    public void ColorKey(string key, bool isLeftHand)
     {
         GameObject noteKey = GameObject.Find(key);
         Debug.Log("Key name is " + noteKey);
@@ -50,10 +56,19 @@ public class PianoFunctions : MonoBehaviour
 
         if (noteKey.TryGetComponent<Renderer>(out var renderer))
         {
+            Color highlightColor = Color.white;
+            if(isLeftHand)
+            {
+                highlightColor = key.Contains("Sharp")
+                ? blackKeyHighlightColorLeft
+                : whiteKeyHighlightColorLeft;
+            } else
+            {
+                highlightColor = key.Contains("Sharp")
+                ? blackKeyHighlightColorRight
+                : whiteKeyHighlightColorRight;
+            }
             // Decide which highlight color to use: black key or white key?
-            Color highlightColor = key.Contains("Sharp")
-                ? blackKeyHighlightColor
-                : whiteKeyHighlightColor;
 
             foreach (var mat in renderer.materials)
             {

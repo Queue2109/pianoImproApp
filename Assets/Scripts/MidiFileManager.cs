@@ -17,6 +17,8 @@ public class MidiFileManager : MonoBehaviour
     public Color normalColor;
     public Color highlightColor;
 
+    private Coroutine blinkRoutine;
+
     // Keep track of the last selected container’s Image, to revert color when a new container is clicked
     private Image lastSelectedContainerImage;
     public Color blinkColor;
@@ -73,9 +75,9 @@ public class MidiFileManager : MonoBehaviour
 
     public void OnStartPlayingClicked()
     {
-        StopCoroutine(BlinkColorRoutine(GameObject.Find("StartPlayingButton").GetComponent<Image>()));
-        lastSelectedContainerImage = null;
-        GameObject.Find("StartPlayingText").GetComponent<TextMeshProUGUI>().text = "Choose another song to switch it up!";
+        GameObject.Find("CurrentlyPlayingText").GetComponent<TextMeshProUGUI>().text = "Song started playing";
+        StopCoroutine(blinkRoutine);
+        blinkRoutine = null;
     }
 
     private void OnContainerClicked(GameObject clickedContainer)
@@ -91,7 +93,9 @@ public class MidiFileManager : MonoBehaviour
             newImage.color = highlightColor;
             lastSelectedContainerImage = newImage;
         }
-        StartCoroutine(BlinkColorRoutine(GameObject.Find("StartPlayingButton").GetComponent<Image>()));
+        GameObject.Find("CurrentlyPlayingText").GetComponent<TextMeshProUGUI>().text = "Playing preview. Press the button to show all features";
+        GameObject.Find("StartPlayingButton").gameObject.SetActive(true);
+        blinkRoutine = StartCoroutine(BlinkColorRoutine(GameObject.Find("StartPlayingButton").GetComponent<Image>()));
     }
 
     private System.Collections.IEnumerator BlinkColorRoutine(Image targetImage)

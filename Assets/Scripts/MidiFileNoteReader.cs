@@ -511,7 +511,7 @@ public class MidiFileNoteReader : MonoBehaviour
                     if ((colorLeftHand && note.NoteNumber < 60) ||
                         (colorRightHand && note.NoteNumber >= 60))
                     {
-                        pianoFunctions.ColorKey(keyName);
+                        pianoFunctions.ColorKey(keyName, note.NoteNumber < 60);
                     }
 
                     if (note.NoteNumber < 60)
