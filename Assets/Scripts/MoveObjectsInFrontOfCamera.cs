@@ -21,12 +21,6 @@ public class MoveObjectsInFrontOfCamera : MonoBehaviour
 
     public void MoveObjects()
     {
-    
-        if (centerEyeAnchor == null)
-        {
-            Debug.Log("CenterEyeAnchor not found in OVRCameraRig. Ensure the structure is correct.");
-            return;
-        }
 
         foreach (GameObject obj in objectsToMove)
         {
@@ -52,20 +46,5 @@ public class MoveObjectsInFrontOfCamera : MonoBehaviour
             obj.transform.position = newPanelPosition;
 
         }
-    }
-    private void LateUpdate()
-    {
-        if (centerEyeAnchor == null) return;
-
-        transform.position = centerEyeAnchor.position + centerEyeAnchor.forward * distanceFromCamera;
-
-        transform.LookAt(centerEyeAnchor);
-
-
-        Vector3 euler = transform.eulerAngles;
-        euler.x = 0f;
-        //if (lockYRotation) euler.y = 0f;
-        //if (lockZRotation) euler.z = 0f;
-        transform.eulerAngles = euler;
     }
 }

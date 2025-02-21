@@ -9,6 +9,7 @@ public class NewAnchorManager : MonoBehaviour
     [Header("Assign the GameObject to attach the anchor")]
     public GameObject go;
     public PianoFunctions pianoFunctions;
+    public PanelManagerSongList panelManagerSongList;
 
     private Guid anchorUuid = Guid.Empty;
     private OVRSpatialAnchor anchor;
@@ -33,6 +34,8 @@ public class NewAnchorManager : MonoBehaviour
             await CreateSpatialAnchorAsync();
             await SaveCurrentAnchorAsync();
         }
+        pianoFunctions.AdjustCollider();
+        panelManagerSongList.MovePanel();   
     }
 
     /// <summary>

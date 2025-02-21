@@ -4,50 +4,66 @@ using UnityEngine;
 
 public class moveObject : MonoBehaviour
 {
-    Vector3 Vec;   
-    Renderer ren;
+    public Transform anchoredObject; // assign your anchored object here
+    private const string PanelPosKey = "PanelPosition";
+    private const string PanelRotKey = "PanelRotation";
+
     void Start()
     {
+        PlayerPrefs.DeleteKey(PanelRotKey);
+        PlayerPrefs.DeleteKey(PanelPosKey);
+        if (PlayerPrefs.HasKey(PanelPosKey))
+        {
+            // Load saved world position and rotation
+            Vector3 savedPos = StringToVector3(PlayerPrefs.GetString(PanelPosKey));
+            Quaternion savedRot = StringToQuaternion(PlayerPrefs.GetString(PanelRotKey));
+            transform.SetParent(null); // Ensure panel is independent
+            transform.position = savedPos;
+            transform.rotation = savedRot;
+        }
     }
 
-    // Update is called once per frame
-    void FixedUpdate()
+    // Call this method when the panel is dropped after being grabbed
+    public void OnPanelDrop()
     {
-      
-        Vec = transform.localPosition;  
-        // Vec.z -= Input.GetAxis("Jump") * Time.deltaTime * 2;  
-        Vec.x += Input.GetAxis("Horizontal") * Time.deltaTime * 10;  
-        Vec.y += Input.GetAxis("Vertical") * Time.deltaTime * 10;  
-        transform.localPosition = Vec;  
-  
+        transform.SetParent(null); // Detach if necessary
+
+        // Save current world position and rotation
+        PlayerPrefs.SetString(PanelPosKey, Vector3ToString(transform.position));
+        PlayerPrefs.SetString(PanelRotKey, QuaternionToString(transform.rotation));
+        PlayerPrefs.Save();
+        Debug.Log("WIII here");
     }
 
-    private void OnCollisionEnter(Collision collision)
+    // Utility methods to convert Vector3 and Quaternion to/from string
+    private string Vector3ToString(Vector3 vec)
     {
-        GameObject key = collision.gameObject;
-        ren = key.GetComponent<Renderer>();
-        if(ren == null) {
-            return;
-        }
-        if(key.name.Contains("Sharp") == true) {
-            ren.material.color = new Color(186, 39, 39);
-        } else {
-            ren.material.color = new Color(186, 39, 39);
-        }
-        Debug.Log("Key pressed: " + collision.gameObject.name);
+        return vec.x + "," + vec.y + "," + vec.z;
     }
 
-    private void OnCollisionExit(Collision collision)
+    private Vector3 StringToVector3(string s)
     {
-        GameObject key = collision.gameObject;
-        ren = key.GetComponent<Renderer>();
-        if(ren == null) {
-            return;
-        }
-        if(key.name.Contains("Sharp") == true) {
-            ren.material.color = new Color(0, 0, 0);
-        } else {
-            ren.material.color = new Color(255, 255, 255);
-        }
+        string[] values = s.Split(',');
+        return new Vector3(
+            float.Parse(values[0]),
+            float.Parse(values[1]),
+            float.Parse(values[2])
+        );
+    }
+
+    private string QuaternionToString(Quaternion quat)
+    {
+        return quat.x + "," + quat.y + "," + quat.z + "," + quat.w;
+    }
+
+    private Quaternion StringToQuaternion(string s)
+    {
+        string[] values = s.Split(',');
+        return new Quaternion(
+            float.Parse(values[0]),
+            float.Parse(values[1]),
+            float.Parse(values[2]),
+            float.Parse(values[3])
+        );
     }
 }

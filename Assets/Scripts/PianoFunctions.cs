@@ -42,8 +42,6 @@ public class PianoFunctions : MonoBehaviour
 
         Debug.Log(whiteKeys);
         Debug.Log(blackKeys);
-
-        AdjustCollider();
     }
     public void ColorKey(string key, bool isLeftHand)
     {
@@ -310,7 +308,7 @@ public class PianoFunctions : MonoBehaviour
         MoveObject(Vector3.down * 0.01f);
     }
 
-    void AdjustCollider()
+    public void AdjustCollider()
     {
         if (pianoKeyboard == null)
         {
