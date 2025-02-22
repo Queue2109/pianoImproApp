@@ -51,11 +51,6 @@ public class PanelManagerSongList : MonoBehaviour
             }
         }
     }
-    
-    public void MovePanel()
-    {
-        panels[currentPanel].transform.position = pianoKeyboard.transform.position + new Vector3(0.4f, 0.2f, 0);
-    }
 
     public void UpdateAndShowPLaySongPanel()
     {

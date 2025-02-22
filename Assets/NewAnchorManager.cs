@@ -35,7 +35,6 @@ public class NewAnchorManager : MonoBehaviour
             await SaveCurrentAnchorAsync();
         }
         pianoFunctions.AdjustCollider();
-        panelManagerSongList.MovePanel();   
     }
 
     /// <summary>
