@@ -17,7 +17,7 @@ public class moveObject : MonoBehaviour
     private const string PanelPosKey = "PanelLocalPosition";
     private const string PanelRotKey = "PanelLocalRotation";
 
-    void Start()
+    public void LoadOnStart()
     {
         Debug.Log("=== START ===");
         Debug.Log("Piano Position: " + pianoKeyboard.transform.position);
@@ -25,26 +25,7 @@ public class moveObject : MonoBehaviour
 
         if (PlayerPrefs.HasKey(PanelPosKey) && PlayerPrefs.HasKey(PanelRotKey))
         {
-            string posString = PlayerPrefs.GetString(PanelPosKey);
-            string rotString = PlayerPrefs.GetString(PanelRotKey);
-            Debug.Log("Saved Position String: " + posString);
-            Debug.Log("Saved Rotation String: " + rotString);
-
-            // Load saved local offset and rotation
-            Vector3 savedLocalOffset = StringToVector3(posString);
-            Quaternion savedLocalRot = StringToQuaternion(rotString);
-
-            Debug.Log("Found saved local offset: " + savedLocalOffset);
-            Debug.Log("Found saved local rotation: " + savedLocalRot);
-
-            Vector3 newWorldPosition = pianoKeyboard.transform.position + pianoKeyboard.transform.rotation * savedLocalOffset;
-            Quaternion newWorldRotation = pianoKeyboard.transform.rotation * savedLocalRot;
-
-            Debug.Log("Calculated Panel World Position: " + newWorldPosition);
-            Debug.Log("Calculated Panel World Rotation: " + newWorldRotation);
-
-            transform.position = newWorldPosition;
-            transform.rotation = newWorldRotation;
+            UpdatePanelPositionFromPrefs();
         }
         else
         {

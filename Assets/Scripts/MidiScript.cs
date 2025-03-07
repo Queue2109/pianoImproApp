@@ -11,6 +11,7 @@ public class MidiScript : MonoBehaviour
     public delegate void MidiNoteEvent(int noteNumber);
     public event MidiNoteEvent OnNoteOn;
     public event MidiNoteEvent OnNoteOff;
+    public MidiFileNoteReader midiFileNoteReader;
 
     private readonly List<string> noteOrder = new() { "A", "A-Sharp", "B", "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp" };
     private bool _midiDeviceConnected;
@@ -67,6 +68,7 @@ public class MidiScript : MonoBehaviour
             }
         }
     }
+
     public bool ListenForDevice()
     {
         // Get all available MIDI devices
@@ -98,7 +100,11 @@ public class MidiScript : MonoBehaviour
                     Debug.Log($"Note On: {note.noteNumber}, Velocity: {velocity}");
                     OnNoteOn?.Invoke(note.noteNumber);
                     AddNoteToPressedList(note.noteNumber);
-                    //ColorKey(note.noteNumber, new Color(0.545f, 0.769f, 0.910f, 0.33f)); // Blue color
+
+                    if (midiFileNoteReader != null)
+                    {
+                        midiFileNoteReader.CheckUserNote(note.noteNumber);
+                    }
                 };
 
                 midiDevice.onWillNoteOff += (note) =>
@@ -106,15 +112,12 @@ public class MidiScript : MonoBehaviour
                     Debug.Log($"Note Off: {note.noteNumber}");
                     OnNoteOff?.Invoke(note.noteNumber);
                     RemoveNoteFromPressedList(note.noteNumber);
-                    //ResetKeyColor(note.noteNumber);
                 };
 
                 Debug.Log("Listeners registered successfully.");
             }
         }
     }
-
-
 
     void AddNoteToPressedList(int noteNumber)
     {

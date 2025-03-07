@@ -10,6 +10,7 @@ public class NewAnchorManager : MonoBehaviour
     public GameObject go;
     public PianoFunctions pianoFunctions;
     public PanelManagerSongList panelManagerSongList;
+    public moveObject moveObjectScript;
 
     private Guid anchorUuid = Guid.Empty;
     private OVRSpatialAnchor anchor;
@@ -35,6 +36,7 @@ public class NewAnchorManager : MonoBehaviour
             await SaveCurrentAnchorAsync();
         }
         pianoFunctions.AdjustCollider();
+        moveObjectScript.LoadOnStart();
     }
 
     /// <summary>
