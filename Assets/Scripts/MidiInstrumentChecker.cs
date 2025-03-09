@@ -5,46 +5,65 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Discovers piano-based channels in a given MIDI file
-/// (skips GM channel 10 (index 9) for drums and anything not in GM piano range 0..7).
+/// Discovers all instrument channels in a given MIDI file
+/// (filters out only the drum channel 9).
 /// </summary>
-public static class MidiInstrumentChecker
+public class MidiInstrumentChecker
 {
-    // Holds channels identified as piano-based
-    private static readonly List<int> pianoChannels = new List<int>();
+    private List<int> instrumentChannels = new List<int>();
 
     /// <summary>
-    /// Reads the MIDI file at 'filePath' and identifies channels
-    /// that have a piano instrument ProgramChange (0..7 in GM).
-    /// Skips channel 9 (drum channel).
+    /// Reads the MIDI file and identifies all instrument channels,
+    /// excluding channel 9 (drums).
     /// </summary>
-    public static void CheckInstruments(MidiFile midiFile)
+    public List<int> CheckInstruments(MidiFile midiFile)
     {
-        // Clear any old data
-        pianoChannels.Clear();
-        Dictionary<int, int> programChanges = GetProgramChanges(midiFile);
+        // Clear previous data
+        instrumentChannels.Clear();
+        HashSet<int> detectedChannels = new HashSet<int>();
 
-        foreach (var kvp in programChanges)
+        Debug.Log(" Scanning MIDI file for channels...");
+
+        foreach (var trackChunk in midiFile.GetTrackChunks())
         {
-            int channel = kvp.Key;        // 0-based channel
-            int programNumber = kvp.Value; // GM instrument program
+            foreach (var midiEvent in trackChunk.Events)
+            {
+                if (midiEvent is ProgramChangeEvent pce)
+                {
+                    int channel = pce.Channel;
+                    if (channel != 9) // Ignore drum channel
+                    {
+                        detectedChannels.Add(channel);
+                    }
+                }
 
-            // Skip channel 9 (drums) and non-piano instruments
-            if (channel == 9)
-                continue;
-
-            // Add to list of piano channels (avoid duplicates)
-            if (!pianoChannels.Contains(channel))
-                pianoChannels.Add(channel);
+                // Also track channels from Note events
+                if (midiEvent is NoteOnEvent noteOn)
+                {
+                    int channel = noteOn.Channel;
+                    if (channel != 9) // Ignore drum channel
+                    {
+                        detectedChannels.Add(channel);
+                    }
+                }
+            }
         }
+
+        // Convert HashSet to List and sort for consistency
+        instrumentChannels = new List<int>(detectedChannels);
+        instrumentChannels.Sort();
+
+        Debug.Log($" Detected channels (excluding drums): {string.Join(", ", instrumentChannels)}");
+
+        return instrumentChannels;
     }
 
     /// <summary>
-    /// Returns a copy of all discovered piano-based channels.
+    /// Returns all non-drum channels found.
     /// </summary>
-    public static List<int> GetPianoChannels()
+    public List<int> GetInstrumentChannels()
     {
-        return new List<int>(pianoChannels);
+        return new List<int>(instrumentChannels);
     }
 
     #region Private Helpers
@@ -66,7 +85,7 @@ public static class MidiInstrumentChecker
                     int channel = pce.Channel;
                     int programNumber = pce.ProgramNumber;
 
-                    // Save the first program change we see for that channel
+                    // Save the first program change per channel
                     if (!programChanges.ContainsKey(channel))
                     {
                         programChanges[channel] = programNumber;
@@ -74,16 +93,13 @@ public static class MidiInstrumentChecker
                 }
             }
         }
-        return programChanges;
-    }
 
-    /// <summary>
-    /// Returns true if the GM program number is in the piano range (0..7).
-    /// </summary>
-    private static bool IsPianoInstrument(int programNumber)
-    {
-        // GM standard: 0..7 are acoustic & electric pianos
-        return programNumber >= 0 && programNumber <= 7;
+        if (programChanges.Count == 0)
+        {
+            Debug.LogWarning(" No ProgramChange events found in the MIDI file!");
+        }
+
+        return programChanges;
     }
 
     #endregion

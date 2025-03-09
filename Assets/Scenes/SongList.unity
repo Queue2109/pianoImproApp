@@ -4600,7 +4600,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1844287184}
         m_TargetAssemblyTypeName: MidiFileNoteReader, Assembly-CSharp
-        m_MethodName: ColorLeftKeys
+        m_MethodName: ColorAccompanimentKeys
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -10716,7 +10716,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1844287184}
         m_TargetAssemblyTypeName: MidiFileNoteReader, Assembly-CSharp
-        m_MethodName: ColorRightKeys
+        m_MethodName: ColorMelodyKeys
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -13373,7 +13373,7 @@ PrefabInstance:
       objectReference: {fileID: 1844287184}
     - target: {fileID: 2157942062418090801, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       propertyPath: _whenSelect.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: StartLeftHandPlayback
+      value: StartAccompanimentPlayback
       objectReference: {fileID: 0}
     - target: {fileID: 2382973440160453153, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       propertyPath: m_AnchorMax.y
@@ -14005,7 +14005,7 @@ PrefabInstance:
       objectReference: {fileID: 1844287184}
     - target: {fileID: 9173349408951614483, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       propertyPath: _whenSelect.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: StartRightHandPlayback
+      value: StartMelodyPlayback
       objectReference: {fileID: 0}
     - target: {fileID: 9173813020911806739, guid: 58bb82f452e1c684c838a50e78a66ca1, type: 3}
       propertyPath: '_interactables.Array.data[0]'

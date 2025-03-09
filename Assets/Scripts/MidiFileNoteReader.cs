@@ -1,312 +1,420 @@
-    using UnityEngine;
-    using UnityEngine.UI;
-    using TMPro;
-    using Melanchall.DryWetMidi.Core;
-    using Melanchall.DryWetMidi.Interaction;
-    using Melanchall.DryWetMidi.Multimedia;
-    using System.Linq;
-    using System.IO;
-    using System;
-    using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+using Melanchall.DryWetMidi.Core;
+using Melanchall.DryWetMidi.Interaction;
+using Melanchall.DryWetMidi.Multimedia;
+using System.Linq;
+using System.IO;
+using System;
+using System.Collections.Generic;
+using Melanchall.DryWetMidi.Common;
 
-    public class MidiFileNoteReader : MonoBehaviour
+public class MidiFileNoteReader : MonoBehaviour
+{
+    // References to other scripts / UI
+    public HttpHandler httpHandler;
+    public PianoFunctions pianoFunctions;
+    public PanelManagerSongList panelManagerSongList;
+    public MidiFileManager midiFileManager;
+    private MidiInstrumentChecker instrumentChecker = new MidiInstrumentChecker();
+    private ScoringLogic scoringManager = new ScoringLogic();
+
+    [Header("UI")]
+    public Slider slider;
+    public GameObject logoPause;
+    public GameObject logoPlay;
+    public TextMeshProUGUI songName;
+    public TextMeshProUGUI timeText;
+    public TextMeshProUGUI speedText;
+
+    private Playback accompanimentPlayback;
+    private Playback melodyPlayback;
+    private OutputDevice outputDevice;
+    private bool isPlaying = false;
+    private PlaybackMode currentMode = PlaybackMode.FullSong;
+    private float playbackSpeed = 1f;
+    private HashSet<int> activeNotes = new HashSet<int>();
+    private List<int> channelSelections = new List<int>();
+    private bool colorAccompaniment = true;
+    private bool colorMelody = true;
+
+    // Filtered MIDI files for each mode
+    private MidiFile accompanimentFile;
+    private MidiFile melodyFile;
+
+    // Times
+    private double totalTime;
+    private MetricTimeSpan totalDuration;
+    private MetricTimeSpan currentTime;
+
+    // For usage in searching the file
+    public string fileName = "";
+    public string author = "";
+
+    private bool isSongReady = false;
+
+    private enum PlaybackMode
     {
-        // References to other scripts / UI
-        public HttpHandler httpHandler;
-        public PianoFunctions pianoFunctions;
-        public PanelManagerSongList panelManagerSongList;
-        public MidiFileManager midiFileManager;
+        FullSong,
+        Accompaniment,
+        Melody
+    }
 
-        [Header("UI")]
-        public Slider slider;
-        public GameObject logoPause;
-        public GameObject logoPlay;
-        public TextMeshProUGUI songName;
-        public TextMeshProUGUI timeText;
-        public TextMeshProUGUI speedText;
+    private List<MidiNoteData> allNotes = new List<MidiNoteData>();   // All notes for scoring
+    private float timingWindow = 0.25f; // ±0.25s window to count note as correct
 
-        // Internal Fields
-        private Playback playback;
-        private OutputDevice outputDevice;
-        private bool isPlaying = false;
-        private PlaybackMode currentMode = PlaybackMode.Full;
-        private float playbackSpeed = 1f;
-        private HashSet<int> activeNotes = new HashSet<int>();
-        private List<int> channelSelections;
-        private bool colorLeftHand = true;
-        private bool colorRightHand = true;
+    private int totalLeft = 0;
+    private int totalRight = 0;
+    private int correctLeft = 0;
+    private int correctRight = 0;
 
-        // Filtered MIDI files for each mode
-        private MidiFile fullFile;
-        private MidiFile leftHandFile;
-        private MidiFile rightHandFile;
+    #region Setup / Lifecycle
 
-        // Times
-        private double totalTime;
-        private MetricTimeSpan totalDuration;
-        private MetricTimeSpan currentTime;
+    void Start()
+    {
+         httpHandler.scoringManager = scoringManager; // Link scoring logic to HTTP handler
+    scoringManager.SetScoringMode(ScoringMode.Melody);
+    }
+    public void Setup()
+    {
+        // Make sure the UI references exist
+        if (!timeText) timeText = GameObject.Find("Time")?.GetComponent<TextMeshProUGUI>();
+        if (!speedText) speedText = GameObject.Find("Speed")?.GetComponent<TextMeshProUGUI>();
+    }
 
-        // For usage in searching the file
-        public string fileName = "";
-        public string author = "";
+    private void Update()
+    {
+        if (!isSongReady) return;
+        if (!isPlaying || melodyPlayback == null || accompanimentPlayback == null) return;
+        if (panelManagerSongList != null && panelManagerSongList.currentPanel != 0) return;
+        if (!slider || !speedText || !timeText) return;
 
-        private bool isSongReady = false;
-
-        private enum PlaybackMode
+        // Now safe to update UI
+        if(currentMode == PlaybackMode.Accompaniment)
         {
-            Full,
-            LeftHand,
-            RightHand
+            currentTime = accompanimentPlayback.GetCurrentTime<MetricTimeSpan>();
+        } else
+        {
+            currentTime = melodyPlayback.GetCurrentTime<MetricTimeSpan>();
         }
+        float progress = (float)(currentTime.TotalSeconds / totalTime);
+        slider.value = progress;
+        timeText.text = FormatTime(currentTime) + " / " + FormatTime(totalDuration);
+    }
 
-        private List<MidiNoteData> allNotes = new List<MidiNoteData>();   // All notes for scoring
-        private float timingWindow = 0.25f; // ±0.25s window to count note as correct
+    private void OnDestroy()
+    {
+        // Ensure resources freed
+        StopPlayback();
+        DisposeDevice();
+    }
+    #endregion
 
-        private int totalLeft = 0;
-        private int totalRight = 0;
-        private int correctLeft = 0;
-        private int correctRight = 0;
+    #region Public Methods For UI
 
-        #region Setup / Lifecycle
+    /// <summary>
+    /// Master function: Start the full/both-hands playback from the beginning,
+    /// ensuring no device conflicts, all UI updates, etc.
+    /// Call this from your UI button to "play the song" normally.
+    /// </summary>
+    public void StartFullSongPlayback()
+    {
+        StartPlayback(PlaybackMode.FullSong);
+    }
 
-        public void Setup()
+    public void StartMelodyPlayback()
+    {
+        StartPlayback(PlaybackMode.Melody);
+    }
+
+    public void StartAccompanimentPlayback()
+    {
+        StartPlayback(PlaybackMode.Accompaniment);
+    }
+
+    public void TogglePlayPause()
+    {
+
+        if (currentMode == PlaybackMode.FullSong)
         {
-            // Make sure the UI references exist
-            if (!timeText) timeText = GameObject.Find("Time")?.GetComponent<TextMeshProUGUI>();
-            if (!speedText) speedText = GameObject.Find("Speed")?.GetComponent<TextMeshProUGUI>();
-        }
-
-        private void Update()
-        {
-            if (!isSongReady) return;
-            if (!isPlaying || playback == null) return;
-            if (panelManagerSongList != null && panelManagerSongList.currentPanel != 0) return;
-            if (!slider || !speedText || !timeText) return;
-
-            // Now safe to update UI
-            currentTime = playback.GetCurrentTime<MetricTimeSpan>();
-            float progress = (float)(currentTime.TotalSeconds / totalTime);
-            slider.value = progress;
-            timeText.text = FormatTime(currentTime) + " / " + FormatTime(totalDuration);
-        }
-
-        private void OnDestroy()
-        {
-            // Ensure resources freed
-            StopPlayback();
-            DisposeDevice();
-        }
-        #endregion
-
-        #region Public Methods For UI
-
-        /// <summary>
-        /// Master function: Start the full/both-hands playback from the beginning,
-        /// ensuring no device conflicts, all UI updates, etc.
-        /// Call this from your UI button to "play the song" normally.
-        /// </summary>
-        public void StartFullSongPlayback()
-        {
-            if (currentMode == PlaybackMode.Full && isSongReady == true)
+            if (accompanimentPlayback?.IsRunning == true)
             {
-                return;
-            }
-            // 1. Stop any old playback
-            StopPlayback();
-
-            // 2. Dispose any old device
-            DisposeDevice();
-
-            // 3. Acquire a new device
-            outputDevice = OutputDevice.GetAll().FirstOrDefault();
-            if (outputDevice == null)
-            {
-                Debug.LogError("No MIDI output device found. Cannot start playback.");
-                return;
-            }
-
-            // 4. Cache or read the MIDI file (and filter if needed)
-            CacheFilteredFiles();
-
-            ParseAllNotes(fullFile);
-
-            // 5. color both hands by default
-            ColorAllKeys();
-
-            // 6. Setup a brand new playback from the fullFile
-            if (fullFile == null)
-            {
-                Debug.LogError("No fullFile loaded. Make sure your fileName is correct.");
-                return;
-            }
-
-            playback = fullFile.GetPlayback(outputDevice);
-            if (playback == null)
-            {
-                Debug.LogError("Could not create playback for the full file.");
-                return;
-            }
-
-            // 7. Subscribe event handlers
-            playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
-            playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
-            playback.Finished += OnPlaybackFinished;
-
-            // 8. Configure
-            playback.Speed = playbackSpeed;
-            currentTime = new MetricTimeSpan(); // start from 0
-            playback.MoveToTime(currentTime);
-
-            // 9. Update totalTime/duration for UI
-            totalTime = playback.GetDuration<MetricTimeSpan>().TotalSeconds;
-            totalDuration = playback.GetDuration<MetricTimeSpan>();
-
-            // 10. Update UI if needed (like show the name, set slider = 0, etc.)
-            if (songName) songName.text = $"{author} {fileName}";
-            slider.value = 0f;
-            UpdateSpeedTextUI();
-
-            // 11. Start playing
-            playback.Start();
-            isSongReady = true;
-            isPlaying = true;
-            currentMode = PlaybackMode.Full;
-            UpdatePlayPauseButtons();
-
-            Debug.Log("Started full/both-hands playback successfully.");
-        }
-
-        public void TogglePlayPause()
-        {
-            if (playback == null)
-            {
-                Debug.LogError("TogglePlayPause called but no playback is present.");
-                return;
-            }
-
-            if (isPlaying)
-            {
-                // Pause
-                playback.Stop();
+                accompanimentPlayback.Stop();
+                melodyPlayback.Stop();
                 isPlaying = false;
-                pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
-                Debug.Log("Playback paused.");
             }
             else
             {
-                // Resume
-                playback.MoveToTime(currentTime);
-                playback.Start();
+                accompanimentPlayback.Start();
+                melodyPlayback.Start();
                 isPlaying = true;
-                Debug.Log("Playback resumed.");
             }
-            UpdatePlayPauseButtons();
         }
-
-        public void Rewind()
+        else if (currentMode == PlaybackMode.Accompaniment)
         {
-            if (playback == null) return;
-
-            // Pause while rewinding
-            if (isPlaying) TogglePlayPause();
-
-            // 10 seconds back
-            double newTimeInSec = Math.Max(0, currentTime.TotalSeconds - 10);
-            currentTime = new MetricTimeSpan(0, 0, (int)newTimeInSec);
-            playback.MoveToTime(currentTime);
-
-            UpdateUI();
-            TogglePlayPause(); // resume
-        }
-
-        public void FastForward()
-        {
-            if (playback == null) return;
-
-            // Pause while fast-forwarding
-            if (isPlaying) TogglePlayPause();
-
-            // 10 seconds forward
-            double newTimeInSec = Math.Min(totalTime, currentTime.TotalSeconds + 10);
-            currentTime = new MetricTimeSpan(0, 0, (int)newTimeInSec);
-            playback.MoveToTime(currentTime);
-
-            UpdateUI();
-            TogglePlayPause(); // resume
-        }
-
-        public void SpeedUp()
-        {
-            playbackSpeed += 0.1f;
-            if (playback != null)
+            if (accompanimentPlayback?.IsRunning == true)
             {
-                playback.Speed = playbackSpeed;
-                playback.MoveToTime(currentTime);
+                accompanimentPlayback.Stop();
+                isPlaying = false;
             }
-            UpdateSpeedTextUI();
-        }
-
-        public void SlowDown()
-        {
-            playbackSpeed = Mathf.Max(0.1f, playbackSpeed - 0.1f);
-            if (playback != null)
+            else
             {
-                playback.Speed = playbackSpeed;
-                playback.MoveToTime(currentTime);
+                accompanimentPlayback.Start();
+                isPlaying = true;
             }
-            UpdateSpeedTextUI();
         }
-
-        public void StopPlayback()
+        else if (currentMode == PlaybackMode.Melody)
         {
-            if (playback != null)
+            if (melodyPlayback?.IsRunning == true)
             {
-                if (playback.IsRunning) playback.Stop();
-                playback.Dispose();
-                playback = null;
+                melodyPlayback.Stop();
+                isPlaying = false;
             }
-            isPlaying = false;
-            isSongReady = false;
-            // Reset any colored notes
-            pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
-            UpdatePlayPauseButtons();
-            Debug.Log("Playback fully stopped.");
+            else
+            {
+                melodyPlayback.Start();
+                isPlaying = true;
+            }
         }
 
-        // (Optional) For a quick "preview" approach
-        public void PlaybackPreview()
-        {
-            // stop anything playing
-            StopPlayback();
-            DisposeDevice();
+        UpdatePlayPauseButtons();
+    }
 
-            // reacquire device
-            outputDevice = OutputDevice.GetAll().FirstOrDefault();
-            if (outputDevice == null)
+    public void Rewind()
+    {
+        // Pause while rewinding
+        if (isPlaying) TogglePlayPause();
+
+        // 10 seconds back
+        double newTimeInSec = Math.Max(0, currentTime.TotalSeconds - 10);
+        currentTime = new MetricTimeSpan(0, 0, (int)newTimeInSec);
+        switch(currentMode)
+        {
+            case PlaybackMode.Accompaniment:
+                accompanimentPlayback.MoveToTime(currentTime);
+                break;
+            case PlaybackMode.Melody:
+                melodyPlayback.MoveToTime(currentTime);
+                break;
+            case PlaybackMode.FullSong:
+                melodyPlayback.MoveToTime(currentTime);
+                accompanimentPlayback.MoveToTime(currentTime);
+                break;
+        }
+
+        UpdateUI();
+        TogglePlayPause(); // resume
+    }
+
+    public void FastForward()
+    {
+        // Pause while fast-forwarding
+        if (isPlaying) TogglePlayPause();
+
+        // 10 seconds forward
+        double newTimeInSec = Math.Min(totalTime, currentTime.TotalSeconds + 10);
+        currentTime = new MetricTimeSpan(0, 0, (int)newTimeInSec);
+        switch (currentMode)
+        {
+            case PlaybackMode.Accompaniment:
+                accompanimentPlayback.MoveToTime(currentTime);
+                break;
+            case PlaybackMode.Melody:
+                melodyPlayback.MoveToTime(currentTime);
+                break;
+            case PlaybackMode.FullSong:
+                melodyPlayback.MoveToTime(currentTime);
+                accompanimentPlayback.MoveToTime(currentTime);
+                break;
+        }
+
+        UpdateUI();
+        TogglePlayPause(); // resume
+    }
+
+    public void SpeedUp()
+    {
+        playbackSpeed += 0.1f;
+        switch (currentMode)
+        {
+            case PlaybackMode.Accompaniment:
+                accompanimentPlayback.Speed = playbackSpeed;
+                accompanimentPlayback.MoveToTime(currentTime);
+                break;
+            case PlaybackMode.Melody:
+                melodyPlayback.Speed = playbackSpeed;
+                melodyPlayback.MoveToTime(currentTime);
+                    break;
+            case PlaybackMode.FullSong:
+                melodyPlayback.Speed = playbackSpeed;
+                melodyPlayback.MoveToTime(currentTime);
+                accompanimentPlayback.Speed = playbackSpeed;
+                accompanimentPlayback.MoveToTime(currentTime);
+                break;
+        }
+
+        UpdateSpeedTextUI();
+    }
+
+    public void SlowDown()
+    {
+        playbackSpeed = Mathf.Max(0.1f, playbackSpeed - 0.1f);
+        switch (currentMode)
+        {
+            case PlaybackMode.Accompaniment:
+                accompanimentPlayback.Speed = playbackSpeed;
+                accompanimentPlayback.MoveToTime(currentTime);
+                break;
+            case PlaybackMode.Melody:
+                melodyPlayback.Speed = playbackSpeed;
+                melodyPlayback.MoveToTime(currentTime);
+                break;
+            case PlaybackMode.FullSong:
+                melodyPlayback.Speed = playbackSpeed;
+                melodyPlayback.MoveToTime(currentTime);
+                accompanimentPlayback.Speed = playbackSpeed;
+                accompanimentPlayback.MoveToTime(currentTime);
+                break;
+        }
+
+        UpdateSpeedTextUI();
+    }
+    private void StartPlayback(PlaybackMode mode)
+    {
+        if (currentMode == mode && isSongReady) return;
+
+        StopPlayback();
+        DisposeDevice();
+
+        outputDevice = OutputDevice.GetAll().FirstOrDefault();
+        if (outputDevice == null)
+        {
+            Debug.LogError("No MIDI output device found. Cannot start playback.");
+            return;
+        }
+
+        CacheFilteredFiles(); // Load Accompaniment & Melody files
+        currentMode = mode;
+
+        if (mode == PlaybackMode.FullSong)
+        {
+            if (accompanimentFile == null || melodyFile == null)
             {
-                Debug.LogError("No MIDI device for preview.");
+                Debug.LogError("Both Accompaniment and Melody files are required for FullSong mode.");
                 return;
             }
 
-            // read file
-            string filePath = FindMidiFile(fileName, Path.Combine(Application.streamingAssetsPath, "MidiFiles"));
-            if (string.IsNullOrEmpty(filePath))
+            accompanimentPlayback = accompanimentFile.GetPlayback(outputDevice);
+            melodyPlayback = melodyFile.GetPlayback(outputDevice);
+
+            // Attach event handlers
+            accompanimentPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
+            accompanimentPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+            melodyPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
+            melodyPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+
+            accompanimentPlayback.Start();
+            melodyPlayback.Start();
+            ColorAllKeys();
+        }
+        else if (mode == PlaybackMode.Accompaniment)
+        {
+            if (accompanimentFile == null)
             {
-                Debug.LogError("Cannot preview. File not found.");
+                Debug.LogError("Accompaniment file not found.");
                 return;
             }
-            var midiFile = MidiFile.Read(filePath);
+            accompanimentPlayback = accompanimentFile.GetPlayback(outputDevice);
+            accompanimentPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
+            accompanimentPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
 
-            // create playback
-            playback = midiFile.GetPlayback(outputDevice);
-            playback.Speed = 1f;
-            playback.Start();
-
-            isPlaying = true;
-            UpdatePlayPauseButtons();
-
-            Debug.Log("Playback preview started.");
+            accompanimentPlayback.Start();
+            ColorAccompanimentKeys();
         }
+        else if (mode == PlaybackMode.Melody)
+        {
+            if (melodyFile == null)
+            {
+                Debug.LogError("Melody file not found.");
+                return;
+            }
+            melodyPlayback = melodyFile.GetPlayback(outputDevice);
+            melodyPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
+            melodyPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+
+            melodyPlayback.Start();
+            ColorMelodyKeys();
+        }
+
+        isPlaying = true;
+        isSongReady = true;
+        totalTime = accompanimentPlayback?.GetDuration<MetricTimeSpan>().TotalSeconds ?? melodyPlayback.GetDuration<MetricTimeSpan>().TotalSeconds;
+        totalDuration = accompanimentPlayback?.GetDuration<MetricTimeSpan>() ?? melodyPlayback.GetDuration<MetricTimeSpan>();
+
+        UpdatePlayPauseButtons();
+        Debug.Log($"Started playback in {mode} mode.");
+    }
+
+
+    public void StopPlayback()
+    {
+        if (accompanimentPlayback != null)
+        {
+            if (accompanimentPlayback.IsRunning) accompanimentPlayback.Stop();
+            accompanimentPlayback.Dispose();
+            accompanimentPlayback = null;
+        }
+
+        if (melodyPlayback != null)
+        {
+            if (melodyPlayback.IsRunning) melodyPlayback.Stop();
+            melodyPlayback.Dispose();
+            melodyPlayback = null;
+        }
+
+        isPlaying = false;
+        isSongReady = false;
+        pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
+        UpdatePlayPauseButtons();
+
+        Debug.Log("Playback fully stopped.");
+    }
+
+    // (Optional) For a quick "preview" approach
+    public void PlaybackPreview()
+    {
+
+        StopPlayback();
+        DisposeDevice();
+
+        outputDevice = OutputDevice.GetAll().FirstOrDefault();
+        if (outputDevice == null)
+        {
+            Debug.LogError("No MIDI output device found. Cannot start playback.");
+            return;
+        }
+
+        CacheFilteredFiles();
+
+        
+        if (accompanimentFile == null || melodyFile == null)
+        {
+            Debug.LogError("Both Accompaniment and Melody files are required for FullSong mode.");
+            return;
+        }
+
+        accompanimentPlayback = accompanimentFile.GetPlayback(outputDevice);
+        melodyPlayback = melodyFile.GetPlayback(outputDevice);
+
+        accompanimentPlayback.Speed = playbackSpeed;
+        melodyPlayback.Speed = playbackSpeed;
+
+        accompanimentPlayback.Start();
+        melodyPlayback.Start();
+
+        Debug.Log("Playback preview started.");
+    }
 
     #endregion
 
@@ -352,401 +460,308 @@
     }
     #endregion
 
-    #region Left / Right Hand
+    #region MIDI Reading / Filtering
 
-    // Example if user wants a "LeftHandOnly" button
-    public void StartLeftHandPlayback()
+    /// <summary>
+    /// Read the main MIDI file from streaming assets.
+    /// Then create leftHandFile, rightHandFile by removing notes.
+    /// Also sets fullFile = the original unfiltered clone.
+    /// </summary>
+    private void CacheFilteredFiles()
+    {
+        string accompanimentPath = FindMidiFile($"Accompaniment{fileName}");
+        string melodyPath = FindMidiFile($"Melody{fileName}");
+
+        if (string.IsNullOrEmpty(accompanimentPath) || string.IsNullOrEmpty(melodyPath))
         {
-
-            if (currentMode == PlaybackMode.LeftHand)
-            {
-                return;
-            }
-
-            StopPlayback();
-            DisposeDevice();
-
-            outputDevice = OutputDevice.GetAll().FirstOrDefault();
-            if (outputDevice == null)
-            {
-                Debug.LogError("No device found for left-hand playback.");
-                return;
-            }
-
-            CacheFilteredFiles(); // ensures leftHandFile is available
-            ColorLeftKeys();
-
-            if (leftHandFile == null)
-            {
-                Debug.LogError("LeftHandFile is null. Possibly filtering failed?");
-                return;
-            }
-
-            playback = leftHandFile.GetPlayback(outputDevice);
-            playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
-            playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
-            playback.Finished += OnPlaybackFinished;
-
-            playback.Speed = playbackSpeed;
-            currentTime = new MetricTimeSpan();
-            playback.MoveToTime(currentTime);
-
-            totalTime = playback.GetDuration<MetricTimeSpan>().TotalSeconds;
-            totalDuration = playback.GetDuration<MetricTimeSpan>();
-            // Optionally set a flag so Update() recognizes we can show time
-            isSongReady = true;
-
-            playback.Start();
-            isPlaying = true;
-            currentMode = PlaybackMode.LeftHand;
-
-            UpdatePlayPauseButtons();
-            Debug.Log("Started left-hand only playback.");
+            Debug.LogError("One or more required MIDI files are missing.");
+            return;
         }
 
-        // Similarly for RightHand
-        public void StartRightHandPlayback()
-        {
-            if (currentMode == PlaybackMode.RightHand)
-            {
-                return;
-            }
 
-            StopPlayback();
-            DisposeDevice();
 
-            outputDevice = OutputDevice.GetAll().FirstOrDefault();
-            if (outputDevice == null)
-            {
-                Debug.LogError("No device found for right-hand playback.");
-                return;
-            }
+        accompanimentFile = MidiFile.Read(accompanimentPath);
+        melodyFile = MidiFile.Read(melodyPath);
 
-            CacheFilteredFiles();
-            ColorRightKeys();
+        ShiftDrumsToCymbal(accompanimentFile);
+        ShiftDrumsToCymbal(melodyFile);
+        channelSelections = instrumentChecker.CheckInstruments(accompanimentFile);
+        channelSelections.AddRange(instrumentChecker.CheckInstruments(melodyFile));
 
-            if (rightHandFile == null)
-            {
-                Debug.LogError("RightHandFile is null. Possibly filtering failed?");
-                return;
-            }
+        Debug.Log($"Piano channels detected: {string.Join(", ", channelSelections)}");
+    }
 
-            playback = rightHandFile.GetPlayback(outputDevice);
-            playback.NotesPlaybackStarted += OnNotesPlaybackStarted;
-            playback.NotesPlaybackFinished += OnNotesPlaybackFinished;
-            playback.Finished += OnPlaybackFinished;
-
-            playback.Speed = playbackSpeed;
-            currentTime = new MetricTimeSpan();
-            playback.MoveToTime(currentTime);
-
-            totalTime = playback.GetDuration<MetricTimeSpan>().TotalSeconds;
-            totalDuration = playback.GetDuration<MetricTimeSpan>();
-
-            totalTime = playback.GetDuration<MetricTimeSpan>().TotalSeconds;
-            totalDuration = playback.GetDuration<MetricTimeSpan>();
-            // Optionally set a flag so Update() recognizes we can show time
-            isSongReady = true;
-
-            playback.Start();
-            isPlaying = true;
-            currentMode = PlaybackMode.RightHand;
-
-            UpdatePlayPauseButtons();
-            Debug.Log("Started right-hand only playback.");
-        }
-
-        #endregion
-
-        #region MIDI Reading / Filtering
-
-        /// <summary>
-        /// Read the main MIDI file from streaming assets.
-        /// Then create leftHandFile, rightHandFile by removing notes.
-        /// Also sets fullFile = the original unfiltered clone.
-        /// </summary>
-        private void CacheFilteredFiles()
-        {
-            string filePath = FindMidiFile(fileName, Path.Combine(Application.streamingAssetsPath, "MidiFiles"));
-            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
-            {
-                Debug.LogError("MIDI file not found: " + filePath);
-                return;
-            }
-            var midiFile = MidiFile.Read(filePath);
-
-            fullFile = midiFile.Clone();
-            leftHandFile = FilterNotes(midiFile, isLeftHand: true);
-            rightHandFile = FilterNotes(midiFile, isLeftHand: false);
-
-            // Optionally, update channelSelections from MidiInstrumentChecker
-            MidiInstrumentChecker.CheckInstruments(fullFile);
-            channelSelections = MidiInstrumentChecker.GetPianoChannels();
-
-            Debug.Log("Filtered left, right, full files, plus updated channelSelections from instrument checker." + channelSelections);
-        }
-
-        private MidiFile FilterNotes(MidiFile source, bool isLeftHand)
-        {
-            var cloned = source.Clone();
-            foreach (var trackChunk in cloned.GetTrackChunks())
-            {
-                var removeEvents = new HashSet<MidiEvent>();
-                foreach (var ev in trackChunk.Events)
-                {
-                    if (ev is NoteOnEvent noteOn)
-                    {
-                        bool keep = isLeftHand
-                                    ? (noteOn.NoteNumber < 60)
-                                    : (noteOn.NoteNumber >= 60);
-
-                        if (!keep)
-                        {
-                            removeEvents.Add(noteOn);
-                            var offEv = trackChunk.Events
-                                .OfType<NoteOffEvent>()
-                                .FirstOrDefault(o => o.NoteNumber == noteOn.NoteNumber
-                                                  && o.Channel == noteOn.Channel);
-                            if (offEv != null) removeEvents.Add(offEv);
-                        }
-                    }
-                }
-
-                foreach (var evToRemove in removeEvents)
-                {
-                    trackChunk.Events.Remove(evToRemove);
-                }
-            }
-            return cloned;
-        }
-
-        public static string FindMidiFile(string fileName, string rootPath)
-        {
-            var files = Directory.GetFiles(rootPath, "*.mid", SearchOption.AllDirectories)
-                .Concat(Directory.GetFiles(rootPath, "*.midi", SearchOption.AllDirectories));
-
-            foreach (var file in files)
-            {
-                if (Path.GetFileNameWithoutExtension(file)
-                    .Equals(fileName, StringComparison.OrdinalIgnoreCase))
-                {
-                    Debug.Log("Found MIDI file: " + file);
-                    return file;
-                }
-            }
-            return null;
-        }
-
-        #endregion
-
-        #region Event Handlers
-
-        private void OnNotesPlaybackStarted(object sender, NotesEventArgs e)
-        {
-            // Callback from DryWetMIDI on the main thread or not, so we use dispatcher.
-            MainThreadDispatcher.Enqueue(() =>
-            {
-                foreach (var note in e.Notes)
-                {
-                    string keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());  
-
-                    // Only color if channel is in the selected set,
-                    // AND it belongs to left or right hand as we prefer.
-                    if (channelSelections.Contains(note.Channel))
-                    {
-                        Debug.Log("Note " + note.NoteName);
-                        // left-hand if note < 60
-                        // right-hand if note >= 60
-                        if ((colorLeftHand && note.NoteNumber < 60) ||
-                            (colorRightHand && note.NoteNumber >= 60))
-                        {
-                            pianoFunctions.ColorKey(keyName, note.NoteNumber < 60);
-                        }
-
-                        if (note.NoteNumber < 60)
-                        {
-                            activeNotes.Add(note.NoteNumber);
-                            IdentifyCurrentChord();
-                        }
-                    }
-                }
-            });
-        }
-
-        private void OnNotesPlaybackFinished(object sender, NotesEventArgs e)
-        {
-            MainThreadDispatcher.Enqueue(() =>
-            {
-                foreach (var note in e.Notes)
-                {
-                    string keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
-
-                    if (channelSelections.Contains(note.Channel))
-                    {
-                        if ((colorLeftHand && note.NoteNumber < 60) ||
-                            (colorRightHand && note.NoteNumber >= 60))
-                        {
-                            pianoFunctions.ResetKeyColor(keyName);
-                        }
-
-                        if (note.NoteNumber < 60)
-                        {
-                            activeNotes.Remove(note.NoteNumber);
-                            IdentifyCurrentChord();
-                        }
-                    }
-                }
-            });
-        }
-
-        private void IdentifyCurrentChord()
-        {
-            // Convert the active notes to a list
-            var currentNotes = activeNotes.ToList();
-            // If you want chord analysis via HttpHandler
-            httpHandler?.getChordName(currentNotes);
-        }
-
-        private void OnPlaybackFinished(object sender, EventArgs e)
-        {
-            MainThreadDispatcher.Enqueue(() =>
-            {
-                Debug.Log("Playback reached the end. Stopping.");
-
-                StopPlayback();
-
-                // calculate accuracy
-                float leftAccuracy = totalLeft == 0 ? 1f : (float)correctLeft / totalLeft;
-                float rightAccuracy = totalRight == 0 ? 1f : (float)correctRight / totalRight;
-                float overallAccuracy = (float)(correctLeft + correctRight) / (totalLeft + totalRight);
-
-                Debug.Log($"Song End. LeftAccuracy={leftAccuracy:P2}, RightAccuracy={rightAccuracy:P2}, Overall={overallAccuracy:P2}");
-
-                string songId = $"{author}-{fileName}";
-                Transform songRow = GameObject.Find(songId)?.transform.Find("StarRow");
-
-                // Star logic
-                // If user got 90% left, star for left
-                // If user got 90% right, star for right
-                // If user got 90% overall, star for both
-                if (leftAccuracy >= 0.90f)
-                    SongProgressManager.Instance.MarkSongCleared(songId, "Left");
-
-                if (rightAccuracy >= 0.90f)
-                    SongProgressManager.Instance.MarkSongCleared(songId, "Right");
-
-                if (overallAccuracy >= 0.90f)
-                    SongProgressManager.Instance.MarkSongCleared(songId, "Both");
-
-                midiFileManager.SetStarColors(songId, songRow);
-            });
-        }
+    private string FindMidiFile(string fileName)
+    {
+        Debug.Log("Path name is" + fileName);
+        string rootPath = Path.Combine(Application.streamingAssetsPath, "MidiFiles");
+        Debug.Log(Directory.GetFiles(rootPath, $"{fileName}.midi", SearchOption.AllDirectories)
+            .FirstOrDefault());
+        return Directory.GetFiles(rootPath, $"{fileName}.midi", SearchOption.AllDirectories)
+            .FirstOrDefault() ?? Directory.GetFiles(rootPath, $"{fileName}.mid", SearchOption.AllDirectories).FirstOrDefault();
+    }
 
     #endregion
 
-    #region Public Scoring Method
-    /// <summary>
-    /// Called by MidiScript whenever user presses a note.
-    /// We check if it matches an expected note in a timeWindow.
-    /// </summary>
-    public void CheckUserNote(int noteNumber)
+    #region Event Handlers
+
+    private void OnNotesPlaybackStarted(object sender, NotesEventArgs e)
     {
-        if (!isPlaying || playback == null || !isSongReady) return;
-
-        var metric = playback.GetCurrentTime<MetricTimeSpan>();
-        double currentSec = metric.TotalMicroseconds / 1_000_000.0;
-
-        // Find a matching note in allNotes that is not yet played
-        // and is within ±timingWindow, same noteNumber
-        MidiNoteData bestCandidate = null;
-        double bestDiff = double.MaxValue;
-
-        foreach (var noteData in allNotes)
+        MainThreadDispatcher.Enqueue(() =>
         {
-            if (noteData.WasPlayed) continue;
-            if (noteData.NoteNumber != noteNumber) continue;
-
-            double diff = Math.Abs(noteData.StartTimeSeconds - currentSec);
-            if (diff <= timingWindow && diff < bestDiff)
+            foreach (var note in e.Notes)
             {
-                bestCandidate = noteData;
-                bestDiff = diff;
+                string keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
+                int channel = note.Channel;
+                int noteNumber = note.NoteNumber;
+
+                Debug.Log($" Note played on channel {channel}, note: {noteNumber} (Octave {note.Octave})");
+
+                bool isAccompanimentNote = accompanimentPlayback != null && sender == accompanimentPlayback;
+                bool isMelodyNote = melodyPlayback != null && sender == melodyPlayback;
+
+                if(channel == 9)
+                {
+                    noteNumber = 51;
+                }
+
+                if (channelSelections.Contains(channel))
+                {
+                    if (isAccompanimentNote)
+                    {
+                        activeNotes.Add(note.NoteNumber);
+
+                        // ?? Keep only the last 5 notes
+                        if (activeNotes.Count > 5)
+                        {
+                            activeNotes = activeNotes.Skip(activeNotes.Count - 5).ToHashSet();
+                        }
+                    }
+
+                    if (isAccompanimentNote && colorAccompaniment)
+                    {
+                        pianoFunctions.ColorKey(keyName, true);
+                    }
+
+                    if (isMelodyNote && colorMelody)
+                    {
+                        pianoFunctions.ColorKey(keyName, false);
+                    }
+
+                    IdentifyCurrentChord();
+                }
+            }
+        });
+    }
+
+    private void ShiftDrumsToCymbal(MidiFile midiFile)
+    {
+        foreach (var trackChunk in midiFile.GetTrackChunks())
+        {
+            foreach (var midiEvent in trackChunk.Events)
+            {
+                if (midiEvent is NoteOnEvent noteOn && noteOn.Channel == 9)
+                {
+                    noteOn.NoteNumber = (SevenBitNumber)51; // Remap to Crash Cymbal 1
+                    Debug.Log($"Remapped drum note {noteOn.NoteNumber} on channel 9 to Cymbal (MIDI 51)");
+                }
             }
         }
+    }
 
-        if (bestCandidate != null)
+    private void OnNotesPlaybackFinished(object sender, NotesEventArgs e)
+    {
+        MainThreadDispatcher.Enqueue(() =>
         {
-            // Mark as correctly played
-            bestCandidate.WasPlayed = true;
-            if (bestCandidate.IsLeftHand) correctLeft++;
-            else correctRight++;
 
-            Debug.Log($"Correct note={noteNumber}, diff={bestDiff:F2}s (Left? {bestCandidate.IsLeftHand})");
+            foreach (var note in e.Notes)
+            {
+                string keyName = pianoFunctions.NoteNameToKeyName(note.NoteName.ToString(), note.Octave.ToString());
+                int channel = note.Channel;
+
+                bool isAccompanimentNote = accompanimentPlayback != null && sender == accompanimentPlayback;
+                bool isMelodyNote = melodyPlayback != null && sender == melodyPlayback;
+
+                // Only reset if it belongs to a piano instrument
+                if (channelSelections.Contains(channel))
+                {
+
+                    if (isAccompanimentNote)
+                    {
+                        activeNotes.Remove(note.NoteNumber);
+                    }
+
+                    if (isAccompanimentNote && colorAccompaniment)
+                    {
+                        pianoFunctions.ResetKeyColor(keyName);
+                    }
+
+                    if (isMelodyNote && colorMelody)
+                    {
+                        pianoFunctions.ResetKeyColor(keyName);
+                    }
+
+                    IdentifyCurrentChord();
+                }
+            }
+        });
+    }
+
+    public void IdentifyCurrentChord()
+    {
+        var currentNotes = activeNotes.OrderByDescending(n => n).Take(5).ToList();
+
+        httpHandler?.getChordName(currentNotes);
+    }
+
+    private void OnPlaybackFinished(object sender, EventArgs e)
+    {
+        MainThreadDispatcher.Enqueue(() =>
+        {
+            Debug.Log("Playback reached the end. Stopping.");
+
+            StopPlayback();
+
+            // calculate accuracy
+            float leftAccuracy = totalLeft == 0 ? 1f : (float)correctLeft / totalLeft;
+            float rightAccuracy = totalRight == 0 ? 1f : (float)correctRight / totalRight;
+            float overallAccuracy = (float)(correctLeft + correctRight) / (totalLeft + totalRight);
+
+            Debug.Log($"Song End. LeftAccuracy={leftAccuracy:P2}, RightAccuracy={rightAccuracy:P2}, Overall={overallAccuracy:P2}");
+
+            string songId = $"{author}-{fileName}";
+            Transform songRow = GameObject.Find(songId)?.transform.Find("StarRow");
+
+            // Star logic
+            // If user got 90% left, star for left
+            // If user got 90% right, star for right
+            // If user got 90% overall, star for both
+            if (leftAccuracy >= 0.90f)
+                SongProgressManager.Instance.MarkSongCleared(songId, "Accompaniment");
+
+            if (rightAccuracy >= 0.90f)
+                SongProgressManager.Instance.MarkSongCleared(songId, "Melody");
+
+            if (overallAccuracy >= 0.90f)
+                SongProgressManager.Instance.MarkSongCleared(songId, "Full");
+
+            midiFileManager.SetStarColors(songId, songRow);
+        });
+    }
+
+    #endregion
+
+
+    #region Utilities
+    private void UpdateUI()
+    {
+        pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
+        // Recalc progress
+        float progress = (float)(currentTime.TotalSeconds / totalTime);
+        slider.value = progress;
+
+        if (timeText)
+            timeText.text = FormatTime(currentTime) + " / " + FormatTime(totalDuration);
+    }
+
+    private void UpdatePlayPauseButtons()
+    {
+        if (!logoPlay || !logoPause) return;
+
+        logoPlay.SetActive(!isPlaying);
+        logoPause.SetActive(isPlaying);
+    }
+
+    private void UpdateSpeedTextUI()
+    {
+        if (speedText != null)
+            speedText.text = $"Speed: {playbackSpeed:0.0}x";
+    }
+
+    private string FormatTime(MetricTimeSpan mts)
+    {
+        return $"{mts.Minutes:D2}:{mts.Seconds:D2}";
+    }
+
+    public void ColorAccompanimentKeys()
+    {
+        colorAccompaniment = true;
+        colorMelody = false;
+        pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
+        ReplayActiveNotes();
+    }
+    public void ColorMelodyKeys()
+    {
+        colorAccompaniment = false;
+        colorMelody = true;
+        pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
+        ReplayActiveNotes();
+    }
+    public void ColorAllKeys() 
+    {
+        colorAccompaniment = true;
+        colorMelody = true;
+        pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
+        ReplayActiveNotes();
+    }
+
+    private void ReplayActiveNotes()
+    {
+        foreach (var noteNumber in activeNotes)
+        {
+            string keyName = pianoFunctions.NoteNameToKeyName(noteNumber.ToString(), ""); // Adjust if octave is needed
+            if (colorAccompaniment)
+            {
+                pianoFunctions.ColorKey(keyName, true);
+            }
+            if (colorMelody)
+            {
+                pianoFunctions.ColorKey(keyName, false);
+            }
         }
-        else
+    }
+
+    private void DisposeDevice()
+    {
+        if (outputDevice != null)
         {
-            // Could log or ignore
-            Debug.Log($"User played note={noteNumber} but no match found. Time={currentSec:F2}s");
+            outputDevice.Dispose();
+            outputDevice = null;
+            Debug.Log("Disposed old output device to avoid conflicts.");
         }
     }
     #endregion
 
-    #region Utilities
-    private void UpdateUI()
-        {
-            pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
-            // Recalc progress
-            float progress = (float)(currentTime.TotalSeconds / totalTime);
-            slider.value = progress;
+    #region Public Scoring Method
+    public void SetScoringMode(ScoringMode mode)
+    {
+        scoringManager.SetScoringMode(mode);
+    }
 
-            if (timeText)
-                timeText.text = FormatTime(currentTime) + " / " + FormatTime(totalDuration);
+    public void LoadNotesForScoring()
+    {
+        scoringManager.LoadNotes(allNotes);
+    }
+    public void CheckUserNote(int noteNumber)
+    {
+        if (!isPlaying || !isSongReady) return;
+
+        double currentSec = 0;
+        if (currentMode == PlaybackMode.FullSong)
+        {
+            double accomTime = accompanimentPlayback?.GetCurrentTime<MetricTimeSpan>().TotalMicroseconds / 1_000_000.0 ?? 0;
+            double melodyTime = melodyPlayback?.GetCurrentTime<MetricTimeSpan>().TotalMicroseconds / 1_000_000.0 ?? 0;
+            currentSec = Math.Max(accomTime, melodyTime);
         }
-
-        private void UpdatePlayPauseButtons()
+        else if (melodyPlayback != null)
         {
-            if (!logoPlay || !logoPause) return;
-
-            logoPlay.SetActive(!isPlaying);
-            logoPause.SetActive(isPlaying);
-        }
-
-        private void UpdateSpeedTextUI()
-        {
-            if (speedText != null)
-                speedText.text = $"Speed: {playbackSpeed:0.0}x";
-        }
-
-        private string FormatTime(MetricTimeSpan mts)
-        {
-            return $"{mts.Minutes:D2}:{mts.Seconds:D2}";
+            currentSec = melodyPlayback.GetCurrentTime<MetricTimeSpan>().TotalMicroseconds / 1_000_000.0;
         }
 
-        public void ColorLeftKeys()
-        {
-            colorLeftHand = true;
-            colorRightHand = false;
-        }
-        public void ColorRightKeys()
-        {
-            colorLeftHand = false;
-            colorRightHand = true;
-        }
-        public void ColorAllKeys()
-        {
-            colorLeftHand = true;
-            colorRightHand = true;
-        }
+        // Instead of doing the scoring here, just delegate to ScoringLogic
+        scoringManager.CheckUserNote(noteNumber, currentSec);
+    }
 
-        private void DisposeDevice()
-        {
-            if (outputDevice != null)
-            {
-                outputDevice.Dispose();
-                outputDevice = null;
-                Debug.Log("Disposed old output device to avoid conflicts.");
-            }
-        }
     #endregion
 }
 public class MidiNoteData

@@ -92,13 +92,13 @@ public class SongProgressManager : MonoBehaviour
         // 2. Update the relevant hand mode flag(s)
         switch (handMode)
         {
-            case "Left":
+            case "Accompaniment":
                 progress.leftHandCleared = true;
                 break;
-            case "Right":
+            case "Melody":
                 progress.rightHandCleared = true;
                 break;
-            case "Both":
+            case "Full":
                 progress.bothHandsCleared = true;
                 break;
             default:

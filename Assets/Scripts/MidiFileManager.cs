@@ -14,41 +14,39 @@ public class MidiFileManager : MonoBehaviour
     public GameObject songContainerPrefab; // A UI prefab containing NoteImage, SongAuthor, and SongTitle
     public Transform contentPanel; // The content panel of the scroll view to hold song containers
     public MidiFileNoteReader midiPlayer; // Reference to the MidiPlayer component
-    string rootPath = Path.Combine(Application.streamingAssetsPath, "MidiFiles");
+    private string rootPath = Path.Combine(Application.streamingAssetsPath, "MidiFiles");
 
-    private List<GameObject> songContainers = new List<GameObject>(); // Store all song 
+    private List<GameObject> songContainers = new List<GameObject>(); // Store all song containers
+    private Dictionary<string, (string accompaniment, string melody)> songFilePaths = new Dictionary<string, (string, string)>();
 
     public Color normalColor;
     public Color highlightColor;
-
     public Color yellowStar;
     public Color grayStar;
 
     private Coroutine blinkRoutine;
-    private string lastClickedSong;
-
-    // Keep track of the last selected container’s Image, to revert color when a new container is clicked
+    private string lastClickedSongKey; // Key format: "Author-SongName"
     private Image lastSelectedContainerImage;
     public Color blinkColor;
 
-
     public async void LogMidiFilesAsync()
     {
-        Debug.Log("In the Log Midi files function");
+        Debug.Log("Scanning MIDI files...");
+
         if (Directory.Exists(rootPath))
         {
-            var midiFiles = await Task.Run(() =>
+            var songFolders = await Task.Run(() =>
             {
-                var files = new List<string>();
-                files.AddRange(Directory.GetFiles(rootPath, "*.midi", SearchOption.AllDirectories));
-                files.AddRange(Directory.GetFiles(rootPath, "*.mid", SearchOption.AllDirectories));
-                return files;
+                return Directory.GetDirectories(rootPath, "*", SearchOption.AllDirectories)
+                    .SelectMany(authorFolder => Directory.GetDirectories(authorFolder))
+                    .ToList();
             });
 
-            foreach (var midiFile in midiFiles)
+            foreach (var songFolder in songFolders)
             {
-                CreateSongContainer(midiFile);
+                DetectMidiFilesInSongFolder(songFolder);
             }
+
             LoadLastPlayedSong();
         }
         else
@@ -57,17 +55,35 @@ public class MidiFileManager : MonoBehaviour
         }
     }
 
-    private void CreateSongContainer(string midiFile)
+    private void DetectMidiFilesInSongFolder(string songFolder)
     {
-        string author = ExtractAuthorFromPath(midiFile, rootPath);
-        string fileName = Path.GetFileNameWithoutExtension(midiFile);
+        string author = ExtractAuthorFromPath(songFolder);
+        string songName = ExtractSongFromPath(songFolder);
+        string songKey = $"{author}-{songName}";
 
+        string accompanimentPath = Directory.GetFiles(songFolder, $"Accompaniment{songName}.midi", SearchOption.TopDirectoryOnly).FirstOrDefault()
+                                   ?? Directory.GetFiles(songFolder, $"Accompaniment{songName}.mid", SearchOption.TopDirectoryOnly).FirstOrDefault();
+        string melodyPath = Directory.GetFiles(songFolder, $"Melody{songName}.midi", SearchOption.TopDirectoryOnly).FirstOrDefault()
+                            ?? Directory.GetFiles(songFolder, $"Melody{songName}.mid", SearchOption.TopDirectoryOnly).FirstOrDefault();
+
+        if (accompanimentPath == null || melodyPath == null)
+        {
+            Debug.LogWarning($"Missing one or more MIDI files in {songFolder}. Skipping...");
+            return;
+        }
+
+        songFilePaths[songKey] = (accompanimentPath, melodyPath);
+        CreateSongContainer(songKey, author, songName);
+    }
+
+    private void CreateSongContainer(string songKey, string author, string songName)
+    {
         GameObject container = Instantiate(songContainerPrefab, contentPanel);
         container.SetActive(true);
-        container.name = $"{author}-{fileName}";
+        container.name = songKey;
 
         container.transform.Find("Image/SongAuthor").GetComponent<TextMeshProUGUI>().text = author != "Unknown" ? author : string.Empty;
-        container.transform.Find("Image/SongTitle").GetComponent<TextMeshProUGUI>().text = fileName;
+        container.transform.Find("Image/SongTitle").GetComponent<TextMeshProUGUI>().text = songName;
 
         SetStarColors(container.name, container.transform.Find("StarRow"));
 
@@ -77,8 +93,8 @@ public class MidiFileManager : MonoBehaviour
             button.onClick.AddListener(() =>
             {
                 OnContainerClicked(container);
-                PlaySong(fileName, author);
-                lastClickedSong = midiFile;
+                lastClickedSongKey = songKey;
+                PlaySong(songName, author);
             });
         }
 
@@ -87,62 +103,59 @@ public class MidiFileManager : MonoBehaviour
 
     public void SetStarColors(string songId, Transform songRow)
     {
-        Debug.Log("Song id is in midifilemanager " + songId);
+        Debug.Log("Setting stars for song: " + songId);
 
         bool leftCleared = SongProgressManager.Instance.IsSongCleared(songId, "Left");
         bool rightCleared = SongProgressManager.Instance.IsSongCleared(songId, "Right");
         bool bothCleared = SongProgressManager.Instance.IsSongCleared(songId, "Both");
+
         Image[] images = songRow.GetComponentsInChildren<Image>();
 
-        // Assuming images are only Star1, Star2, Star3 in the correct order
-        // or you can find by name:
         Image leftStar = images.FirstOrDefault(i => i.name == "Star1");
         Image middleStar = images.FirstOrDefault(i => i.name == "Star2");
         Image rightStar = images.FirstOrDefault(i => i.name == "Star3");
 
-        // Left star if left-hand mode is cleared
-        leftStar.color = leftCleared ? yellowStar : grayStar;
-
-        // Middle star if both-hands mode is cleared
-        middleStar.color = bothCleared ? yellowStar : grayStar;
-
-        // Right star if right-hand mode is cleared
-        rightStar.color = rightCleared ? yellowStar : grayStar;
+        if (leftStar) leftStar.color = leftCleared ? yellowStar : grayStar;
+        if (middleStar) middleStar.color = bothCleared ? yellowStar : grayStar;
+        if (rightStar) rightStar.color = rightCleared ? yellowStar : grayStar;
     }
 
     public void SaveLastPlayedSongToPlayerPrefs()
     {
-        PlayerPrefs.SetString("LastPlayedSong", lastClickedSong);
+        PlayerPrefs.SetString("LastPlayedSong", lastClickedSongKey);
     }
 
     private void LoadLastPlayedSong()
     {
-        string file = PlayerPrefs.GetString("LastPlayedSong");
-        if(file == null) {
+        string lastPlayedKey = PlayerPrefs.GetString("LastPlayedSong", null);
+        if (string.IsNullOrEmpty(lastPlayedKey) || !songFilePaths.ContainsKey(lastPlayedKey))
+        {
             return;
         }
-        lastPlayedSongGameObject.SetActive(true);   
-        string fileName = Path.GetFileNameWithoutExtension(file);
-        string author = ExtractAuthorFromPath(file, rootPath);
 
-        bool isRightCleared = SongProgressManager.Instance.IsSongCleared($"{author}-{fileName}", "Right");
-        if (isRightCleared)
-        {
-            // Show a check mark, or color the UI element differently
-        }
+        lastPlayedSongGameObject.SetActive(true);
+        string[] parts = lastPlayedKey.Split('-');
+        if (parts.Length < 2) return;
+
+        string author = parts[0];
+        string songName = parts[1];
+
         lastPlayedSongContainer.transform.Find("Image/SongAuthor").GetComponent<TextMeshProUGUI>().text = author != "Unknown" ? author : string.Empty;
-        lastPlayedSongContainer.transform.Find("Image/SongTitle").GetComponent<TextMeshProUGUI>().text = fileName;
-        lastPlayedSongContainer.name = $"{author}-{fileName}";
+        lastPlayedSongContainer.transform.Find("Image/SongTitle").GetComponent<TextMeshProUGUI>().text = songName;
+        lastPlayedSongContainer.name = lastPlayedKey;
+
         Button button = lastPlayedSongContainer.GetComponent<Button>();
         if (button != null)
         {
             button.onClick.AddListener(() =>
             {
                 OnContainerClicked(lastPlayedSongContainer);
-                PlaySong(fileName, author);
+                lastClickedSongKey = lastPlayedKey;
+                PlaySong(songName, author);
             });
         }
-        SetStarColors($"{author}-{fileName}", lastPlayedSongContainer.transform.Find("StarRow"));
+
+        SetStarColors(lastPlayedKey, lastPlayedSongContainer.transform.Find("StarRow"));
     }
 
     public void OnStartPlayingClicked()
@@ -165,9 +178,8 @@ public class MidiFileManager : MonoBehaviour
             newImage.color = highlightColor;
             lastSelectedContainerImage = newImage;
         }
-        GameObject.Find("CurrentlyPlayingText").GetComponent<TextMeshProUGUI>().text = "Playing preview. Press the button to show all features";
-        GameObject.Find("StartPlayingButton").gameObject.SetActive(true);
         blinkRoutine = StartCoroutine(BlinkColorRoutine(GameObject.Find("StartPlayingButton").GetComponent<Image>()));
+
     }
 
     private System.Collections.IEnumerator BlinkColorRoutine(Image targetImage)
@@ -184,18 +196,18 @@ public class MidiFileManager : MonoBehaviour
         }
     }
 
-    private string ExtractAuthorFromPath(string filePath, string rootPath)
+    private string ExtractAuthorFromPath(string folderPath)
     {
-        string relativePath = filePath.Replace(rootPath, string.Empty).Trim(Path.DirectorySeparatorChar);
+        string relativePath = folderPath.Replace(rootPath, "").Trim(Path.DirectorySeparatorChar);
         string[] pathParts = relativePath.Split(Path.DirectorySeparatorChar);
+        return (pathParts.Length >= 2) ? pathParts[0] : "Unknown";
+    }
 
-        foreach (var part in pathParts)
-        {
-            Debug.Log("Part is " + part);
-            return part;
-        }
-
-        return "Unknown";
+    private string ExtractSongFromPath(string folderPath)
+    {
+        string relativePath = folderPath.Replace(rootPath, "").Trim(Path.DirectorySeparatorChar);
+        string[] pathParts = relativePath.Split(Path.DirectorySeparatorChar);
+        return (pathParts.Length >= 2) ? pathParts[1] : "Unknown";
     }
 
     public void PlaySong(string fileName, string author)

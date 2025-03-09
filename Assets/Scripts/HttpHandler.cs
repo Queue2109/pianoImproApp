@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using UnityEngine;
@@ -14,7 +14,9 @@ public class HttpHandler : MonoBehaviour
 
     string url = "http://127.0.0.1:5000/analyze";
     public TextMeshProUGUI text;
+    public int currentChordBaseNote = 0;
     Dictionary<string, string> chordDictionary;
+    public ScoringLogic scoringManager;
     void Start()
     {
         chordDictionary = new Dictionary<string, string>
@@ -71,12 +73,10 @@ public class HttpHandler : MonoBehaviour
     IEnumerator PostRequest(List<int> notes)
     {
         string notesToJson = JsonUtility.ToJson(new NotesData { notes = notes.ToArray() });
-       // Debug.Log(notesToJson);
 
         using UnityWebRequest webRequest = new UnityWebRequest(url, "POST");
         webRequest.SetRequestHeader("Content-Type", "application/json");
         byte[] bytes = Encoding.UTF8.GetBytes(notesToJson);
-      //  Debug.Log(bytes); 
         webRequest.uploadHandler = new UploadHandlerRaw(bytes);
         webRequest.downloadHandler = new DownloadHandlerBuffer();
         yield return webRequest.SendWebRequest();
@@ -88,16 +88,55 @@ public class HttpHandler : MonoBehaviour
         else
         {
             string responseText = webRequest.downloadHandler.text;
-
             var responseData = JsonUtility.FromJson<ResponseData>(responseText);
-            if(chordDictionary.ContainsKey(responseData.result)) {
-                text.text = responseData.rootNote + chordDictionary[responseData.result];
+
+            if (chordDictionary.ContainsKey(responseData.result))
+            {
+                string chordSymbol = chordDictionary[responseData.result];
+
+                // Ensure proper formatting for minor chords
+                if (chordSymbol == "m")
+                {
+                    text.text = responseData.rootNote + "m";  // "Em" instead of "E-"
+                }
+                else
+                {
+                    text.text = responseData.rootNote + chordSymbol;
+                }
+
+                currentChordBaseNote = ConvertNoteToMidi(responseData.rootNote);
+            }
+            else
+            {
+                Debug.LogWarning($"Unknown chord: {responseData.rootNote} {responseData.result}");
             }
 
-            Debug.Log("Result: " + responseData.result);
 
+
+            Debug.Log("Detected Chord: " + responseData.rootNote + " " + responseData.result);
         }
+    }
 
+    private int ConvertNoteToMidi(string note)
+    {
+        Dictionary<string, int> noteToMidi = new Dictionary<string, int>
+    {
+        {"C", 0}, {"C#", 1}, {"D", 2}, {"D#", 3}, {"E", 4},
+        {"F", 5}, {"F#", 6}, {"G", 7}, {"G#", 8}, {"A", 9},
+        {"A#", 10}, {"B", 11}
+    };
+
+        note = note.ToUpper(); // Ensure case consistency
+
+        if (noteToMidi.ContainsKey(note))
+        {
+            return noteToMidi[note];
+        }
+        else
+        {
+            Debug.LogError($"Unknown note: {note}");
+            return -1;  // Error case
+        }
     }
 
     [System.Serializable]
