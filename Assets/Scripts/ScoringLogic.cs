@@ -79,10 +79,35 @@ public class ScoringLogic
     };
     }
 
-    public void SetCurrentChord(int rootNote, bool isMajor)
+    public void SetCurrentChord(List<int> notes)
     {
-        currentChordRoot = rootNote;
-        isCurrentChordMajor = isMajor;
+        if (notes == null || notes.Count < 3)
+        {
+            Debug.LogWarning("SetCurrentChord requires at least 3 notes to determine the chord type.");
+            return;
+        }
+
+        notes.Sort(); // Ensure ascending order
+        currentChordRoot = notes[0];
+
+        int interval1 = notes[1] - notes[0];
+        int interval2 = notes[2] - notes[0];
+
+        // Detect major or minor based on intervals
+        if (interval1 == 4 && interval2 == 7)
+        {
+            isCurrentChordMajor = true;
+        }
+        else if (interval1 == 3 && interval2 == 7)
+        {
+            isCurrentChordMajor = false;
+        }
+        else
+        {
+            Debug.LogWarning("Chord type could not be confidently determined.");
+            isCurrentChordMajor = true; // fallback default
+        }
+
         Debug.Log($"🎵 New Chord Set: {currentChordRoot} {(isCurrentChordMajor ? "Major" : "Minor")}");
     }
 

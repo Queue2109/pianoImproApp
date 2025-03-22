@@ -24,9 +24,13 @@ public class MidiFileNoteReader : MonoBehaviour
     public Slider slider;
     public GameObject logoPause;
     public GameObject logoPlay;
-    public TextMeshProUGUI songName;
+    public TextMeshPro songName;
     public TextMeshProUGUI timeText;
     public TextMeshProUGUI speedText;
+    public TextMeshPro playAccompanimentButtonText;
+    public TextMeshPro playMelodyButtonText;
+    public TextMeshPro colorAccompanimentKeysButtonText;
+    public TextMeshPro colorMelodyKeysButtonText;
 
     private Playback accompanimentPlayback;
     private Playback melodyPlayback;
@@ -53,6 +57,7 @@ public class MidiFileNoteReader : MonoBehaviour
     public string author = "";
 
     private bool isSongReady = false;
+    private int timesPlayed = 0;
 
     private enum PlaybackMode
     {
@@ -74,7 +79,7 @@ public class MidiFileNoteReader : MonoBehaviour
     void Start()
     {
          httpHandler.scoringManager = scoringManager; // Link scoring logic to HTTP handler
-    scoringManager.SetScoringMode(ScoringMode.Melody);
+        scoringManager.SetScoringMode(ScoringMode.Melody);
     }
     public void Setup()
     {
@@ -113,24 +118,33 @@ public class MidiFileNoteReader : MonoBehaviour
 
     #region Public Methods For UI
 
-    /// <summary>
-    /// Master function: Start the full/both-hands playback from the beginning,
-    /// ensuring no device conflicts, all UI updates, etc.
-    /// Call this from your UI button to "play the song" normally.
-    /// </summary>
     public void StartFullSongPlayback()
     {
         StartPlayback(PlaybackMode.FullSong);
     }
-
     public void StartMelodyPlayback()
     {
-        StartPlayback(PlaybackMode.Melody);
+        if (currentMode == PlaybackMode.FullSong)
+        {
+            StartPlayback(PlaybackMode.Accompaniment);
+
+        }
+        else if (currentMode == PlaybackMode.Accompaniment)
+        {
+            StartPlayback(PlaybackMode.FullSong);
+        }
     }
 
     public void StartAccompanimentPlayback()
     {
-        StartPlayback(PlaybackMode.Accompaniment);
+        if(currentMode == PlaybackMode.FullSong)
+        {
+            StartPlayback(PlaybackMode.Melody);
+
+        } else if(currentMode == PlaybackMode.Melody)
+        {
+            StartPlayback(PlaybackMode.FullSong);
+        }
     }
 
     public void TogglePlayPause()
@@ -282,8 +296,7 @@ public class MidiFileNoteReader : MonoBehaviour
     }
     private void StartPlayback(PlaybackMode mode)
     {
-        if (currentMode == mode && isSongReady) return;
-
+        Debug.Log("In the startPlayback");
         StopPlayback();
         DisposeDevice();
 
@@ -294,7 +307,6 @@ public class MidiFileNoteReader : MonoBehaviour
             return;
         }
 
-        CacheFilteredFiles(); // Load Accompaniment & Melody files
         currentMode = mode;
 
         if (mode == PlaybackMode.FullSong)
@@ -313,6 +325,10 @@ public class MidiFileNoteReader : MonoBehaviour
             accompanimentPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
             melodyPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
             melodyPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+            AttachPlaybackCycleEvents();
+
+            playAccompanimentButtonText.text = "Playing accompaniment: ON";
+            playMelodyButtonText.text = "Playing melody: ON";
 
             accompanimentPlayback.Start();
             melodyPlayback.Start();
@@ -328,6 +344,10 @@ public class MidiFileNoteReader : MonoBehaviour
             accompanimentPlayback = accompanimentFile.GetPlayback(outputDevice);
             accompanimentPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
             accompanimentPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+            AttachPlaybackCycleEvents();
+
+            playAccompanimentButtonText.text = "Playing accompaniment: ON";
+            playMelodyButtonText.text = "Playing melody: OFF";
 
             accompanimentPlayback.Start();
             ColorAccompanimentKeys();
@@ -342,6 +362,10 @@ public class MidiFileNoteReader : MonoBehaviour
             melodyPlayback = melodyFile.GetPlayback(outputDevice);
             melodyPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
             melodyPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+            AttachPlaybackCycleEvents();
+
+            playAccompanimentButtonText.text = "Playing accompaniment: OFF";
+            playMelodyButtonText.text = "Playing melody: ON";
 
             melodyPlayback.Start();
             ColorMelodyKeys();
@@ -352,7 +376,9 @@ public class MidiFileNoteReader : MonoBehaviour
         totalTime = accompanimentPlayback?.GetDuration<MetricTimeSpan>().TotalSeconds ?? melodyPlayback.GetDuration<MetricTimeSpan>().TotalSeconds;
         totalDuration = accompanimentPlayback?.GetDuration<MetricTimeSpan>() ?? melodyPlayback.GetDuration<MetricTimeSpan>();
 
+        pianoFunctions.ResetAllKeysToDefaultColor();
         UpdatePlayPauseButtons();
+        UpdateUI();
         Debug.Log($"Started playback in {mode} mode.");
     }
 
@@ -384,7 +410,7 @@ public class MidiFileNoteReader : MonoBehaviour
     // (Optional) For a quick "preview" approach
     public void PlaybackPreview()
     {
-
+        timesPlayed = 1;
         StopPlayback();
         DisposeDevice();
 
@@ -410,11 +436,27 @@ public class MidiFileNoteReader : MonoBehaviour
         accompanimentPlayback.Speed = playbackSpeed;
         melodyPlayback.Speed = playbackSpeed;
 
+        ParseAllNotes(accompanimentFile, melodyFile);
+
         accompanimentPlayback.Start();
         melodyPlayback.Start();
 
+
         Debug.Log("Playback preview started.");
     }
+
+    public void AttachPlaybackCycleEvents()
+    {
+        // Attach event so we know when the playback ends
+        if (accompanimentPlayback != null)
+            accompanimentPlayback.Finished += OnPlaybackFinishedCycle;
+        if (melodyPlayback != null)
+            melodyPlayback.Finished += OnPlaybackFinishedCycle;
+
+        Debug.Log("In the AttachPlaybackCycleEvents");
+
+    }
+
 
     #endregion
 
@@ -422,9 +464,9 @@ public class MidiFileNoteReader : MonoBehaviour
     /// <summary>
     /// Read the entire MIDI file (e.g. fullFile) into allNotes for scoring.
     /// </summary>
-    private void ParseAllNotes(MidiFile midiFile)
+    private void ParseAllNotes(MidiFile accompanimentMidiFile, MidiFile melodyMidiFile)
     {
-        if (midiFile == null)
+        if (accompanimentFile == null || melodyMidiFile == null)
         {
             Debug.LogWarning("ParseAllNotes called with null midiFile.");
             return;
@@ -435,27 +477,43 @@ public class MidiFileNoteReader : MonoBehaviour
         correctLeft = 0;
         correctRight = 0;
 
-        var tempoMap = midiFile.GetTempoMap();
-        var notes = midiFile.GetNotes(); // from Melanchall.DryWetMidi
-        foreach (var note in notes)
+        var accompanimentTempoMap = accompanimentMidiFile.GetTempoMap();
+        var melodyTempoMap = melodyMidiFile.GetTempoMap();
+        var accompanimentNotes = accompanimentMidiFile.GetNotes(); 
+        var melodyNotes = melodyMidiFile.GetNotes();
+        foreach (var note in accompanimentNotes)
         {
-            var startTime = note.TimeAs<MetricTimeSpan>(tempoMap);
+            var startTime = note.TimeAs<MetricTimeSpan>(accompanimentTempoMap);
             double startSec = startTime.TotalMicroseconds / 1_000_000.0;
 
-            bool isLeft = (note.NoteNumber < 60); // your own logic
 
             allNotes.Add(new MidiNoteData()
             {
                 StartTimeSeconds = startSec,
                 NoteNumber = note.NoteNumber,
-                IsLeftHand = isLeft,
+                IsLeftHand = true,
                 WasPlayed = false
             });
         }
+        foreach (var note in melodyNotes)
+        {
+            var startTime = note.TimeAs<MetricTimeSpan>(melodyTempoMap);
+            double startSec = startTime.TotalMicroseconds / 1_000_000.0;
 
+
+            allNotes.Add(new MidiNoteData()
+            {
+                StartTimeSeconds = startSec,
+                NoteNumber = note.NoteNumber,
+                IsLeftHand = false,
+                WasPlayed = false
+            });
+        }
         // We can store how many left vs right total
         totalLeft = allNotes.Count(n => n.IsLeftHand);
+
         totalRight = allNotes.Count(n => !n.IsLeftHand);
+
         Debug.Log($"ParseAllNotes => totalLeft={totalLeft}, totalRight={totalRight}, totalAll={allNotes.Count}");
     }
     #endregion
@@ -607,14 +665,49 @@ public class MidiFileNoteReader : MonoBehaviour
         });
     }
 
+    private void OnPlaybackFinishedCycle(object sender, EventArgs e)
+    {
+        MainThreadDispatcher.Enqueue(() =>
+        {
+            timesPlayed++;
+            Debug.Log($"In the OnPlaybackFinishedCycle times PLayed {timesPlayed}");
+            // Second iteration: improvisation
+            if (timesPlayed == 2)
+            {
+                scoringManager.SetScoringMode(ScoringMode.Improvisation);
+                StartPlayback(currentMode);
+            }
+            // Third iteration: scoring ON again
+            else if (timesPlayed == 3)
+            {
+                scoringManager.SetScoringMode(ScoringMode.Melody);
+                StartPlayback(currentMode);
+            }
+            else
+            {
+                // After the 3rd time, we're done. Optionally unhook events or do any cleanup.
+                Debug.Log("Song has now played all 3 passes.");
+                if (accompanimentPlayback != null)
+                {
+                    accompanimentPlayback.Finished -= OnPlaybackFinishedCycle;
+                }
+                if (melodyPlayback != null)
+                {
+                    melodyPlayback.Finished -= OnPlaybackFinishedCycle;
+                }
+                OnPlaybackFinished();
+            }
+        });
+    }
+
     public void IdentifyCurrentChord()
     {
-        var currentNotes = activeNotes.OrderByDescending(n => n).Take(5).ToList();
-
+        var currentNotes = activeNotes.OrderByDescending(n => n).ToList();
+        scoringManager.SetCurrentChord(currentNotes);
         httpHandler?.getChordName(currentNotes);
     }
 
-    private void OnPlaybackFinished(object sender, EventArgs e)
+    private void OnPlaybackFinished()
     {
         MainThreadDispatcher.Enqueue(() =>
         {
@@ -656,11 +749,14 @@ public class MidiFileNoteReader : MonoBehaviour
     private void UpdateUI()
     {
         pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
-        // Recalc progress
-        float progress = (float)(currentTime.TotalSeconds / totalTime);
-        slider.value = progress;
+        // Recalc progress  
+        if (currentTime != null)
+        {
+            float progress = (float)(currentTime.TotalSeconds / totalTime);
+            slider.value = progress;
+        }
 
-        if (timeText)
+        if (timeText != null && totalDuration != null)
             timeText.text = FormatTime(currentTime) + " / " + FormatTime(totalDuration);
     }
 
@@ -683,25 +779,36 @@ public class MidiFileNoteReader : MonoBehaviour
         return $"{mts.Minutes:D2}:{mts.Seconds:D2}";
     }
 
+    private void ColorAllKeys()
+    {
+        pianoFunctions.ResetAllKeysToDefaultColor();
+        colorAccompaniment = true;
+        colorMelody = true;
+
+        colorAccompanimentKeysButtonText.text = "Accompaniment key coloring: ON";
+        colorMelodyKeysButtonText.text = "Melody key coloring: ON";
+        ReplayActiveNotes();
+    }
+
     public void ColorAccompanimentKeys()
     {
-        colorAccompaniment = true;
-        colorMelody = false;
-        pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
+        pianoFunctions.ResetAllKeysToDefaultColor();
+        colorAccompaniment = !colorAccompaniment;
+        if(colorAccompaniment)
+            colorAccompanimentKeysButtonText.text = "Accompaniment key coloring: ON";
+        else
+            colorAccompanimentKeysButtonText.text = "Accompaniment key coloring: OFF";
+
         ReplayActiveNotes();
     }
     public void ColorMelodyKeys()
     {
-        colorAccompaniment = false;
-        colorMelody = true;
-        pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
-        ReplayActiveNotes();
-    }
-    public void ColorAllKeys() 
-    {
-        colorAccompaniment = true;
-        colorMelody = true;
-        pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);
+        pianoFunctions.ResetAllKeysToDefaultColor();
+        colorMelody = !colorMelody;
+        if (colorMelody)
+            colorMelodyKeysButtonText.text = "Melody key coloring: ON";
+        else
+            colorMelodyKeysButtonText.text = "Melody key coloring: OFF";
         ReplayActiveNotes();
     }
 

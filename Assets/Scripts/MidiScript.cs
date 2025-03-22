@@ -21,12 +21,16 @@ public class MidiScript : MonoBehaviour
     private TextMeshProUGUI midiButtonText;
     public Button button;
 
+    private bool listenersRegistered = false;
+
     void Start()
     {
         midiButtonText = button.GetComponentInChildren<TextMeshProUGUI>();
         textMeshProUGUI.text = "MIDI device not detected. Make sure your cable is connected and press any key on your piano keyboard";
         midiButtonText.text = "Start listening";
         button.enabled = true;
+
+        ListenForMIDIDevice();
     }
 
     public void ListenForMIDIDevice()
@@ -36,36 +40,40 @@ public class MidiScript : MonoBehaviour
 
     IEnumerator CheckForMidiDeviceConnection()
     {
-        float timeElapsed = 0f;
-        float timeout = 10f;
-
-        textMeshProUGUI.text = "Listening for MIDI device. Make sure you are pressing keys on your piano keyboard.";
-        button.enabled = false;
-        while (!_midiDeviceConnected)
+        while (!listenersRegistered)
         {
-            // Check for MIDI devices
-            _midiDeviceConnected = ListenForDevice();
+            float timeElapsed = 0f;
+            float timeout = 10f;
 
-            if (_midiDeviceConnected)
+            textMeshProUGUI.text = "Listening for MIDI device. Make sure you are pressing keys on your piano keyboard.";
+            button.enabled = false;
+            while (!_midiDeviceConnected)
             {
-                textMeshProUGUI.text = "MIDI device detected.";
-                Debug.Log("MIDI device connected. Starting to listen for notes.");
-                EnableMidiListeners();
-                yield break;
-            }
+                // Check for MIDI devices
+                _midiDeviceConnected = ListenForDevice();
 
-            // If we're here, no device yet. Wait then accumulate elapsed time.
+                if (_midiDeviceConnected)
+                {
+                    textMeshProUGUI.text = "MIDI device detected.";
+                    Debug.Log("MIDI device connected. Starting to listen for notes.");
+                    EnableMidiListeners();
+                    yield break;
+                }
+
+                // If we're here, no device yet. Wait then accumulate elapsed time.
+                yield return new WaitForSeconds(CheckInterval);
+                timeElapsed += CheckInterval;
+
+                // Stop looking after 10 seconds
+                if (timeElapsed >= timeout)
+                {
+                    textMeshProUGUI.text = "No MIDI device detected within 10 seconds. Try again";
+                    button.enabled = true;
+                    Debug.LogWarning("Stopping MIDI device check after 10 seconds.");
+                    yield break;
+                }
+            }
             yield return new WaitForSeconds(CheckInterval);
-            timeElapsed += CheckInterval;
-
-            // Stop looking after 10 seconds
-            if (timeElapsed >= timeout)
-            {
-                textMeshProUGUI.text = "No MIDI device detected within 10 seconds. Try again";
-                button.enabled = true;
-                Debug.LogWarning("Stopping MIDI device check after 10 seconds.");
-                yield break;
-            }
         }
     }
 

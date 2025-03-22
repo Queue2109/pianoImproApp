@@ -130,6 +130,33 @@ public class PianoFunctions : MonoBehaviour
         }
     }
 
+    public void ResetAllKeysToDefaultColor()
+    {
+        for (int i = 0; i < blackKeys.Count; i++)
+        {
+            if (blackKeys[i].TryGetComponent<Renderer>(out var renderer))
+            {
+                foreach (var mat in renderer.materials)
+                {
+                    mat.SetColor("_Color", blackKeyDefaultColor);
+                }
+            }
+            
+        }
+
+        // Reset white keys
+        for (int i = 0; i < whiteKeys.Count; i++)
+        {
+            if (whiteKeys[i].TryGetComponent<Renderer>(out var renderer))
+            {
+                foreach (var mat in renderer.materials)
+                {
+                    mat.SetColor("_Color", whiteKeyDefaultColor);
+                }
+            }
+        }
+    }
+
     public string NoteNameToKeyName(string note, string octave)
     {
         // check which note it is

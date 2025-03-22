@@ -6,7 +6,6 @@ using static OVRSpatialAnchor;
 
 public class NewAnchorManager : MonoBehaviour
 {
-    [Header("Assign the GameObject to attach the anchor")]
     public GameObject go;
     public PianoFunctions pianoFunctions;
     public PanelManagerSongList panelManagerSongList;

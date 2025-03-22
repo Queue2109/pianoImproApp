@@ -9,9 +9,9 @@ public class moveObject : MonoBehaviour
     public GameObject pianoKeyboard;
 
     // Default local offset and rotation relative to the piano (set these in the Inspector)
-    public Vector3 defaultLocalOffset = new Vector3(-0.4f, 0.2f, 0);
+    public Vector3 defaultLocalOffset = new Vector3(-0.9f, 0.3f, 0);
     // Default local rotation with -45 degrees on the X axis.
-    private Quaternion defaultLocalRotation = Quaternion.Euler(-45f, -180f, 0f);
+    private Quaternion defaultLocalRotation = Quaternion.Euler(25f, -180f, 0f);
 
     // Keys for saving local transform data in PlayerPrefs
     private const string PanelPosKey = "PanelLocalPosition";
