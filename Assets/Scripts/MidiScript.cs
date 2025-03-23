@@ -12,6 +12,7 @@ public class MidiScript : MonoBehaviour
     public event MidiNoteEvent OnNoteOn;
     public event MidiNoteEvent OnNoteOff;
     public MidiFileNoteReader midiFileNoteReader;
+    public GameObject midiListenerUIObject;
 
     private readonly List<string> noteOrder = new() { "A", "A-Sharp", "B", "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp" };
     private bool _midiDeviceConnected;
@@ -19,21 +20,10 @@ public class MidiScript : MonoBehaviour
     private List<int> pressedNotes = new List<int>();
     public TextMeshProUGUI textMeshProUGUI;
     private TextMeshProUGUI midiButtonText;
-    public Button button;
 
     private bool listenersRegistered = false;
 
     void Start()
-    {
-        midiButtonText = button.GetComponentInChildren<TextMeshProUGUI>();
-        textMeshProUGUI.text = "MIDI device not detected. Make sure your cable is connected and press any key on your piano keyboard";
-        midiButtonText.text = "Start listening";
-        button.enabled = true;
-
-        ListenForMIDIDevice();
-    }
-
-    public void ListenForMIDIDevice()
     {
         StartCoroutine(CheckForMidiDeviceConnection());
     }
@@ -45,8 +35,6 @@ public class MidiScript : MonoBehaviour
             float timeElapsed = 0f;
             float timeout = 10f;
 
-            textMeshProUGUI.text = "Listening for MIDI device. Make sure you are pressing keys on your piano keyboard.";
-            button.enabled = false;
             while (!_midiDeviceConnected)
             {
                 // Check for MIDI devices
@@ -56,6 +44,10 @@ public class MidiScript : MonoBehaviour
                 {
                     textMeshProUGUI.text = "MIDI device detected.";
                     Debug.Log("MIDI device connected. Starting to listen for notes.");
+                    yield return new WaitForSeconds(5f);
+                    MainThreadDispatcher.Enqueue(() => {
+                        midiListenerUIObject.SetActive(false);
+                    });
                     EnableMidiListeners();
                     yield break;
                 }
@@ -67,8 +59,6 @@ public class MidiScript : MonoBehaviour
                 // Stop looking after 10 seconds
                 if (timeElapsed >= timeout)
                 {
-                    textMeshProUGUI.text = "No MIDI device detected within 10 seconds. Try again";
-                    button.enabled = true;
                     Debug.LogWarning("Stopping MIDI device check after 10 seconds.");
                     yield break;
                 }

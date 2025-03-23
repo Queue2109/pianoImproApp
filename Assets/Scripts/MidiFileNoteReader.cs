@@ -24,6 +24,9 @@ public class MidiFileNoteReader : MonoBehaviour
     public Slider slider;
     public GameObject logoPause;
     public GameObject logoPlay;
+    public GameObject pianoSettingsUI;
+    public GameObject songChoiceUI;
+    public GameObject scoreBoard;
     public TextMeshPro songName;
     public TextMeshProUGUI timeText;
     public TextMeshProUGUI speedText;
@@ -66,7 +69,8 @@ public class MidiFileNoteReader : MonoBehaviour
         Melody
     }
 
-    private List<MidiNoteData> allNotes = new List<MidiNoteData>();   // All notes for scoring
+    private List<MidiNoteData> allAccompanimentNotes = new List<MidiNoteData>();   // All notes for scoring
+    private List<MidiNoteData> allMelodyNotes = new List<MidiNoteData>();   // All notes for scoring
     private float timingWindow = 0.25f; // ±0.25s window to count note as correct
 
     private int totalLeft = 0;
@@ -84,6 +88,7 @@ public class MidiFileNoteReader : MonoBehaviour
     public void Setup()
     {
         // Make sure the UI references exist
+        if (!slider) slider = GameObject.Find("Slider")?.GetComponent<Slider>();
         if (!timeText) timeText = GameObject.Find("Time")?.GetComponent<TextMeshProUGUI>();
         if (!speedText) speedText = GameObject.Find("Speed")?.GetComponent<TextMeshProUGUI>();
     }
@@ -94,15 +99,9 @@ public class MidiFileNoteReader : MonoBehaviour
         if (!isPlaying || melodyPlayback == null || accompanimentPlayback == null) return;
         if (panelManagerSongList != null && panelManagerSongList.currentPanel != 0) return;
         if (!slider || !speedText || !timeText) return;
-
-        // Now safe to update UI
-        if(currentMode == PlaybackMode.Accompaniment)
-        {
-            currentTime = accompanimentPlayback.GetCurrentTime<MetricTimeSpan>();
-        } else
-        {
-            currentTime = melodyPlayback.GetCurrentTime<MetricTimeSpan>();
-        }
+        
+        currentTime = accompanimentPlayback.GetCurrentTime<MetricTimeSpan>();
+       
         float progress = (float)(currentTime.TotalSeconds / totalTime);
         slider.value = progress;
         timeText.text = FormatTime(currentTime) + " / " + FormatTime(totalDuration);
@@ -473,7 +472,8 @@ public class MidiFileNoteReader : MonoBehaviour
         }
 
         // Clear old data
-        allNotes.Clear();
+        allAccompanimentNotes.Clear();
+        allMelodyNotes.Clear();
         correctLeft = 0;
         correctRight = 0;
 
@@ -481,13 +481,14 @@ public class MidiFileNoteReader : MonoBehaviour
         var melodyTempoMap = melodyMidiFile.GetTempoMap();
         var accompanimentNotes = accompanimentMidiFile.GetNotes(); 
         var melodyNotes = melodyMidiFile.GetNotes();
+
         foreach (var note in accompanimentNotes)
         {
             var startTime = note.TimeAs<MetricTimeSpan>(accompanimentTempoMap);
             double startSec = startTime.TotalMicroseconds / 1_000_000.0;
 
 
-            allNotes.Add(new MidiNoteData()
+            allAccompanimentNotes.Add(new MidiNoteData()
             {
                 StartTimeSeconds = startSec,
                 NoteNumber = note.NoteNumber,
@@ -495,13 +496,14 @@ public class MidiFileNoteReader : MonoBehaviour
                 WasPlayed = false
             });
         }
+
         foreach (var note in melodyNotes)
         {
             var startTime = note.TimeAs<MetricTimeSpan>(melodyTempoMap);
             double startSec = startTime.TotalMicroseconds / 1_000_000.0;
 
 
-            allNotes.Add(new MidiNoteData()
+            allMelodyNotes.Add(new MidiNoteData()
             {
                 StartTimeSeconds = startSec,
                 NoteNumber = note.NoteNumber,
@@ -510,11 +512,13 @@ public class MidiFileNoteReader : MonoBehaviour
             });
         }
         // We can store how many left vs right total
-        totalLeft = allNotes.Count(n => n.IsLeftHand);
+        totalLeft = allAccompanimentNotes.Count() * 3; // we play the same accompaniment 3 times
 
-        totalRight = allNotes.Count(n => !n.IsLeftHand);
+        totalRight = allMelodyNotes.Count() * 2; // times 2 because we play the melody first and third iteration
 
-        Debug.Log($"ParseAllNotes => totalLeft={totalLeft}, totalRight={totalRight}, totalAll={allNotes.Count}");
+        LoadNotesForScoring();
+
+        Debug.Log($"ParseAllNotes => totalLeft={totalLeft}, totalRight={totalRight}");
     }
     #endregion
 
@@ -535,8 +539,6 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.LogError("One or more required MIDI files are missing.");
             return;
         }
-
-
 
         accompanimentFile = MidiFile.Read(accompanimentPath);
         melodyFile = MidiFile.Read(melodyPath);
@@ -676,12 +678,14 @@ public class MidiFileNoteReader : MonoBehaviour
             {
                 scoringManager.SetScoringMode(ScoringMode.Improvisation);
                 StartPlayback(currentMode);
+                currentTime = new MetricTimeSpan(0, 0, 0);
             }
             // Third iteration: scoring ON again
             else if (timesPlayed == 3)
             {
                 scoringManager.SetScoringMode(ScoringMode.Melody);
                 StartPlayback(currentMode);
+                currentTime = new MetricTimeSpan(0, 0, 0);
             }
             else
             {
@@ -715,15 +719,19 @@ public class MidiFileNoteReader : MonoBehaviour
 
             StopPlayback();
 
+            correctRight = scoringManager.GetCorrectMelodyNotes();
+
             // calculate accuracy
-            float leftAccuracy = totalLeft == 0 ? 1f : (float)correctLeft / totalLeft;
-            float rightAccuracy = totalRight == 0 ? 1f : (float)correctRight / totalRight;
+            float leftAccuracy = totalLeft == 0 ? 0f : (float)correctLeft / totalLeft;
+            float rightAccuracy = totalRight == 0 ? 0f : (float)correctRight / totalRight;
             float overallAccuracy = (float)(correctLeft + correctRight) / (totalLeft + totalRight);
 
             Debug.Log($"Song End. LeftAccuracy={leftAccuracy:P2}, RightAccuracy={rightAccuracy:P2}, Overall={overallAccuracy:P2}");
 
             string songId = $"{author}-{fileName}";
             Transform songRow = GameObject.Find(songId)?.transform.Find("StarRow");
+
+            SongProgress savedProgress = SongProgressManager.Instance.GetSongProgress(songId);
 
             // Star logic
             // If user got 90% left, star for left
@@ -738,7 +746,25 @@ public class MidiFileNoteReader : MonoBehaviour
             if (overallAccuracy >= 0.90f)
                 SongProgressManager.Instance.MarkSongCleared(songId, "Full");
 
-            midiFileManager.SetStarColors(songId, songRow);
+            if(savedProgress != null) {
+                if (overallAccuracy > savedProgress.overallScore)
+                {
+                    SongProgressManager.Instance.SaveSongProgress(songId, "Overall", overallAccuracy);
+                }
+                if (leftAccuracy > savedProgress.leftHandScore)
+                {
+                    SongProgressManager.Instance.SaveSongProgress(songId, "Left", leftAccuracy);
+                }
+                if (rightAccuracy > savedProgress.rightHandScore)
+                {
+                    SongProgressManager.Instance.SaveSongProgress(songId, "Right", rightAccuracy);
+                }
+            }
+
+            Image[] images = songRow.GetComponentsInChildren<Image>();
+            midiFileManager.SetStarColors(songId, images);
+
+            midiFileManager.ShowScoreBoardWithCurrentData(songId, leftAccuracy, rightAccuracy, overallAccuracy);
         });
     }
 
@@ -754,10 +780,10 @@ public class MidiFileNoteReader : MonoBehaviour
         {
             float progress = (float)(currentTime.TotalSeconds / totalTime);
             slider.value = progress;
-        }
 
-        if (timeText != null && totalDuration != null)
-            timeText.text = FormatTime(currentTime) + " / " + FormatTime(totalDuration);
+            if (timeText != null && totalDuration != null)
+                timeText.text = FormatTime(currentTime) + " / " + FormatTime(totalDuration);
+        }
     }
 
     private void UpdatePlayPauseButtons()
@@ -766,6 +792,9 @@ public class MidiFileNoteReader : MonoBehaviour
 
         logoPlay.SetActive(!isPlaying);
         logoPause.SetActive(isPlaying);
+
+        pianoSettingsUI?.SetActive(!isPlaying);
+        songChoiceUI?.SetActive(!isPlaying);
     }
 
     private void UpdateSpeedTextUI()
@@ -847,7 +876,8 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void LoadNotesForScoring()
     {
-        scoringManager.LoadNotes(allNotes);
+        scoringManager.LoadNotes(allAccompanimentNotes, true);
+        scoringManager.LoadNotes(allMelodyNotes, false);
     }
     public void CheckUserNote(int noteNumber)
     {
@@ -865,9 +895,31 @@ public class MidiFileNoteReader : MonoBehaviour
             currentSec = melodyPlayback.GetCurrentTime<MetricTimeSpan>().TotalMicroseconds / 1_000_000.0;
         }
 
+        string currentPlaybackSource = DeterminePlaybackSource(noteNumber, currentSec);
+
         // Instead of doing the scoring here, just delegate to ScoringLogic
-        scoringManager.CheckUserNote(noteNumber, currentSec);
+        scoringManager.CheckUserNote(noteNumber, currentSec, currentPlaybackSource);
     }
+
+    private string DeterminePlaybackSource(int userNoteNumber, double currentTime)
+    {
+        bool matchesAccompaniment = allAccompanimentNotes.Any(n =>
+            Mathf.Abs((float)(n.StartTimeSeconds - currentTime)) <= timingWindow &&
+            n.NoteNumber == userNoteNumber);
+
+        bool matchesMelody = allMelodyNotes.Any(n =>
+            Mathf.Abs((float)(n.StartTimeSeconds - currentTime)) <= timingWindow &&
+            n.NoteNumber == userNoteNumber);
+
+        Debug.Log($"Current note matches the accompaniment: {matchesAccompaniment} and matches melody: {matchesMelody}");
+
+        if (matchesMelody)
+            return "Melody";
+        else if (matchesAccompaniment)
+            return "Accompaniment";
+        else return "Accompaniment";
+    }
+
 
     #endregion
 }

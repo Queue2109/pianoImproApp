@@ -12,9 +12,11 @@ public enum ScoringMode
 public class ScoringLogic
 {
     private ScoringMode currentScoringMode = ScoringMode.Melody;
-    private List<MidiNoteData> allNotes = new List<MidiNoteData>();
+    private List<MidiNoteData> allAccompanimentNotes = new List<MidiNoteData>();
+    private List<MidiNoteData> allMelodyNotes = new List<MidiNoteData>();
     private float timingWindow = 0.25f; // ±0.25s window to count note as correct
     private int correctMelodyNotes = 0;
+    private int correctAccompanimentNotes = 0;
     private int correctImprovisedNotes = 0;
     private int currentChordRoot = 60; // Default C
     private bool isCurrentChordMajor = true; // Default major
@@ -25,40 +27,58 @@ public class ScoringLogic
         Debug.Log($"Scoring mode set to: {mode}");
     }
 
-    public void LoadNotes(List<MidiNoteData> notes)
+    public void LoadNotes(List<MidiNoteData> notes, bool isAccompaniment)
     {
-        allNotes = new List<MidiNoteData>(notes);
+        if(isAccompaniment)
+            allAccompanimentNotes = new List<MidiNoteData>(notes);
+        else
+            allMelodyNotes = new List<MidiNoteData>(notes);
         Debug.Log($"Loaded {notes.Count} notes for scoring.");
     }
 
-    public void CheckUserNote(int noteNumber, double currentSec)
+    public void CheckUserNote(int noteNumber, double currentSec, string currentPlaybackSource)
     {
-        if (currentScoringMode == ScoringMode.Melody)
+        if (currentPlaybackSource == "Accompaniment")
         {
-            MidiNoteData bestCandidate = allNotes
-                .Where(noteData => !noteData.WasPlayed && noteData.NoteNumber == noteNumber)
-                .OrderBy(noteData => Math.Abs(noteData.StartTimeSeconds - currentSec))
-                .FirstOrDefault();
+            MidiNoteData bestCandidate = allAccompanimentNotes
+              .Where(noteData => !noteData.WasPlayed && noteData.NoteNumber == noteNumber)
+              .OrderBy(noteData => Math.Abs(noteData.StartTimeSeconds - currentSec))
+              .FirstOrDefault();
 
             if (bestCandidate != null && Math.Abs(bestCandidate.StartTimeSeconds - currentSec) <= timingWindow)
             {
                 bestCandidate.WasPlayed = true;
-                correctMelodyNotes++;
-                Debug.Log($"🎵 Melody Mode: Correct note={noteNumber}, diff={(bestCandidate.StartTimeSeconds - currentSec):F2}s");
+                correctAccompanimentNotes++;
+                Debug.Log($"🎵 Melody Mode, accompaniment: Correct note={noteNumber}, diff={(bestCandidate.StartTimeSeconds - currentSec):F2}s");
             }
-        }
-        else if (currentScoringMode == ScoringMode.Improvisation)
-        {
-            HashSet<int> dynamicBluesScale = GetDynamicBluesScale(currentChordRoot, isCurrentChordMajor);
+        } else {
+            if (currentScoringMode == ScoringMode.Melody)
+            {
+                MidiNoteData bestCandidate = allMelodyNotes
+                    .Where(noteData => !noteData.WasPlayed && noteData.NoteNumber == noteNumber)
+                    .OrderBy(noteData => Math.Abs(noteData.StartTimeSeconds - currentSec))
+                    .FirstOrDefault();
 
-            if (dynamicBluesScale.Contains(noteNumber))
-            {
-                correctImprovisedNotes++;
-                Debug.Log($"🎷 Improvisation Mode: 🎶 Correct improvisation note={noteNumber} (Blues Scale)");
+                if (bestCandidate != null && Math.Abs(bestCandidate.StartTimeSeconds - currentSec) <= timingWindow)
+                {
+                    bestCandidate.WasPlayed = true;
+                    correctMelodyNotes++;
+                    Debug.Log($"🎵 Melody Mode: Correct note={noteNumber}, diff={(bestCandidate.StartTimeSeconds - currentSec):F2}s");
+                }
             }
-            else
+            else if (currentScoringMode == ScoringMode.Improvisation)
             {
-                Debug.Log($"❌ Improvisation Mode: Note {noteNumber} is outside the blues scale.");
+                HashSet<int> dynamicBluesScale = GetDynamicBluesScale(currentChordRoot, isCurrentChordMajor);
+
+                if (dynamicBluesScale.Contains(noteNumber))
+                {
+                    correctImprovisedNotes++;
+                    Debug.Log($"🎷 Improvisation Mode: 🎶 Correct improvisation note={noteNumber} (Blues Scale)");
+                }
+                else
+                {
+                    Debug.Log($"❌ Improvisation Mode: Note {noteNumber} is outside the blues scale.");
+                }
             }
         }
     }
@@ -113,4 +133,6 @@ public class ScoringLogic
 
     public int GetCorrectMelodyNotes() => correctMelodyNotes;
     public int GetCorrectImprovisedNotes() => correctImprovisedNotes;
+
+    public int GetCorrectAccompanimentNotes() => correctAccompanimentNotes;
 }

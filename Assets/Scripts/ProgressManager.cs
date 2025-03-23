@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 using UnityEngine;
+using UnityEditor;
 
 public class SongProgressManager : MonoBehaviour
 {
@@ -74,6 +75,11 @@ public class SongProgressManager : MonoBehaviour
         File.WriteAllText(filePath, json);
     }
 
+    public SongProgress GetSongProgress(string songId)
+    {
+        return allSongsProgress.songs.Find(p => p.songId == songId);
+    }
+
     /// <summary>
     /// Marks a given song as cleared in the specified hand mode.
     /// </summary>
@@ -143,6 +149,26 @@ public class SongProgressManager : MonoBehaviour
                 progress.rightHandCleared &&
                 progress.bothHandsCleared);
     }
+
+    public void SaveSongProgress(string songId, string progressMode, float score)
+    {
+        SongProgress progress = allSongsProgress.songs.Find(p => p.songId == songId);
+        if (progress == null) return;
+        switch (progressMode)
+        {
+            case "Left":
+                progress.leftHandScore = score;
+                break;
+            case "Right":
+                progress.rightHandScore = score;
+                break;
+            case "Overall":
+                progress.overallScore = score;
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 [Serializable]
@@ -152,6 +178,9 @@ public class SongProgress
     public bool leftHandCleared;
     public bool rightHandCleared;
     public bool bothHandsCleared;
+    public float leftHandScore;
+    public float rightHandScore;
+    public float overallScore;
 }
 
 [Serializable]

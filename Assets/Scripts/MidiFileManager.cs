@@ -12,6 +12,13 @@ public class MidiFileManager : MonoBehaviour
     public GameObject lastPlayedSongContainer;
     public GameObject lastPlayedSongGameObject;
     public GameObject songContainerPrefab; // A UI prefab containing NoteImage, SongAuthor, and SongTitle
+    public GameObject scoreBoard;
+
+    public TMPro.TextMeshPro songNameText;
+    public TextMeshProUGUI accuracyAccompanimentScoreText;
+    public TextMeshProUGUI accuracyMelodyText;
+    public TextMeshProUGUI accuracyOverallText;
+
     public Transform contentPanel; // The content panel of the scroll view to hold song containers
     public MidiFileNoteReader midiPlayer; // Reference to the MidiPlayer component
     private string rootPath = Path.Combine(Application.streamingAssetsPath, "MidiFiles");
@@ -85,7 +92,9 @@ public class MidiFileManager : MonoBehaviour
         container.transform.Find("Image/SongAuthor").GetComponent<TextMeshProUGUI>().text = author != "Unknown" ? author : string.Empty;
         container.transform.Find("Image/SongTitle").GetComponent<TextMeshProUGUI>().text = songName;
 
-        SetStarColors(container.name, container.transform.Find("StarRow"));
+
+        Image[] images = container.transform.Find("StarRow").GetComponentsInChildren<Image>();
+        SetStarColors(container.name, images);
 
         Button button = container.GetComponent<Button>();
         if (button != null)
@@ -93,6 +102,7 @@ public class MidiFileManager : MonoBehaviour
             button.onClick.AddListener(() =>
             {
                 OnContainerClicked(container);
+                ShowScoreBoardFromSavedData($"{author}-{songName}");
                 lastClickedSongKey = songKey;
                 PlaySong(songName, author);
             });
@@ -101,7 +111,7 @@ public class MidiFileManager : MonoBehaviour
         songContainers.Add(container);
     }
 
-    public void SetStarColors(string songId, Transform songRow)
+    public void SetStarColors(string songId, Image[] stars)
     {
         Debug.Log("Setting stars for song: " + songId);
 
@@ -109,15 +119,46 @@ public class MidiFileManager : MonoBehaviour
         bool rightCleared = SongProgressManager.Instance.IsSongCleared(songId, "Right");
         bool bothCleared = SongProgressManager.Instance.IsSongCleared(songId, "Both");
 
-        Image[] images = songRow.GetComponentsInChildren<Image>();
-
-        Image leftStar = images.FirstOrDefault(i => i.name == "Star1");
-        Image middleStar = images.FirstOrDefault(i => i.name == "Star2");
-        Image rightStar = images.FirstOrDefault(i => i.name == "Star3");
+        Image leftStar = stars.FirstOrDefault(i => i.name == "Star1");
+        Image middleStar = stars.FirstOrDefault(i => i.name == "Star2");
+        Image rightStar = stars.FirstOrDefault(i => i.name == "Star3");
 
         if (leftStar) leftStar.color = leftCleared ? yellowStar : grayStar;
         if (middleStar) middleStar.color = bothCleared ? yellowStar : grayStar;
         if (rightStar) rightStar.color = rightCleared ? yellowStar : grayStar;
+    }
+
+    private void ShowScoreBoardFromSavedData(string songId)
+    {
+        MainThreadDispatcher.Enqueue(() =>
+        {
+            scoreBoard.SetActive(true);
+
+            SongProgress progress = SongProgressManager.Instance.GetSongProgress(songId);
+
+            songNameText.text = songId;
+            accuracyAccompanimentScoreText.text = $"{progress.leftHandScore * 100}%";
+            accuracyMelodyText.text = $"{progress.rightHandScore * 100}%";
+            accuracyOverallText.text = $"{progress.overallScore * 100}%";
+
+            SetStarColors(songId, GameObject.Find("StarRowScoring").GetComponentsInChildren<Image>());
+        });
+    }
+
+
+    public void ShowScoreBoardWithCurrentData(string songId, float accompanimentScore, float melodyScore, float overallScore)
+    {
+        MainThreadDispatcher.Enqueue(() =>
+        {
+            scoreBoard.SetActive(true);
+
+            songNameText.text = songId;
+            accuracyAccompanimentScoreText.text = $"{accompanimentScore * 100}%";
+            accuracyMelodyText.text = $"{melodyScore * 100}%";
+            accuracyOverallText.text = $"{overallScore * 100}%";
+
+            SetStarColors(songId, GameObject.Find("StarRowScoring").GetComponentsInChildren<Image>());
+        });
     }
 
     public void SaveLastPlayedSongToPlayerPrefs()
@@ -151,16 +192,17 @@ public class MidiFileManager : MonoBehaviour
             {
                 OnContainerClicked(lastPlayedSongContainer);
                 lastClickedSongKey = lastPlayedKey;
+                ShowScoreBoardFromSavedData($"{author}-{songName}");
                 PlaySong(songName, author);
             });
         }
 
-        SetStarColors(lastPlayedKey, lastPlayedSongContainer.transform.Find("StarRow"));
+        Image[] images = lastPlayedSongContainer.transform.Find("StarRow").GetComponentsInChildren<Image>();
+        SetStarColors(lastPlayedKey, images);
     }
 
     public void OnStartPlayingClicked()
     {
-        GameObject.Find("CurrentlyPlayingText").GetComponent<TextMeshProUGUI>().text = "Song started playing";
         StopCoroutine(blinkRoutine);
         blinkRoutine = null;
     }
@@ -178,6 +220,7 @@ public class MidiFileManager : MonoBehaviour
             newImage.color = highlightColor;
             lastSelectedContainerImage = newImage;
         }
+
         blinkRoutine = StartCoroutine(BlinkColorRoutine(GameObject.Find("StartPlayingButton").GetComponent<Image>()));
 
     }
