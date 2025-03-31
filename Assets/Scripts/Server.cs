@@ -34,7 +34,7 @@ public class Server : MonoBehaviour
         flaskProcess.BeginErrorReadLine();
     }
 
-    void OnApplicationQuit()
+    void OnDestroy()
     {
         if (flaskProcess != null && !flaskProcess.HasExited)
         {

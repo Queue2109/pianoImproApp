@@ -52,6 +52,11 @@ public class PanelManagerSongList : MonoBehaviour
         }
     }
 
+    public void MakePanelVisible(bool isVisible)
+    {
+        panels[currentPanel].SetActive(isVisible);
+    }
+
     public void UpdateAndShowPLaySongPanel()
     {
         midiFileNoteReader.StartFullSongPlayback();

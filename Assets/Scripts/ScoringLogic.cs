@@ -12,14 +12,27 @@ public enum ScoringMode
 public class ScoringLogic
 {
     private ScoringMode currentScoringMode = ScoringMode.Melody;
+
     private List<MidiNoteData> allAccompanimentNotes = new List<MidiNoteData>();
     private List<MidiNoteData> allMelodyNotes = new List<MidiNoteData>();
-    private float timingWindow = 0.25f; // ±0.25s window to count note as correct
+
+    private float timingWindow = 0.25f;
+
     private int correctMelodyNotes = 0;
     private int correctAccompanimentNotes = 0;
-    private int correctImprovisedNotes = 0;
-    private int currentChordRoot = 60; // Default C
-    private bool isCurrentChordMajor = true; // Default major
+    private int totalMelodyNotesPlayed = 0;
+
+    private int currentChordRoot = 60;
+    private bool isCurrentChordMajor = true;
+
+    private int totalImprovisedNotes = 0;
+    private int wrongImprovisedNotes = 0;
+
+    private List<int> wrongMelodyNotes = new List<int>();
+    private List<int> wrongAccompanimentNotes = new List<int>();
+    private List<int> wrongImprovisationNotes = new List<int>();
+
+
 
     public void SetScoringMode(ScoringMode mode)
     {
@@ -29,7 +42,7 @@ public class ScoringLogic
 
     public void LoadNotes(List<MidiNoteData> notes, bool isAccompaniment)
     {
-        if(isAccompaniment)
+        if (isAccompaniment)
             allAccompanimentNotes = new List<MidiNoteData>(notes);
         else
             allMelodyNotes = new List<MidiNoteData>(notes);
@@ -49,7 +62,12 @@ public class ScoringLogic
             {
                 bestCandidate.WasPlayed = true;
                 correctAccompanimentNotes++;
-                Debug.Log($"🎵 Melody Mode, accompaniment: Correct note={noteNumber}, diff={(bestCandidate.StartTimeSeconds - currentSec):F2}s");
+                Debug.Log($"🎵 Accompaniment Mode, accompaniment: Correct note={noteNumber}, diff={(bestCandidate.StartTimeSeconds - currentSec):F2}s");
+            }
+            else
+            {
+                wrongAccompanimentNotes.Add(noteNumber);
+                Debug.Log($"❌ Accompaniment: Incorrect note={noteNumber}");
             }
         } else {
             if (currentScoringMode == ScoringMode.Melody)
@@ -58,6 +76,7 @@ public class ScoringLogic
                     .Where(noteData => !noteData.WasPlayed && noteData.NoteNumber == noteNumber)
                     .OrderBy(noteData => Math.Abs(noteData.StartTimeSeconds - currentSec))
                     .FirstOrDefault();
+                totalMelodyNotesPlayed++;
 
                 if (bestCandidate != null && Math.Abs(bestCandidate.StartTimeSeconds - currentSec) <= timingWindow)
                 {
@@ -65,21 +84,29 @@ public class ScoringLogic
                     correctMelodyNotes++;
                     Debug.Log($"🎵 Melody Mode: Correct note={noteNumber}, diff={(bestCandidate.StartTimeSeconds - currentSec):F2}s");
                 }
+                else
+                {
+                    wrongMelodyNotes.Add(noteNumber);
+                    Debug.Log($"❌  Melody Mode: Incorrect note={noteNumber}");
+                }
             }
             else if (currentScoringMode == ScoringMode.Improvisation)
             {
+                totalImprovisedNotes++;
+
                 HashSet<int> dynamicBluesScale = GetDynamicBluesScale(currentChordRoot, isCurrentChordMajor);
 
                 if (dynamicBluesScale.Contains(noteNumber))
                 {
-                    correctImprovisedNotes++;
-                    Debug.Log($"🎷 Improvisation Mode: 🎶 Correct improvisation note={noteNumber} (Blues Scale)");
+                    Debug.Log($"🎷 Improvisation Mode: 🎶 Correct note={noteNumber} (Blues Scale)");
                 }
                 else
                 {
+                    wrongImprovisedNotes++;
                     Debug.Log($"❌ Improvisation Mode: Note {noteNumber} is outside the blues scale.");
                 }
             }
+
         }
     }
 
@@ -88,15 +115,15 @@ public class ScoringLogic
         int bluesRoot = isMajorChord ? rootNote - 3 : rootNote;
 
         return new HashSet<int>
-    {
-        bluesRoot,             // 1st (Root)
-        bluesRoot + 3,         // ♭3 (Minor Third)
-        bluesRoot + 5,         // 4th (Perfect Fourth)
-        bluesRoot + 6,         // ♭5 (Diminished Fifth)
-        bluesRoot + 7,         // 5th (Perfect Fifth)
-        bluesRoot + 10,        // ♭7 (Minor Seventh)
-        bluesRoot + 12         // Octave
-    };
+        {
+            bluesRoot,             // 1st (Root)
+            bluesRoot + 3,         // ♭3 (Minor Third)
+            bluesRoot + 5,         // 4th (Perfect Fourth)
+            bluesRoot + 6,         // ♭5 (Diminished Fifth)
+            bluesRoot + 7,         // 5th (Perfect Fifth)
+            bluesRoot + 10,        // ♭7 (Minor Seventh)
+            bluesRoot + 12         // Octave
+        };
     }
 
     public void SetCurrentChord(List<int> notes)
@@ -131,8 +158,26 @@ public class ScoringLogic
         Debug.Log($"🎵 New Chord Set: {currentChordRoot} {(isCurrentChordMajor ? "Major" : "Minor")}");
     }
 
-    public int GetCorrectMelodyNotes() => correctMelodyNotes;
-    public int GetCorrectImprovisedNotes() => correctImprovisedNotes;
+    public float GetImprovisationScore()
+    {
+        if (totalImprovisedNotes == 0) return 0f;
+        float penaltyPerWrongNote = 100f / totalImprovisedNotes;
+        Debug.Log($"Penalty per wrong note in improvisation mode: {penaltyPerWrongNote}");
+        float score = 100f - (wrongImprovisedNotes * penaltyPerWrongNote);
 
-    public int GetCorrectAccompanimentNotes() => correctAccompanimentNotes;
+        return Mathf.Max(0f, score);
+    }
+
+    public float GetAccompanimentScore()
+    {
+        return (correctAccompanimentNotes - (wrongAccompanimentNotes.Count / 2)) / allAccompanimentNotes.Count;
+    }
+
+    public float GetMelodyScore()
+    {
+        return (correctMelodyNotes - (wrongMelodyNotes.Count / 2)) / allMelodyNotes.Count;
+    }
+    //public int GetCorrectMelodyNotes() => correctMelodyNotes;
+    //public float GetCorrectImprovisedNotes() => {return 1;}
+    //public int GetCorrectAccompanimentNotes() => correctAccompanimentNotes;
 }

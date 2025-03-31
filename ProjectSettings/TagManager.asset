@@ -9,6 +9,12 @@ TagManager:
   - IntroCanva
   - Panel
   - NoteText
+  - Locomotion
+  - PassThrough
+  - PassThroughButton
+  - LocoButton
+  - LocoText
+  - ButtonPanel
   layers:
   - Default
   - TransparentFX

@@ -19,9 +19,9 @@ public class MidiScript : MonoBehaviour
     private const float CheckInterval = 0.5f; // Check every second
     private List<int> pressedNotes = new List<int>();
     public TextMeshProUGUI textMeshProUGUI;
-    private TextMeshProUGUI midiButtonText;
 
-    private bool listenersRegistered = false;
+    private System.Action<Minis.MidiNoteControl, float> noteOnHandler;
+    private System.Action<Minis.MidiNoteControl> noteOffHandler;
 
     void Start()
     {
@@ -30,41 +30,51 @@ public class MidiScript : MonoBehaviour
 
     IEnumerator CheckForMidiDeviceConnection()
     {
-        while (!listenersRegistered)
+        while (true)
         {
-            float timeElapsed = 0f;
-            float timeout = 10f;
+            bool isCurrentlyConnected = IsMidiDeviceAvailable();
 
-            while (!_midiDeviceConnected)
+            if (isCurrentlyConnected && !_midiDeviceConnected)
             {
-                // Check for MIDI devices
-                _midiDeviceConnected = ListenForDevice();
+               
+                _midiDeviceConnected = true;
+                Debug.Log("MIDI device connected.");
+                textMeshProUGUI.text = "MIDI device successfully connected";
 
-                if (_midiDeviceConnected)
-                {
-                    textMeshProUGUI.text = "MIDI device detected.";
-                    Debug.Log("MIDI device connected. Starting to listen for notes.");
-                    yield return new WaitForSeconds(5f);
-                    MainThreadDispatcher.Enqueue(() => {
-                        midiListenerUIObject.SetActive(false);
-                    });
-                    EnableMidiListeners();
-                    yield break;
-                }
+                EnableMidiListeners();
 
-                // If we're here, no device yet. Wait then accumulate elapsed time.
-                yield return new WaitForSeconds(CheckInterval);
-                timeElapsed += CheckInterval;
-
-                // Stop looking after 10 seconds
-                if (timeElapsed >= timeout)
-                {
-                    Debug.LogWarning("Stopping MIDI device check after 10 seconds.");
-                    yield break;
-                }
+                // Hide UI after delay
+                yield return new WaitForSeconds(5f);
+                MainThreadDispatcher.Enqueue(() => midiListenerUIObject.SetActive(false));
             }
-            yield return new WaitForSeconds(CheckInterval);
+            else if (!isCurrentlyConnected && _midiDeviceConnected)
+            {
+                _midiDeviceConnected = false;
+                midiListenerUIObject.SetActive(true);
+                Debug.LogWarning("MIDI device disconnected.");
+                textMeshProUGUI.text = "MIDI device disconnected.";
+                DisableMidiListeners();
+
+                // Show UI again if needed
+                MainThreadDispatcher.Enqueue(() => midiListenerUIObject.SetActive(true));
+            }
+
+            yield return new WaitForSeconds(CheckInterval); // Check every few seconds
         }
+    }
+
+
+    public bool IsMidiDeviceAvailable()
+    {
+        foreach (var device in InputSystem.devices)
+        {
+            if (device is Minis.MidiDevice)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public bool ListenForDevice()
@@ -93,7 +103,8 @@ public class MidiScript : MonoBehaviour
             {
                 Debug.Log($"Registering listeners for MIDI device: {midiDevice.description.product}");
 
-                midiDevice.onWillNoteOn += (note, velocity) =>
+                // Save handlers so we can remove them later
+                noteOnHandler = (note, velocity) =>
                 {
                     Debug.Log($"Note On: {note.noteNumber}, Velocity: {velocity}");
                     OnNoteOn?.Invoke(note.noteNumber);
@@ -105,16 +116,43 @@ public class MidiScript : MonoBehaviour
                     }
                 };
 
-                midiDevice.onWillNoteOff += (note) =>
+                noteOffHandler = (note) =>
                 {
                     Debug.Log($"Note Off: {note.noteNumber}");
                     OnNoteOff?.Invoke(note.noteNumber);
                     RemoveNoteFromPressedList(note.noteNumber);
                 };
 
+                midiDevice.onWillNoteOn += noteOnHandler;
+                midiDevice.onWillNoteOff += noteOffHandler;
+
                 Debug.Log("Listeners registered successfully.");
             }
         }
+    }
+
+    void DisableMidiListeners()
+    {
+        foreach (var device in InputSystem.devices)
+        {
+            if (device is Minis.MidiDevice midiDevice)
+            {
+                if (noteOnHandler != null)
+                {
+                    midiDevice.onWillNoteOn -= noteOnHandler;
+                }
+
+                if (noteOffHandler != null)
+                {
+                    midiDevice.onWillNoteOff -= noteOffHandler;
+                }
+
+                Debug.Log($"Listeners removed for MIDI device: {midiDevice.description.product}");
+            }
+        }
+
+        noteOnHandler = null;
+        noteOffHandler = null;
     }
 
     void AddNoteToPressedList(int noteNumber)

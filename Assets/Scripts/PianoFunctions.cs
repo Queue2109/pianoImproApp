@@ -294,45 +294,45 @@ public class PianoFunctions : MonoBehaviour
         AdjustCollider();
     }
 
-    public void MoveLeft()
-    {
-        MoveObject(Vector3.left * 0.01f);
-    }
-
-    public void MoveRight()
-    {
-        MoveObject(Vector3.right * 0.01f);
-    }
-
     public void MoveForward()
     {
-        MoveObject(Vector3.forward * 0.01f);
+        MoveObject(-transform.forward * 0.01f);
     }
 
     public void MoveBackward()
     {
-        MoveObject(Vector3.back * 0.01f);
+        MoveObject(transform.forward * 0.01f);
+    }
+
+    public void MoveLeft()
+    {
+        MoveObject(transform.right * 0.01f);
+    }
+
+    public void MoveRight()
+    {
+        MoveObject(-transform.right * 0.01f);
     }
 
     public void RotateLeft()
     {
-        transform.Rotate(Vector3.up, -1f, Space.Self);
+        transform.Rotate(transform.up, -1f, Space.Self);
     }
 
     // Function to rotate the object to the right (clockwise)
     public void RotateRight()
     {
-        transform.Rotate(Vector3.up, 1f, Space.Self);
+        transform.Rotate(transform.up, 1f, Space.Self);
     }
 
     public void MovePianoUp()
     {
-        MoveObject(Vector3.up * 0.01f);
+        MoveObject(transform.up * 0.01f);
     }
 
     public void MovePianoDown()
     {
-        MoveObject(Vector3.down * 0.01f);
+        MoveObject(-transform.up * 0.01f);
     }
 
     public void AdjustCollider()

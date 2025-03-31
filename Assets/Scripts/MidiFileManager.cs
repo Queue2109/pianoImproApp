@@ -14,10 +14,12 @@ public class MidiFileManager : MonoBehaviour
     public GameObject songContainerPrefab; // A UI prefab containing NoteImage, SongAuthor, and SongTitle
     public GameObject scoreBoard;
 
-    public TMPro.TextMeshPro songNameText;
-    public TextMeshProUGUI accuracyAccompanimentScoreText;
-    public TextMeshProUGUI accuracyMelodyText;
-    public TextMeshProUGUI accuracyOverallText;
+    public GameObject songNameText;
+    public GameObject accuracyAccompanimentScoreText;
+    public GameObject accuracyMelodyText;
+    public GameObject accuracyOverallText;
+
+    public PanelManagerSongList panelManagerSongList;
 
     public Transform contentPanel; // The content panel of the scroll view to hold song containers
     public MidiFileNoteReader midiPlayer; // Reference to the MidiPlayer component
@@ -135,11 +137,19 @@ public class MidiFileManager : MonoBehaviour
             scoreBoard.SetActive(true);
 
             SongProgress progress = SongProgressManager.Instance.GetSongProgress(songId);
+            songNameText.GetComponent<TextMeshProUGUI>().text = songId;
 
-            songNameText.text = songId;
-            accuracyAccompanimentScoreText.text = $"{progress.leftHandScore * 100}%";
-            accuracyMelodyText.text = $"{progress.rightHandScore * 100}%";
-            accuracyOverallText.text = $"{progress.overallScore * 100}%";
+            if (progress != null)
+            {
+                accuracyAccompanimentScoreText.GetComponent<TextMeshProUGUI>().text = $"{progress.leftHandScore * 100}%";
+                accuracyMelodyText.GetComponent<TextMeshProUGUI>().text = $"{progress.rightHandScore * 100}%";
+                accuracyOverallText.GetComponent<TextMeshProUGUI>().text = $"{progress.overallScore * 100}%";
+            } else
+            {
+                accuracyAccompanimentScoreText.GetComponent<TextMeshProUGUI>().text = $"0%";
+                accuracyMelodyText.GetComponent<TextMeshProUGUI>().text = $"0%";
+                accuracyOverallText.GetComponent<TextMeshProUGUI>().text = $"0%";
+            }
 
             SetStarColors(songId, GameObject.Find("StarRowScoring").GetComponentsInChildren<Image>());
         });
@@ -152,10 +162,10 @@ public class MidiFileManager : MonoBehaviour
         {
             scoreBoard.SetActive(true);
 
-            songNameText.text = songId;
-            accuracyAccompanimentScoreText.text = $"{accompanimentScore * 100}%";
-            accuracyMelodyText.text = $"{melodyScore * 100}%";
-            accuracyOverallText.text = $"{overallScore * 100}%";
+            songNameText.GetComponent<TextMeshProUGUI>().text = songId;
+            accuracyAccompanimentScoreText.GetComponent<TextMeshProUGUI>().text = $"{accompanimentScore * 100}%";
+            accuracyMelodyText.GetComponent<TextMeshProUGUI>().text = $"{melodyScore * 100}%";
+            accuracyOverallText.GetComponent<TextMeshProUGUI>().text = $"{overallScore * 100}%";
 
             SetStarColors(songId, GameObject.Find("StarRowScoring").GetComponentsInChildren<Image>());
         });
@@ -166,7 +176,7 @@ public class MidiFileManager : MonoBehaviour
         PlayerPrefs.SetString("LastPlayedSong", lastClickedSongKey);
     }
 
-    private void LoadLastPlayedSong()
+    public void LoadLastPlayedSong()
     {
         string lastPlayedKey = PlayerPrefs.GetString("LastPlayedSong", null);
         if (string.IsNullOrEmpty(lastPlayedKey) || !songFilePaths.ContainsKey(lastPlayedKey))
@@ -221,6 +231,8 @@ public class MidiFileManager : MonoBehaviour
             lastSelectedContainerImage = newImage;
         }
 
+        panelManagerSongList.MakePanelVisible(false);
+
         blinkRoutine = StartCoroutine(BlinkColorRoutine(GameObject.Find("StartPlayingButton").GetComponent<Image>()));
 
     }
@@ -253,9 +265,9 @@ public class MidiFileManager : MonoBehaviour
         return (pathParts.Length >= 2) ? pathParts[1] : "Unknown";
     }
 
-    public void PlaySong(string fileName, string author)
+    public void PlaySong(string songName, string author)
     {
-        midiPlayer.fileName = fileName;
+        midiPlayer.fileName = songName;
         midiPlayer.author = author;
         midiPlayer.PlaybackPreview();
     }

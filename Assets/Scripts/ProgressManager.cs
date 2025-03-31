@@ -169,7 +169,22 @@ public class SongProgressManager : MonoBehaviour
                 break;
         }
     }
+    public void ResetProgress()
+    {
+        // Create a new blank progress object
+        allSongsProgress = new AllSongsProgress();
+
+        // Convert to JSON
+        string json = JsonUtility.ToJson(allSongsProgress, true);
+
+        // Overwrite the existing progress file
+        File.WriteAllText(GetProgressFilePath(), json);
+
+        Debug.Log("All songs progress reset.");
+    }
 }
+
+
 
 [Serializable]
 public class SongProgress
