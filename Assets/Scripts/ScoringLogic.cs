@@ -27,6 +27,7 @@ public class ScoringLogic
 
     private int totalImprovisedNotes = 0;
     private int wrongImprovisedNotes = 0;
+    private bool isScoringActive = false;
 
     private List<int> wrongMelodyNotes = new List<int>();
     private List<int> wrongAccompanimentNotes = new List<int>();
@@ -40,6 +41,11 @@ public class ScoringLogic
         Debug.Log($"Scoring mode set to: {mode}");
     }
 
+    public ScoringMode GetScoringMode()
+    {
+        return currentScoringMode;
+    }
+
     public void LoadNotes(List<MidiNoteData> notes, bool isAccompaniment)
     {
         if (isAccompaniment)
@@ -51,6 +57,10 @@ public class ScoringLogic
 
     public void CheckUserNote(int noteNumber, double currentSec, string currentPlaybackSource)
     {
+        if(!isScoringActive)
+        {
+            return;
+        }
         if (currentPlaybackSource == "Accompaniment")
         {
             MidiNoteData bestCandidate = allAccompanimentNotes
@@ -170,14 +180,47 @@ public class ScoringLogic
 
     public float GetAccompanimentScore()
     {
-        return (correctAccompanimentNotes - (wrongAccompanimentNotes.Count / 2)) / allAccompanimentNotes.Count;
+        if (allAccompanimentNotes.Count == 0) return 0f;
+        float rawScore = (correctAccompanimentNotes - (wrongAccompanimentNotes.Count / 2f)) / allAccompanimentNotes.Count;
+        return Mathf.Clamp01(rawScore);
     }
 
     public float GetMelodyScore()
     {
-        return (correctMelodyNotes - (wrongMelodyNotes.Count / 2)) / allMelodyNotes.Count;
+        float rawScore = (correctMelodyNotes - (wrongMelodyNotes.Count / 2)) / allMelodyNotes.Count;
+        return Mathf.Clamp01(rawScore);
     }
-    //public int GetCorrectMelodyNotes() => correctMelodyNotes;
-    //public float GetCorrectImprovisedNotes() => {return 1;}
-    //public int GetCorrectAccompanimentNotes() => correctAccompanimentNotes;
+    public void ResetScoring()
+    {
+        // Clears all counters, wasPlayed flags, and "wrong" lists
+        correctMelodyNotes = 0;
+        correctAccompanimentNotes = 0;
+        totalMelodyNotesPlayed = 0;
+
+        totalImprovisedNotes = 0;
+        wrongImprovisedNotes = 0;
+
+        wrongMelodyNotes.Clear();
+        wrongAccompanimentNotes.Clear();
+        wrongImprovisationNotes.Clear();
+
+        // Also reset 'WasPlayed' flags on your note lists
+        foreach (var note in allAccompanimentNotes) note.WasPlayed = false;
+        foreach (var note in allMelodyNotes) note.WasPlayed = false;
+
+        Debug.Log("Scoring has been reset.");
+    }
+    public void StartScoring()
+    {
+        ResetScoring();
+        isScoringActive = true;
+        Debug.Log("Scoring started.");
+    }
+
+    public void StopScoring()
+    {
+        isScoringActive = false;
+        Debug.Log("Scoring stopped.");
+    }
+
 }

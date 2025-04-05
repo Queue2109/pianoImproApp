@@ -27,6 +27,10 @@ public class MidiFileNoteReader : MonoBehaviour
     public GameObject logoPlay;
     public GameObject pianoSettingsUI;
     public GameObject songChoiceUI;
+    public GameObject slowDownButton;
+    public GameObject speedUpButton;
+    public GameObject fastForwardButton;
+    public GameObject rewindButton;
     public GameObject scoreBoard;
     public TextMeshPro songName;
     public TextMeshProUGUI timeText;
@@ -35,6 +39,8 @@ public class MidiFileNoteReader : MonoBehaviour
     public TextMeshPro playMelodyButtonText;
     public TextMeshPro colorAccompanimentKeysButtonText;
     public TextMeshPro colorMelodyKeysButtonText;
+
+    private TextMeshProUGUI scoringModeTitle;
 
     private Playback accompanimentPlayback;
     private Playback melodyPlayback;
@@ -101,6 +107,7 @@ public class MidiFileNoteReader : MonoBehaviour
         if (!slider) slider = GameObject.Find("Slider")?.GetComponent<Slider>();
         if (!timeText) timeText = GameObject.Find("Time")?.GetComponent<TextMeshProUGUI>();
         if (!speedText) speedText = GameObject.Find("Speed")?.GetComponent<TextMeshProUGUI>();
+        if (!scoringModeTitle) scoringModeTitle = GameObject.Find("ScoringModeTitle")?.GetComponent<TextMeshProUGUI>();
     }
 
     void Update()
@@ -196,6 +203,8 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void Rewind()
     {
+        if (accompanimentPlayback == null) return;
+
         // Pause while rewinding
         if (isPlaying) TogglePlayPause();
 
@@ -222,6 +231,8 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void FastForward()
     {
+        if (accompanimentPlayback == null) return;
+
         // Pause while fast-forwarding
         if (isPlaying) TogglePlayPause();
 
@@ -248,6 +259,7 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void SpeedUp()
     {
+        if (accompanimentPlayback == null) return;
         playbackSpeed += 0.1f;
         switch (currentMode)
         {
@@ -280,6 +292,8 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void SlowDown()
     {
+        if (accompanimentPlayback == null) return;
+
         playbackSpeed = Mathf.Max(0.1f, playbackSpeed - 0.1f);
         switch (currentMode)
         {
@@ -305,18 +319,27 @@ public class MidiFileNoteReader : MonoBehaviour
     public void TogglePracticeMode()
     {
         practiceMode = !practiceMode;
-        if(practiceMode)
+        TextMeshProUGUI dialogTitle = GameObject.Find("PlaybackModeTitle").GetComponent<TextMeshProUGUI>();
+        TextMeshProUGUI dialogText = GameObject.Find("PlaybackModeText").GetComponent<TextMeshProUGUI>();
+        if (practiceMode)
         {
             GameObject.Find("PlayModeText").GetComponent<TextMeshPro>().text = "Mode: Practice";
-            StartPlayback(PlaybackMode.FullSong);
+            dialogTitle.text = "Practice mode";
+            dialogText.text = "In this mode, scoring system is disabled. You can focus on practicing the song and switch to classic mode when you feel ready.";
+            scoringManager.StopScoring();
         } else {
-            GameObject.Find("PlayModeText").GetComponent<TextMeshPro>().text = "Mode: Classic (with scoring system)";
-            StartPlayback(PlaybackMode.FullSong);
+            dialogTitle.text = "Classic mode";
+            dialogText.text = "In this mode, your playing will be scored. Press play when you feel ready and play the song from start to end. Your score will be visible at the end of the song.";
+            GameObject.Find("PlayModeText").GetComponent<TextMeshPro>().text = "Mode: Classic";
+            scoringManager.StartScoring();
         }
-        GameObject.Find("SlowDownButton").SetActive(practiceMode);
-        GameObject.Find("SpeedUpButton").SetActive(practiceMode);
-        GameObject.Find("RewindButton").SetActive(practiceMode);
-        GameObject.Find("FastForwardButton").SetActive(practiceMode);
+
+        slowDownButton.SetActive(practiceMode);
+        speedUpButton.SetActive(practiceMode);
+        rewindButton.SetActive(practiceMode);
+        fastForwardButton.SetActive(practiceMode);
+        currentTime = new MetricTimeSpan(0);
+        StartPlayback(PlaybackMode.FullSong);
     }
 
     private void InitializePlaybacks()
@@ -351,6 +374,20 @@ public class MidiFileNoteReader : MonoBehaviour
 
     private void StartPlayback(PlaybackMode mode)
     {
+        if(timesPlayed >= 4)
+        {
+            timesPlayed = 1;
+            scoringManager.ResetScoring();
+            InitializePlaybacks();
+        }
+
+        if(practiceMode && slowDownButton.activeSelf == false)
+        {
+            slowDownButton.SetActive(practiceMode);
+            speedUpButton.SetActive(practiceMode);
+            rewindButton.SetActive(practiceMode);
+            fastForwardButton.SetActive(practiceMode);
+        }
         currentMode = mode;
         if (accompanimentPlayback == null || melodyPlayback == null)
         {
@@ -359,23 +396,30 @@ public class MidiFileNoteReader : MonoBehaviour
             return;
         }
 
+        songName.text = $"{author}: {fileName}";
+        scoringModeTitle.text = $"{(scoringManager.GetScoringMode() == ScoringMode.Melody ? "Play melody and accompaniment" : "Time to improvise!")}";
+
         muteAccompanimentPlayback = (mode == PlaybackMode.Melody);
         muteMelodyPlayback = (mode == PlaybackMode.Accompaniment);
+        Debug.Log($"timesPLayed {timesPlayed}");
 
         playAccompanimentButtonText.text = $"Playing accompaniment: {(muteAccompanimentPlayback ? "OFF" : "ON")}";
         playMelodyButtonText.text = $"Playing melody: {(muteMelodyPlayback ? "OFF" : "ON")}";
 
         if (!isPlaying)
         {
+            Debug.Log($"timesPLayed {isPlaying}");
+
             accompanimentPlayback.Start();
             melodyPlayback.Start();
             isPlaying = true;
             isSongReady = true;
         }
+        Debug.Log($"timesPLayed {isPlaying}");
+
 
         totalTime = accompanimentPlayback?.GetDuration<MetricTimeSpan>().TotalSeconds ?? melodyPlayback.GetDuration<MetricTimeSpan>().TotalSeconds;
         totalDuration = accompanimentPlayback?.GetDuration<MetricTimeSpan>() ?? melodyPlayback.GetDuration<MetricTimeSpan>();
-
         pianoFunctions.ResetAllKeysToDefaultColor();
 
         UpdatePlayPauseButtons();
@@ -443,6 +487,8 @@ public class MidiFileNoteReader : MonoBehaviour
         StopPlayback();
         DisposeDevice();
 
+        practiceMode = true;
+
         outputDevice = OutputDevice.GetAll().FirstOrDefault();
         if (outputDevice == null)
         {
@@ -477,8 +523,6 @@ public class MidiFileNoteReader : MonoBehaviour
         // Attach event so we know when the playback ends
         if (accompanimentPlayback != null)
             accompanimentPlayback.Finished += OnPlaybackFinishedCycle;
-        if (melodyPlayback != null)
-            melodyPlayback.Finished += OnPlaybackFinishedCycle;
 
         Debug.Log("In the AttachPlaybackCycleEvents");
 
@@ -704,15 +748,21 @@ public class MidiFileNoteReader : MonoBehaviour
             if (timesPlayed == 2)
             {
                 scoringManager.SetScoringMode(ScoringMode.Improvisation);
-                StartPlayback(currentMode);
                 currentTime = new MetricTimeSpan(0, 0, 0);
+                accompanimentPlayback?.MoveToTime(currentTime);
+                melodyPlayback?.MoveToTime(currentTime);
+                isPlaying = false;
+                StartPlayback(currentMode);
             }
             // Third iteration: scoring ON again
             else if (timesPlayed == 3)
             {
                 scoringManager.SetScoringMode(ScoringMode.Melody);
-                StartPlayback(currentMode);
                 currentTime = new MetricTimeSpan(0, 0, 0);
+                accompanimentPlayback?.MoveToTime(currentTime);
+                melodyPlayback?.MoveToTime(currentTime);
+                isPlaying = false;
+                StartPlayback(currentMode);
             }
             else
             {
@@ -721,10 +771,6 @@ public class MidiFileNoteReader : MonoBehaviour
                 if (accompanimentPlayback != null)
                 {
                     accompanimentPlayback.Finished -= OnPlaybackFinishedCycle;
-                }
-                if (melodyPlayback != null)
-                {
-                    melodyPlayback.Finished -= OnPlaybackFinishedCycle;
                 }
                 OnPlaybackFinished();
             }
