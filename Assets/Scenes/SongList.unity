@@ -3642,6 +3642,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 2146127999}
+        m_TargetAssemblyTypeName: moveObject, Assembly-CSharp
+        m_MethodName: UpdatePanelPositionFromPrefs
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &342713861
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5811,6 +5823,10 @@ PrefabInstance:
     - target: {fileID: 2778893221137343601, guid: 323cb65d2594c79499a11a99ff0fb347, type: 3}
       propertyPath: _width
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3159839825100900288, guid: 323cb65d2594c79499a11a99ff0fb347, type: 3}
+      propertyPath: m_Name
+      value: PlayModeText
       objectReference: {fileID: 0}
     - target: {fileID: 3159839825100900288, guid: 323cb65d2594c79499a11a99ff0fb347, type: 3}
       propertyPath: m_Layer

@@ -13,6 +13,8 @@ public class NewAnchorManager : MonoBehaviour
 
     private Guid anchorUuid = Guid.Empty;
     private OVRSpatialAnchor anchor;
+
+    bool anchorReady = false;
     private List<OVRSpatialAnchor.UnboundAnchor> _unboundAnchors = new List<OVRSpatialAnchor.UnboundAnchor>();
 
     private async void Start()
@@ -25,29 +27,35 @@ public class NewAnchorManager : MonoBehaviour
         {
             // If we have a saved UUID, attempt to load that anchor
             var anchorsToLoad = new List<Guid> { anchorUuid };
-            await LoadAnchorsByUuidAsync(anchorsToLoad);
+            anchorReady = await LoadAnchorsByUuidAsync(anchorsToLoad);
         }
         else
         {
             // No previously saved anchor, so create a new one and save it
             pianoFunctions.BringPianoCloser();
-            await CreateSpatialAnchorAsync();
-            await SaveCurrentAnchorAsync();
+            anchorReady = await CreateSpatialAnchorAsync(); 
+            if (anchorReady)
+            {
+                await SaveCurrentAnchorAsync();
+            }
         }
         pianoFunctions.AdjustCollider();
-        moveObjectScript.LoadOnStart();
+        if (anchorReady)
+        {
+            moveObjectScript.LoadOnStart();
+        }
     }
 
     /// <summary>
     /// Creates an OVRSpatialAnchor if none exists yet. Waits for creation to complete.
     /// </summary>
-    private async Task CreateSpatialAnchorAsync()
+    private async Task<bool> CreateSpatialAnchorAsync()
     {
         // Check if we already have a valid anchor
         if (anchor != null && anchor.Created)
         {
             Debug.Log("Anchor already exists and is created.");
-            return;
+            return true;
         }
 
         // Either get or add OVRSpatialAnchor
@@ -65,7 +73,14 @@ public class NewAnchorManager : MonoBehaviour
             await Task.Delay(500);
         }
 
-        Debug.Log($"Anchor created with UUID: {anchor.Uuid}");
+        if(anchor.Created)
+        {
+            Debug.Log($"Anchor created with UUID: {anchor.Uuid}");
+            return true;
+        }
+
+        return false;
+        
     }
 
     /// <summary>
@@ -96,12 +111,12 @@ public class NewAnchorManager : MonoBehaviour
     /// <summary>
     /// Loads and binds anchors based on given UUIDs.
     /// </summary>
-    private async Task LoadAnchorsByUuidAsync(IEnumerable<Guid> uuids)
+    private async Task<bool> LoadAnchorsByUuidAsync(IEnumerable<Guid> uuids)
     {
         if (uuids == null)
         {
             Debug.LogWarning("No UUIDs provided to load.");
-            return;
+            return false;
         }
 
         var result = await OVRSpatialAnchor.LoadUnboundAnchorsAsync(uuids, _unboundAnchors);
@@ -127,16 +142,20 @@ public class NewAnchorManager : MonoBehaviour
 
                     unboundAnchor.BindTo(anchor);
                     Debug.Log($"Anchor {unboundAnchor.Uuid} bound to GameObject.");
+                    return true;
                 }
                 else
                 {
                     Debug.LogError($"Localization failed for anchor {unboundAnchor.Uuid}");
+                    return false;
                 }
             }
+            return false;
         }
         else
         {
             Debug.LogError($"Anchor load failed with error {result.Status}.");
+            return false;
         }
     }
 

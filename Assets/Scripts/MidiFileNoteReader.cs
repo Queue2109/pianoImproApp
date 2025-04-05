@@ -47,6 +47,10 @@ public class MidiFileNoteReader : MonoBehaviour
     private bool colorAccompaniment = true;
     private bool colorMelody = true;
 
+    private EventHandler<MidiEventPlayedEventArgs> accompanimentHandler;
+    private EventHandler<MidiEventPlayedEventArgs> melodyHandler;
+
+
     // Filtered MIDI files for each mode
     private MidiFile accompanimentFile;
     private MidiFile melodyFile;
@@ -134,7 +138,8 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void StartFullSongPlayback()
     {
-        StartPlayback(PlaybackMode.FullSong);
+        currentMode = PlaybackMode.FullSong;
+        InitializePlaybacks();
         ColorAllKeys();
     }
     public void StartMelodyPlayback()
@@ -302,10 +307,10 @@ public class MidiFileNoteReader : MonoBehaviour
         practiceMode = !practiceMode;
         if(practiceMode)
         {
-            GameObject.Find("PracticeMode").GetComponent<TextMeshPro>().text = "Mode: Practice";
+            GameObject.Find("PlayModeText").GetComponent<TextMeshPro>().text = "Mode: Practice";
             StartPlayback(PlaybackMode.FullSong);
         } else {
-            GameObject.Find("PracticeMode").GetComponent<TextMeshPro>().text = "Mode: Classic (with scoring system)";
+            GameObject.Find("PlayModeText").GetComponent<TextMeshPro>().text = "Mode: Classic (with scoring system)";
             StartPlayback(PlaybackMode.FullSong);
         }
         GameObject.Find("SlowDownButton").SetActive(practiceMode);
@@ -314,74 +319,65 @@ public class MidiFileNoteReader : MonoBehaviour
         GameObject.Find("FastForwardButton").SetActive(practiceMode);
     }
 
-    private void StartPlayback(PlaybackMode mode)
+    private void InitializePlaybacks()
     {
-        Debug.Log("In the startPlayback");
         StopPlayback();
         DisposeDevice();
 
         outputDevice = OutputDevice.GetAll().FirstOrDefault();
         if (outputDevice == null)
         {
-            Debug.LogError("No MIDI output device found. Cannot start playback.");
+            Debug.LogError("No MIDI output device found.");
             return;
         }
 
-        currentMode = mode;
-        if (accompanimentFile == null || melodyFile == null)
-        {
-            Debug.LogError("Both Accompaniment and Melody files are required for FullSong mode.");
-            return;
-        }
+        accompanimentPlayback = accompanimentFile.GetPlayback();
+        melodyPlayback = melodyFile.GetPlayback();
 
-        accompanimentPlayback = accompanimentFile.GetPlayback(outputDevice);
-        melodyPlayback = melodyFile.GetPlayback(outputDevice);
+        accompanimentPlayback.Speed = playbackSpeed;
+        melodyPlayback.Speed = playbackSpeed;
 
-        // Attach event handlers
         accompanimentPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
         accompanimentPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
         melodyPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
         melodyPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
-        AttachPlaybackCycleEvents();
-
-        if (mode == PlaybackMode.FullSong)
-        {
-            playAccompanimentButtonText.text = "Playing accompaniment: ON";
-            playMelodyButtonText.text = "Playing melody: ON";
-
-            muteAccompanimentPlayback = false;
-            muteMelodyPlayback = false;
-        }
-        else if (mode == PlaybackMode.Accompaniment)
-        {
-            playAccompanimentButtonText.text = "Playing accompaniment: ON";
-            playMelodyButtonText.text = "Playing melody: OFF";
-
-            muteAccompanimentPlayback = false;
-            muteMelodyPlayback = true;
-        }
-        else if (mode == PlaybackMode.Melody)
-        {
-            playAccompanimentButtonText.text = "Playing accompaniment: OFF";
-            playMelodyButtonText.text = "Playing melody: ON";
-
-            muteAccompanimentPlayback = true;
-            muteMelodyPlayback = false;
-        }
 
         SubscribeToMutePlaybacks();
 
-        accompanimentPlayback.Start();
-        melodyPlayback.Start();
+        AttachPlaybackCycleEvents();
 
-        isPlaying = true;
-        isSongReady = true;
-        Debug.Log($"Song ready {isSongReady} isPlaying {isPlaying}");
+        StartPlayback(currentMode);
+    }
+
+    private void StartPlayback(PlaybackMode mode)
+    {
+        currentMode = mode;
+        if (accompanimentPlayback == null || melodyPlayback == null)
+        {
+            Debug.LogError("Both Accompaniment and Melody files are required for FullSong mode.");
+            InitializePlaybacks();
+            return;
+        }
+
+        muteAccompanimentPlayback = (mode == PlaybackMode.Melody);
+        muteMelodyPlayback = (mode == PlaybackMode.Accompaniment);
+
+        playAccompanimentButtonText.text = $"Playing accompaniment: {(muteAccompanimentPlayback ? "OFF" : "ON")}";
+        playMelodyButtonText.text = $"Playing melody: {(muteMelodyPlayback ? "OFF" : "ON")}";
+
+        if (!isPlaying)
+        {
+            accompanimentPlayback.Start();
+            melodyPlayback.Start();
+            isPlaying = true;
+            isSongReady = true;
+        }
 
         totalTime = accompanimentPlayback?.GetDuration<MetricTimeSpan>().TotalSeconds ?? melodyPlayback.GetDuration<MetricTimeSpan>().TotalSeconds;
         totalDuration = accompanimentPlayback?.GetDuration<MetricTimeSpan>() ?? melodyPlayback.GetDuration<MetricTimeSpan>();
 
         pianoFunctions.ResetAllKeysToDefaultColor();
+
         UpdatePlayPauseButtons();
         UpdateUI();
 
@@ -390,19 +386,30 @@ public class MidiFileNoteReader : MonoBehaviour
 
     private void SubscribeToMutePlaybacks()
     {
-        melodyPlayback.EventPlayed += (_, e) =>
+        // Unsubscribe if already assigned
+        if (accompanimentHandler != null)
+            accompanimentPlayback.EventPlayed -= accompanimentHandler;
+
+        if (melodyHandler != null)
+            melodyPlayback.EventPlayed -= melodyHandler;
+
+        // Create new handlers that reflect current mute flags
+        accompanimentHandler = (_, e) =>
+        {
+            if (!muteAccompanimentPlayback)
+                outputDevice.SendEvent(e.Event);
+        };
+
+        melodyHandler = (_, e) =>
         {
             if (!muteMelodyPlayback)
                 outputDevice.SendEvent(e.Event);
         };
 
-        accompanimentPlayback = accompanimentFile.GetPlayback();
-        accompanimentPlayback.EventPlayed += (_, e) =>
-        {
-            if (!muteAccompanimentPlayback)
-                outputDevice.SendEvent(e.Event);
-        };
+        accompanimentPlayback.EventPlayed += accompanimentHandler;
+        melodyPlayback.EventPlayed += melodyHandler;
     }
+
     public void StopPlayback()
     {
         if (accompanimentPlayback != null)
@@ -444,7 +451,6 @@ public class MidiFileNoteReader : MonoBehaviour
         }
 
         CacheFilteredFiles();
-
         
         if (accompanimentFile == null || melodyFile == null)
         {
@@ -901,6 +907,7 @@ public class MidiFileNoteReader : MonoBehaviour
         scoringManager.LoadNotes(allAccompanimentNotes, true);
         scoringManager.LoadNotes(allMelodyNotes, false);
     }
+
     public void CheckUserNote(int noteNumber)
     {
         if (!isPlaying || !isSongReady) return;
@@ -941,8 +948,6 @@ public class MidiFileNoteReader : MonoBehaviour
             return "Accompaniment";
         else return "Accompaniment";
     }
-
-
     #endregion
 }
 public class MidiNoteData
