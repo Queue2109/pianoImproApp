@@ -80,95 +80,29 @@ public class SongProgressManager : MonoBehaviour
         return allSongsProgress.songs.Find(p => p.songId == songId);
     }
 
-    /// <summary>
-    /// Marks a given song as cleared in the specified hand mode.
-    /// </summary>
-    public void MarkSongCleared(string songId, string handMode)
-    {
-        // 1. Look up existing progress for this song
-        SongProgress progress = allSongsProgress.songs.Find(p => p.songId == songId);
-        if (progress == null)
-        {
-            // Create new if we don't have it yet
-            progress = new SongProgress();
-            progress.songId = songId;
-            allSongsProgress.songs.Add(progress);
-        }
-
-        // 2. Update the relevant hand mode flag(s)
-        switch (handMode)
-        {
-            case "Accompaniment":
-                progress.leftHandCleared = true;
-                break;
-            case "Melody":
-                progress.rightHandCleared = true;
-                break;
-            case "Full":
-                progress.bothHandsCleared = true;
-                break;
-            default:
-                Debug.LogWarning("Unknown hand mode: " + handMode);
-                break;
-        }
-
-        // 3. Save changes to disk
-        SaveProgress();
-    }
-
-    /// <summary>
-    /// Checks if the player has cleared a specific hand mode for the given song.
-    /// </summary>
-    public bool IsSongCleared(string songId, string handMode)
+    public float GetOverallProgress(string songId)
     {
         SongProgress progress = allSongsProgress.songs.Find(p => p.songId == songId);
-        if (progress == null) return false;
-
-        switch (handMode)
-        {
-            case "Left":
-                return progress.leftHandCleared;
-            case "Right":
-                return progress.rightHandCleared;
-            case "Both":
-                return progress.bothHandsCleared;
-            default:
-                return false;
-        }
+        if (progress == null) return 0f;
+        return (progress.leftHandScore + progress.rightHandScore) / 2;
     }
 
-    /// <summary>
-    /// Example: Check if *all* hand modes are cleared for a given song.
-    /// </summary>
-    public bool IsSongFullyCleared(string songId)
-    {
-        SongProgress progress = allSongsProgress.songs.Find(p => p.songId == songId);
-        if (progress == null) return false;
-
-        return (progress.leftHandCleared &&
-                progress.rightHandCleared &&
-                progress.bothHandsCleared);
-    }
-
-    public void SaveSongProgress(string songId, string progressMode, float score)
+    public void SaveSongProgress(string songId, float leftHandScore, float rightHandsScore, int allImprovisedNotes, int wrongImprovisedNotes)
     {
         SongProgress progress = allSongsProgress.songs.Find(p => p.songId == songId);
         if (progress == null) return;
-        switch (progressMode)
-        {
-            case "Left":
-                progress.leftHandScore = score;
-                break;
-            case "Right":
-                progress.rightHandScore = score;
-                break;
-            case "Overall":
-                progress.overallScore = score;
-                break;
-            default:
-                break;
-        }
+        progress.leftHandScore = leftHandScore;
+        progress.rightHandScore = rightHandsScore;
+
+        progress.numberOfWrongImprovisedNotes = wrongImprovisedNotes;
+        progress.numberOfImprovisedNotes = allImprovisedNotes;
+
+        Debug.Log($"SaveSongProgress {progress.rightHandScore}");
+        Debug.Log($"SaveSongProgress {progress.leftHandScore}");
+
+        SaveProgress();
     }
+
     public void ResetProgress()
     {
         // Create a new blank progress object
@@ -184,18 +118,14 @@ public class SongProgressManager : MonoBehaviour
     }
 }
 
-
-
 [Serializable]
 public class SongProgress
 {
-    public string songId;            // Unique identifier for the song
-    public bool leftHandCleared;
-    public bool rightHandCleared;
-    public bool bothHandsCleared;
+    public string songId;
     public float leftHandScore;
     public float rightHandScore;
-    public float overallScore;
+    public int numberOfImprovisedNotes;
+    public int numberOfWrongImprovisedNotes;
 }
 
 [Serializable]

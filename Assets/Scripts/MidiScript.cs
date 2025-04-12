@@ -20,7 +20,6 @@ public class MidiScript : MonoBehaviour
     private readonly List<string> noteOrder = new() { "A", "A-Sharp", "B", "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp" };
     private bool _midiDeviceConnected;
     private const float CheckInterval = 0.5f; // Check every second
-    private List<int> pressedNotes = new List<int>();
     public TextMeshProUGUI textMeshProUGUI;
 
     private System.Action<Minis.MidiNoteControl, float> noteOnHandler;
@@ -115,8 +114,6 @@ public class MidiScript : MonoBehaviour
                 {
                     Debug.Log($"Note On: {note.noteNumber}, Velocity: {velocity}");
                     OnNoteOn?.Invoke(note.noteNumber);
-                    AddNoteToPressedList(note.noteNumber);
-
 
                     if (midiFileNoteReader != null)
                     {
@@ -128,7 +125,6 @@ public class MidiScript : MonoBehaviour
                 {
                     Debug.Log($"Note Off: {note.noteNumber}");
                     OnNoteOff?.Invoke(note.noteNumber);
-                    RemoveNoteFromPressedList(note.noteNumber);
                 };
 
                 midiDevice.onWillNoteOn += noteOnHandler;
@@ -161,22 +157,6 @@ public class MidiScript : MonoBehaviour
 
         noteOnHandler = null;
         noteOffHandler = null;
-    }
-
-    void AddNoteToPressedList(int noteNumber)
-    {
-        if (!pressedNotes.Contains(noteNumber))
-        {
-            pressedNotes.Add(noteNumber);
-        }
-    }
-
-    void RemoveNoteFromPressedList(int noteNumber)
-    {
-        if (pressedNotes.Contains(noteNumber))
-        {
-            pressedNotes.Remove(noteNumber);
-        }
     }
 
     public string NoteNameConverter(int midiNote)

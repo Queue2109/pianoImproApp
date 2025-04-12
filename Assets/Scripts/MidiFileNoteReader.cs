@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using Melanchall.DryWetMidi.Common;
 using System.Collections;
+using UnityEditor;
 
 public class MidiFileNoteReader : MonoBehaviour
 {
@@ -89,8 +90,6 @@ public class MidiFileNoteReader : MonoBehaviour
     private List<MidiNoteData> allMelodyNotes = new List<MidiNoteData>();   // All notes for scoring
     private float timingWindow = 0.25f; // ±0.25s window to count note as correct
 
-    private int totalLeft = 0;
-    private int totalRight = 0;
     private int correctLeft = 0;
     private int correctRight = 0;
 
@@ -100,6 +99,7 @@ public class MidiFileNoteReader : MonoBehaviour
     {
         httpHandler.scoringManager = scoringManager; // Link scoring logic to HTTP handler
         scoringManager.SetScoringMode(ScoringMode.Melody);
+        LoadNotesForScoring();
         SongProgressManager.Instance.ResetProgress();
     }
     public void Setup()
@@ -146,7 +146,11 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void StartFullSongPlayback()
     {
+        playbackSpeed = 1;
         currentMode = PlaybackMode.FullSong;
+        scoringManager.ResetScoring();
+        scoringManager.SetScoringMode(ScoringMode.Melody);
+        timesPlayed = 1;
         InitializePlaybacks();
         ColorAllKeys();
     }
@@ -332,18 +336,16 @@ public class MidiFileNoteReader : MonoBehaviour
             dialogTitle.text = "Classic mode";
             dialogText.text = "In this mode, your playing will be scored. Press play when you feel ready and play the song from start to end. Your score will be visible at the end of the song.";
             GameObject.Find("PlayModeText").GetComponent<TextMeshPro>().text = "Mode: Classic";
+            StartFullSongPlayback();
             scoringManager.StartScoring();
         }
 
-        playbackSpeed = 1;
 
         restartButton.SetActive(!practiceMode);
         slowDownButton.SetActive(practiceMode);
         speedUpButton.SetActive(practiceMode);
         rewindButton.SetActive(practiceMode);
         fastForwardButton.SetActive(practiceMode);
-
-        InitializePlaybacks();
     }
 
     private void InitializePlaybacks()
@@ -401,19 +403,12 @@ public class MidiFileNoteReader : MonoBehaviour
             return;
         }
 
-        if(scoringManager.GetScoringMode() == ScoringMode.Improvisation)
-        {
-            muteMelodyPlayback = true;
-        } else
-        {
-            muteMelodyPlayback = false;
-        }
-
         songName.text = $"{author}: {fileName}";
         scoringModeTitle.text = $"{(scoringManager.GetScoringMode() == ScoringMode.Melody ? "Play melody and accompaniment" : "Time to improvise!")}";
 
         muteAccompanimentPlayback = (mode == PlaybackMode.Melody);
-        muteMelodyPlayback = (mode == PlaybackMode.Accompaniment);
+        muteMelodyPlayback = (mode == PlaybackMode.Accompaniment || scoringManager.GetScoringMode() == ScoringMode.Improvisation);
+
         Debug.Log($"timesPLayed {timesPlayed}");
 
         playAccompanimentButtonText.text = $"Playing accompaniment: {(muteAccompanimentPlayback ? "OFF" : "ON")}";
@@ -422,7 +417,8 @@ public class MidiFileNoteReader : MonoBehaviour
         if (!isPlaying)
         {
             Debug.Log($"timesPLayed {isPlaying}");
-
+            melodyPlayback.MoveToTime(new MetricTimeSpan(0));
+            accompanimentPlayback.MoveToTime(new MetricTimeSpan(0));
             accompanimentPlayback.Start();
             melodyPlayback.Start();
             isPlaying = true;
@@ -501,6 +497,8 @@ public class MidiFileNoteReader : MonoBehaviour
         DisposeDevice();
 
         practiceMode = true;
+        LoadNotesForScoring();
+        scoringManager.SetScoringMode(ScoringMode.Melody);
         playbackSpeed = 1;
 
         outputDevice = OutputDevice.GetAll().FirstOrDefault();
@@ -597,14 +595,7 @@ public class MidiFileNoteReader : MonoBehaviour
                 WasPlayed = false
             });
         }
-        // We can store how many left vs right total
-        totalLeft = allAccompanimentNotes.Count() * 3; // we play the same accompaniment 3 times
-
-        totalRight = allMelodyNotes.Count() * 2; // times 2 because we play the melody first and third iteration
-
         LoadNotesForScoring();
-
-        Debug.Log($"ParseAllNotes => totalLeft={totalLeft}, totalRight={totalRight}");
     }
     #endregion
 
@@ -761,6 +752,7 @@ public class MidiFileNoteReader : MonoBehaviour
             // Second iteration: improvisation
             if (timesPlayed == 2)
             {
+                LoadNotesForScoring();
                 scoringManager.SetScoringMode(ScoringMode.Improvisation);
                 currentTime = new MetricTimeSpan(0, 0, 0);
                 accompanimentPlayback?.MoveToTime(currentTime);
@@ -771,6 +763,7 @@ public class MidiFileNoteReader : MonoBehaviour
             // Third iteration: scoring ON again
             else if (timesPlayed == 3)
             {
+                LoadNotesForScoring();
                 scoringManager.SetScoringMode(ScoringMode.Melody);
                 currentTime = new MetricTimeSpan(0, 0, 0);
                 accompanimentPlayback?.MoveToTime(currentTime);
@@ -808,42 +801,20 @@ public class MidiFileNoteReader : MonoBehaviour
 
             // calculate accuracy
             float leftAccuracy = scoringManager.GetAccompanimentScore();
-            float rightAccuracy = (scoringManager.GetMelodyScore() + scoringManager.GetImprovisationScore()) / 2;
-            float overallAccuracy = (float)(correctLeft + correctRight) / (totalLeft + totalRight);
+            float rightAccuracy = scoringManager.GetMelodyScore();
+            float overallAccuracy = (float)(leftAccuracy + rightAccuracy) / 2;
 
-            Debug.Log($"Song End. LeftAccuracy={leftAccuracy:P2}, RightAccuracy={rightAccuracy:P2}, Overall={overallAccuracy:P2}");
+            Debug.Log($"Song End. LeftAccuracy={leftAccuracy:P2},  {scoringManager.GetMelodyScore()} RightAccuracy={rightAccuracy:P2}, Overall={overallAccuracy:P2}");
 
             string songId = $"{author}-{fileName}";
+
             Transform songRow = GameObject.Find(songId)?.transform.Find("StarRow");
 
             SongProgress savedProgress = SongProgressManager.Instance.GetSongProgress(songId);
 
-            // Star logic
-            // If user got 90% left, star for left
-            // If user got 90% right, star for right
-            // If user got 90% overall, star for both
-            if (leftAccuracy >= 0.90f)
-                SongProgressManager.Instance.MarkSongCleared(songId, "Accompaniment");
-
-            if (rightAccuracy >= 0.90f)
-                SongProgressManager.Instance.MarkSongCleared(songId, "Melody");
-
-            if (overallAccuracy >= 0.90f)
-                SongProgressManager.Instance.MarkSongCleared(songId, "Full");
-
-            if(savedProgress != null) {
-                if (overallAccuracy > savedProgress.overallScore)
-                {
-                    SongProgressManager.Instance.SaveSongProgress(songId, "Overall", overallAccuracy);
-                }
-                if (leftAccuracy > savedProgress.leftHandScore)
-                {
-                    SongProgressManager.Instance.SaveSongProgress(songId, "Left", leftAccuracy);
-                }
-                if (rightAccuracy > savedProgress.rightHandScore)
-                {
-                    SongProgressManager.Instance.SaveSongProgress(songId, "Right", rightAccuracy);
-                }
+            if (savedProgress != null && SongProgressManager.Instance.GetOverallProgress(songId) < overallAccuracy || savedProgress == null)
+            {
+                SongProgressManager.Instance.SaveSongProgress(songId, leftAccuracy, rightAccuracy, scoringManager.totalImprovisedNotes, scoringManager.wrongImprovisedNotes);
             }
 
             Image[] images = songRow.GetComponentsInChildren<Image>();
@@ -957,10 +928,6 @@ public class MidiFileNoteReader : MonoBehaviour
     #endregion
 
     #region Public Scoring Method
-    public void SetScoringMode(ScoringMode mode)
-    {
-        scoringManager.SetScoringMode(mode);
-    }
 
     public void LoadNotesForScoring()
     {
@@ -972,42 +939,16 @@ public class MidiFileNoteReader : MonoBehaviour
     {
         if (!isPlaying || !isSongReady) return;
 
-        double currentSec = 0;
-        if (currentMode == PlaybackMode.FullSong)
+        
+        if (melodyPlayback != null)
         {
-            double accomTime = accompanimentPlayback?.GetCurrentTime<MetricTimeSpan>().TotalMicroseconds / 1_000_000.0 ?? 0;
-            double melodyTime = melodyPlayback?.GetCurrentTime<MetricTimeSpan>().TotalMicroseconds / 1_000_000.0 ?? 0;
-            currentSec = Math.Max(accomTime, melodyTime);
-        }
-        else if (melodyPlayback != null)
-        {
-            currentSec = melodyPlayback.GetCurrentTime<MetricTimeSpan>().TotalMicroseconds / 1_000_000.0;
-        }
+            double currentSec = melodyPlayback.GetCurrentTime<MetricTimeSpan>().TotalMicroseconds / 1_000_000.0;
 
-        string currentPlaybackSource = DeterminePlaybackSource(noteNumber, currentSec);
-
-        // Instead of doing the scoring here, just delegate to ScoringLogic
-        scoringManager.CheckUserNote(noteNumber, currentSec, currentPlaybackSource);
+            // Instead of doing the scoring here, just delegate to ScoringLogic
+            scoringManager.CheckUserNote(noteNumber, currentSec);
+        }
     }
 
-    private string DeterminePlaybackSource(int userNoteNumber, double currentTime)
-    {
-        bool matchesAccompaniment = allAccompanimentNotes.Any(n =>
-            Mathf.Abs((float)(n.StartTimeSeconds - currentTime)) <= timingWindow &&
-            n.NoteNumber == userNoteNumber);
-
-        bool matchesMelody = allMelodyNotes.Any(n =>
-            Mathf.Abs((float)(n.StartTimeSeconds - currentTime)) <= timingWindow &&
-            n.NoteNumber == userNoteNumber);
-
-        Debug.Log($"Current note matches the accompaniment: {matchesAccompaniment} and matches melody: {matchesMelody}");
-
-        if (matchesMelody)
-            return "Melody";
-        else if (matchesAccompaniment)
-            return "Accompaniment";
-        else return "Accompaniment";
-    }
     #endregion
 }
 public class MidiNoteData

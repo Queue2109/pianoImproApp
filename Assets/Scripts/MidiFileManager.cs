@@ -117,17 +117,15 @@ public class MidiFileManager : MonoBehaviour
     {
         Debug.Log("Setting stars for song: " + songId);
 
-        bool leftCleared = SongProgressManager.Instance.IsSongCleared(songId, "Left");
-        bool rightCleared = SongProgressManager.Instance.IsSongCleared(songId, "Right");
-        bool bothCleared = SongProgressManager.Instance.IsSongCleared(songId, "Both");
+        float highScore = SongProgressManager.Instance.GetOverallProgress(songId);
 
         Image leftStar = stars.FirstOrDefault(i => i.name == "Star1");
         Image middleStar = stars.FirstOrDefault(i => i.name == "Star2");
         Image rightStar = stars.FirstOrDefault(i => i.name == "Star3");
 
-        if (leftStar) leftStar.color = leftCleared ? yellowStar : grayStar;
-        if (middleStar) middleStar.color = bothCleared ? yellowStar : grayStar;
-        if (rightStar) rightStar.color = rightCleared ? yellowStar : grayStar;
+        if (leftStar) leftStar.color = highScore >= 70 ? yellowStar : grayStar;
+        if (middleStar) middleStar.color = highScore >= 95 ? yellowStar : grayStar;
+        if (rightStar) rightStar.color = highScore >= 80 ? yellowStar : grayStar;
     }
 
     private void ShowScoreBoardFromSavedData(string songId)
@@ -143,7 +141,7 @@ public class MidiFileManager : MonoBehaviour
             {
                 accuracyAccompanimentScoreText.GetComponent<TextMeshProUGUI>().text = $"{progress.leftHandScore * 100}%";
                 accuracyMelodyText.GetComponent<TextMeshProUGUI>().text = $"{progress.rightHandScore * 100}%";
-                accuracyOverallText.GetComponent<TextMeshProUGUI>().text = $"{progress.overallScore * 100}%";
+                accuracyOverallText.GetComponent<TextMeshProUGUI>().text = $"{SongProgressManager.Instance.GetOverallProgress(songId) * 100}%";
             } else
             {
                 accuracyAccompanimentScoreText.GetComponent<TextMeshProUGUI>().text = $"0%";
