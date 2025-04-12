@@ -204,7 +204,7 @@ public class PianoFunctions : MonoBehaviour
             }
         }
 
-        AdjustCollider();
+        AdjustColliderPrecisely();
 
         Debug.Log($"Piano adjusted to {keyCount} keys starting from {startNote}.");
     }
@@ -243,8 +243,8 @@ public class PianoFunctions : MonoBehaviour
 
     public void ScaleObject(float scaleFactor)
     {
-        transform.localScale *= scaleFactor;
-        AdjustCollider();
+        transform.localScale = new Vector3(transform.localScale.x * scaleFactor, transform.localScale.y * scaleFactor, transform.localScale.z * scaleFactor);
+        AdjustColliderPrecisely();
     }
     public void ScaleWhiteKeys(float scaleFactor)
     {
@@ -268,7 +268,7 @@ public class PianoFunctions : MonoBehaviour
 
             float newZPosition = key.localPosition.z + (changeInHeight * ratioZtoY);
             key.localPosition = new Vector3(key.localPosition.x, key.localPosition.y, newZPosition);
-            AdjustCollider();
+            AdjustColliderPrecisely();
         }
     }
 
@@ -291,7 +291,6 @@ public class PianoFunctions : MonoBehaviour
             float newZPosition = key.localPosition.z + (changeInHeight * ratioZtoY);
             key.localPosition = new Vector3(key.localPosition.x, key.localPosition.y, newZPosition);
         }
-        AdjustCollider();
     }
 
     public void MoveForward()
@@ -335,7 +334,7 @@ public class PianoFunctions : MonoBehaviour
         MoveObject(-transform.up * 0.01f);
     }
 
-    public void AdjustCollider()
+    public void AdjustColliderPrecisely()
     {
         if (pianoKeyboard == null)
         {
@@ -343,45 +342,72 @@ public class PianoFunctions : MonoBehaviour
             return;
         }
 
-        BoxCollider collider = pianoKeyboard.GetComponent<BoxCollider>();
-        if (collider == null)
+        BoxCollider boxCol = pianoKeyboard.GetComponent<BoxCollider>();
+        if (boxCol == null)
         {
             Debug.LogError("BoxCollider component not found on the piano keyboard object.");
             return;
         }
 
-        // 1. Get ALL active keys (white or black).
-        //    Exclude the root piano transform itself, just child keys.
-        List<Transform> activeKeys = pianoKeyboard.GetComponentsInChildren<Transform>()
-            .Where(t => t != pianoKeyboard.transform && t.gameObject.activeSelf && !t.name.Contains("Hand") && !t.name.Contains("PlayControl") && !t.name.Contains("Chord"))
-            .OrderBy(t => t.localPosition.x)
+        // Grab ALL active Renderers (white/black keys), 
+        // excluding any "Hand", "PlayControl", or "Chord" objects.
+        var keyRenderers = pianoKeyboard.GetComponentsInChildren<Renderer>()
+            .Where(r => r.gameObject.activeSelf
+                        && !r.name.Contains("Hand")
+                        && !r.name.Contains("Chord"))
             .ToList();
 
-        // 2. Ensure we have something to measure.
-        if (activeKeys.Count == 0)
+        if (keyRenderers.Count == 0)
         {
-            Debug.LogError("No active keys found. Cannot adjust collider.");
+            Debug.LogWarning("No active key renderers found. Collider not adjusted.");
             return;
         }
 
-        // 3. Identify the leftmost and rightmost active key in local space.
-        Transform firstKey = activeKeys.First();  // lowest x
-        Transform lastKey = activeKeys.Last();   // highest x
+        // Initialize bounding box min/max in local space
+        Vector3 minLocal = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        Vector3 maxLocal = new Vector3(float.MinValue, float.MinValue, float.MinValue);
 
-        // 4. Calculate midpoint + new width (sizeX) in local space.
-        Vector3 lowPos = firstKey.localPosition;
-        Vector3 highPos = lastKey.localPosition;
-        Vector3 midpoint = (lowPos + highPos) * 0.5f;
+        // We'll keep the existing collider center
+        Vector3 originalCenter = (minLocal + maxLocal) * 0.5f;
 
-        float sizeX = Mathf.Abs(highPos.x - lowPos.x);
-        float sizeY = collider.size.y; // keep original Y (height)
-        float sizeZ = collider.size.z * whiteKeyScaleFactor; // keep original Z (depth)
+        // Calculate the bounding box of all renderers in local coordinates
+        foreach (var rend in keyRenderers)
+        {
+            // Bounds are in world space
+            Bounds worldBounds = rend.bounds;
 
-        // 5. Assign new center & size to the BoxCollider
-        collider.center = midpoint;
-        collider.size = new Vector3(sizeX, sizeY, sizeZ);
+            // Convert the 8 corners of the world bounding box to local space
+            Vector3[] corners =
+            {
+            new Vector3(worldBounds.min.x, worldBounds.min.y, worldBounds.min.z),
+            new Vector3(worldBounds.min.x, worldBounds.min.y, worldBounds.max.z),
+            new Vector3(worldBounds.min.x, worldBounds.max.y, worldBounds.min.z),
+            new Vector3(worldBounds.min.x, worldBounds.max.y, worldBounds.max.z),
+            new Vector3(worldBounds.max.x, worldBounds.min.y, worldBounds.min.z),
+            new Vector3(worldBounds.max.x, worldBounds.min.y, worldBounds.max.z),
+            new Vector3(worldBounds.max.x, worldBounds.max.y, worldBounds.min.z),
+            new Vector3(worldBounds.max.x, worldBounds.max.y, worldBounds.max.z)
+        };
 
-        Debug.Log($"Adjusted collider to active keys. Count={activeKeys.Count}, Width={sizeX}");
+            foreach (Vector3 corner in corners)
+            {
+                Vector3 localPos = pianoKeyboard.transform.InverseTransformPoint(corner);
+
+                // Update local min/max
+                minLocal = Vector3.Min(minLocal, localPos);
+                maxLocal = Vector3.Max(maxLocal, localPos);
+            }
+        }
+
+        // New size = difference between local max and min
+        Vector3 newSize = maxLocal - minLocal;
+
+        // Assign the new size to the collider
+        // We do NOT change center — we keep whatever was in boxCol.center
+        boxCol.size = newSize;
+
+        // (Optional) if you want to confirm or log the results:
+        Debug.Log($"AdjustColliderPrecisely: size={newSize}, centerPreserved={originalCenter}");
     }
 
     public void BringPianoCloser()

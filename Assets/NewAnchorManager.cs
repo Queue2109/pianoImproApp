@@ -39,7 +39,7 @@ public class NewAnchorManager : MonoBehaviour
                 await SaveCurrentAnchorAsync();
             }
         }
-        pianoFunctions.AdjustCollider();
+        pianoFunctions.AdjustColliderPrecisely();
         if (anchorReady)
         {
             moveObjectScript.LoadOnStart();
