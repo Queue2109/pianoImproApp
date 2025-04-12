@@ -9,14 +9,10 @@ public class MoveObjectsInFrontOfCamera : MonoBehaviour
     [Tooltip("The OVRCameraRig in your scene.")]
     public Transform centerEyeAnchor;
 
-    [Header("Settings")]
-    public float distanceFromCamera = 2f;
-
 
     void Start()
     {
 
-        MoveObjects();
     }
 
     public void MoveObjects()

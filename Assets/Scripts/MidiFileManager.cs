@@ -181,6 +181,7 @@ public class MidiFileManager : MonoBehaviour
         string lastPlayedKey = PlayerPrefs.GetString("LastPlayedSong", null);
         if (string.IsNullOrEmpty(lastPlayedKey) || !songFilePaths.ContainsKey(lastPlayedKey))
         {
+            lastPlayedSongGameObject.SetActive(false);
             return;
         }
 

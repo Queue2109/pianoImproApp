@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using Melanchall.DryWetMidi.Multimedia;
+using System.Linq;
 using Minis;
 using TMPro;
 using UnityEngine;
@@ -23,8 +25,12 @@ public class MidiScript : MonoBehaviour
     private System.Action<Minis.MidiNoteControl, float> noteOnHandler;
     private System.Action<Minis.MidiNoteControl> noteOffHandler;
 
+    private OutputDevice outputDevice;
+
     void Start()
     {
+    
+        outputDevice = OutputDevice.GetAll().FirstOrDefault();
         StartCoroutine(CheckForMidiDeviceConnection());
     }
 
@@ -109,6 +115,7 @@ public class MidiScript : MonoBehaviour
                     Debug.Log($"Note On: {note.noteNumber}, Velocity: {velocity}");
                     OnNoteOn?.Invoke(note.noteNumber);
                     AddNoteToPressedList(note.noteNumber);
+
 
                     if (midiFileNoteReader != null)
                     {

@@ -31,6 +31,7 @@ public class MidiFileNoteReader : MonoBehaviour
     public GameObject speedUpButton;
     public GameObject fastForwardButton;
     public GameObject rewindButton;
+    public GameObject restartButton;
     public GameObject scoreBoard;
     public TextMeshPro songName;
     public TextMeshProUGUI timeText;
@@ -334,12 +335,15 @@ public class MidiFileNoteReader : MonoBehaviour
             scoringManager.StartScoring();
         }
 
+        playbackSpeed = 1;
+
+        restartButton.SetActive(!practiceMode);
         slowDownButton.SetActive(practiceMode);
         speedUpButton.SetActive(practiceMode);
         rewindButton.SetActive(practiceMode);
         fastForwardButton.SetActive(practiceMode);
-        currentTime = new MetricTimeSpan(0);
-        StartPlayback(PlaybackMode.FullSong);
+
+        InitializePlaybacks();
     }
 
     private void InitializePlaybacks()
@@ -383,6 +387,7 @@ public class MidiFileNoteReader : MonoBehaviour
 
         if(practiceMode && slowDownButton.activeSelf == false)
         {
+            restartButton.SetActive(!practiceMode);
             slowDownButton.SetActive(practiceMode);
             speedUpButton.SetActive(practiceMode);
             rewindButton.SetActive(practiceMode);
@@ -394,6 +399,14 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.LogError("Both Accompaniment and Melody files are required for FullSong mode.");
             InitializePlaybacks();
             return;
+        }
+
+        if(scoringManager.GetScoringMode() == ScoringMode.Improvisation)
+        {
+            muteMelodyPlayback = true;
+        } else
+        {
+            muteMelodyPlayback = false;
         }
 
         songName.text = $"{author}: {fileName}";
@@ -488,6 +501,7 @@ public class MidiFileNoteReader : MonoBehaviour
         DisposeDevice();
 
         practiceMode = true;
+        playbackSpeed = 1;
 
         outputDevice = OutputDevice.GetAll().FirstOrDefault();
         if (outputDevice == null)
