@@ -37,7 +37,7 @@ public class PianoFunctions : MonoBehaviour
         pianoKeyboard = GameObject.FindGameObjectWithTag("Piano");
         blackKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => child.name.Contains("Sharp")).ToList();
         blackKeys = blackKeys.OrderBy(key => key.position.x).ToList();
-        whiteKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => !child.name.Contains("Sharp")).ToList();
+        whiteKeys = pianoKeyboard.GetComponentsInChildren<Transform>().Where(child => !child.name.Contains("Sharp") && !child.name.Contains("Hand")).ToList();
         whiteKeys = whiteKeys.OrderBy(key => key.position.x).ToList();
 
         Debug.Log(whiteKeys);
@@ -194,7 +194,7 @@ public class PianoFunctions : MonoBehaviour
         // Set keys active or inactive based on required key count
         foreach (Transform child in transform)
         {
-            if (allKeys.Contains(child.name) || child.name.Contains("Hand") || child.name.Contains("Chord") || child.name.Contains("PlayControl"))
+            if (allKeys.Contains(child.name) || child.name.Contains("Hand") || child.name.Contains("Chord") || child.name.Contains("Mode"))
             {
                 child.gameObject.SetActive(true);
             }
@@ -354,6 +354,7 @@ public class PianoFunctions : MonoBehaviour
         var keyRenderers = pianoKeyboard.GetComponentsInChildren<Renderer>()
             .Where(r => r.gameObject.activeSelf
                         && !r.name.Contains("Hand")
+                        && !r.name.Contains("Mode")
                         && !r.name.Contains("Chord"))
             .ToList();
 

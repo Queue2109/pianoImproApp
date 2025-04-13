@@ -14,7 +14,6 @@ public class HttpHandler : MonoBehaviour
 
     string url = "http://127.0.0.1:5000/analyze";
     public TextMeshProUGUI text;
-    public int currentChordBaseNote = 0;
     Dictionary<string, string> chordDictionary;
     public ScoringLogic scoringManager;
     void Start()
@@ -103,39 +102,13 @@ public class HttpHandler : MonoBehaviour
                 {
                     text.text = responseData.rootNote + chordSymbol;
                 }
-
-                currentChordBaseNote = ConvertNoteToMidi(responseData.rootNote);
             }
             else
             {
                 Debug.LogWarning($"Unknown chord: {responseData.rootNote} {responseData.result}");
             }
 
-
-
             Debug.Log("Detected Chord: " + responseData.rootNote + " " + responseData.result);
-        }
-    }
-
-    private int ConvertNoteToMidi(string note)
-    {
-        Dictionary<string, int> noteToMidi = new Dictionary<string, int>
-    {
-        {"C", 0}, {"C#", 1}, {"D", 2}, {"D#", 3}, {"E", 4},
-        {"F", 5}, {"F#", 6}, {"G", 7}, {"G#", 8}, {"A", 9},
-        {"A#", 10}, {"B", 11}
-    };
-
-        note = note.ToUpper(); // Ensure case consistency
-
-        if (noteToMidi.ContainsKey(note))
-        {
-            return noteToMidi[note];
-        }
-        else
-        {
-            Debug.LogError($"Unknown note: {note}");
-            return -1;  // Error case
         }
     }
 

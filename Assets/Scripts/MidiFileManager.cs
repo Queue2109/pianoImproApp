@@ -18,6 +18,8 @@ public class MidiFileManager : MonoBehaviour
     public GameObject accuracyAccompanimentScoreText;
     public GameObject accuracyMelodyText;
     public GameObject accuracyOverallText;
+    public GameObject totalImprovisedNotesText;
+    public GameObject wrongImprovisedNotesText;
 
     public PanelManagerSongList panelManagerSongList;
 
@@ -139,31 +141,19 @@ public class MidiFileManager : MonoBehaviour
 
             if (progress != null)
             {
-                accuracyAccompanimentScoreText.GetComponent<TextMeshProUGUI>().text = $"{progress.leftHandScore * 100}%";
-                accuracyMelodyText.GetComponent<TextMeshProUGUI>().text = $"{progress.rightHandScore * 100}%";
-                accuracyOverallText.GetComponent<TextMeshProUGUI>().text = $"{SongProgressManager.Instance.GetOverallProgress(songId) * 100}%";
+                accuracyAccompanimentScoreText.GetComponent<TextMeshProUGUI>().text = $"{(progress.leftHandScore * 100f).ToString("F1")}%";
+                accuracyMelodyText.GetComponent<TextMeshProUGUI>().text = $"{(progress.rightHandScore * 100f).ToString("F1")}%";
+                accuracyOverallText.GetComponent<TextMeshProUGUI>().text = $"{(SongProgressManager.Instance.GetOverallProgress(songId) * 100f).ToString("")}%";
+                totalImprovisedNotesText.GetComponent<TextMeshProUGUI>().text = $"{progress.numberOfImprovisedNotes}";
+                wrongImprovisedNotesText.GetComponent<TextMeshProUGUI>().text = $"{progress.numberOfWrongImprovisedNotes}";
             } else
             {
                 accuracyAccompanimentScoreText.GetComponent<TextMeshProUGUI>().text = $"0%";
                 accuracyMelodyText.GetComponent<TextMeshProUGUI>().text = $"0%";
                 accuracyOverallText.GetComponent<TextMeshProUGUI>().text = $"0%";
+                totalImprovisedNotesText.GetComponent<TextMeshProUGUI>().text = $"0";
+                wrongImprovisedNotesText.GetComponent<TextMeshProUGUI>().text = $"0";
             }
-
-            SetStarColors(songId, GameObject.Find("StarRowScoring").GetComponentsInChildren<Image>());
-        });
-    }
-
-
-    public void ShowScoreBoardWithCurrentData(string songId, float accompanimentScore, float melodyScore, float overallScore)
-    {
-        MainThreadDispatcher.Enqueue(() =>
-        {
-            scoreBoard.SetActive(true);
-
-            songNameText.GetComponent<TextMeshProUGUI>().text = songId;
-            accuracyAccompanimentScoreText.GetComponent<TextMeshProUGUI>().text = $"{accompanimentScore * 100}%";
-            accuracyMelodyText.GetComponent<TextMeshProUGUI>().text = $"{melodyScore * 100}%";
-            accuracyOverallText.GetComponent<TextMeshProUGUI>().text = $"{overallScore * 100}%";
 
             SetStarColors(songId, GameObject.Find("StarRowScoring").GetComponentsInChildren<Image>());
         });

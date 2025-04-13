@@ -69,7 +69,6 @@ public class NewAnchorManager : MonoBehaviour
         // Wait until OVRSpatialAnchor reports it is created
         while (!anchor.Created)
         {
-            Debug.Log("Waiting for anchor to be created...");
             await Task.Delay(500);
         }
 

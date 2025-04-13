@@ -33,6 +33,7 @@ public class ScoringLogic
     public void SetScoringMode(ScoringMode mode)
     {
         currentScoringMode = mode;
+        PrepareForNextCycle();
         Debug.Log($"played Scoring mode set to: {mode}");
     }
 
@@ -147,7 +148,6 @@ public class ScoringLogic
         }
     }
 
-
     private HashSet<int> GetDynamicBluesScale(int rootNote, bool isMajorChord)
     {
         // If major chord, shift root down by 3
@@ -180,7 +180,6 @@ public class ScoringLogic
 
         return fullRangeSet;
     }
-
 
     public void SetCurrentChord(List<int> notes)
     {
@@ -234,6 +233,11 @@ public class ScoringLogic
         return Mathf.Clamp01(rawScore);
     }
 
+    private void PrepareForNextCycle()
+    {
+        accompChronoList?.Reset();
+        melodyChronoList?.Reset();
+    }
 
     public void ResetScoring()
     {
@@ -305,7 +309,12 @@ public class ScoringLogic
             {
                 var note = sortedNotes[i];
                 if (note.WasPlayed)
+                {
+                    Debug.Log("Note was played.");
                     continue;
+                }
+
+                Debug.Log($"Curent sec {currentSec}");
 
                 double noteTime = note.StartTimeSeconds;
                 // If we've exceeded currentSec + timingWindow, no need to check further

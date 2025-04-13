@@ -87,19 +87,27 @@ public class SongProgressManager : MonoBehaviour
         return (progress.leftHandScore + progress.rightHandScore) / 2;
     }
 
-    public void SaveSongProgress(string songId, float leftHandScore, float rightHandsScore, int allImprovisedNotes, int wrongImprovisedNotes)
+    public void SaveSongProgress(string songId, float leftHandScore, float rightHandsScore,
+                             int allImprovisedNotes, int wrongImprovisedNotes)
     {
+        // Try to find existing entry by songId
         SongProgress progress = allSongsProgress.songs.Find(p => p.songId == songId);
-        if (progress == null) return;
+
+        // If none is found, create a new one and add to the list
+        if (progress == null)
+        {
+            progress = new SongProgress();
+            progress.songId = songId;
+            allSongsProgress.songs.Add(progress);
+        }
+
+        // Update the fields
         progress.leftHandScore = leftHandScore;
         progress.rightHandScore = rightHandsScore;
-
         progress.numberOfWrongImprovisedNotes = wrongImprovisedNotes;
         progress.numberOfImprovisedNotes = allImprovisedNotes;
 
-        Debug.Log($"SaveSongProgress {progress.rightHandScore}");
-        Debug.Log($"SaveSongProgress {progress.leftHandScore}");
-
+        // Finally, save
         SaveProgress();
     }
 
@@ -116,7 +124,7 @@ public class SongProgressManager : MonoBehaviour
 
         Debug.Log("All songs progress reset.");
     }
-}
+} 
 
 [Serializable]
 public class SongProgress

@@ -1,169 +1,135 @@
-using System.Collections;
-using System.Collections.Generic;
-using Melanchall.DryWetMidi.Multimedia;
-using System.Linq;
-using Minis;
-using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
-using Melanchall.DryWetMidi.Core;
+using TMPro;
+using Minis;
+using System.Linq;
 
 public class MidiScript : MonoBehaviour
 {
+    // Event delegates if you still want them:
     public delegate void MidiNoteEvent(int noteNumber);
     public event MidiNoteEvent OnNoteOn;
     public event MidiNoteEvent OnNoteOff;
+
+    [Header("References")]
     public MidiFileNoteReader midiFileNoteReader;
     public GameObject midiListenerUIObject;
-
-    private readonly List<string> noteOrder = new() { "A", "A-Sharp", "B", "C", "C-Sharp", "D", "D-Sharp", "E", "F", "F-Sharp", "G", "G-Sharp" };
-    private bool _midiDeviceConnected;
-    private const float CheckInterval = 0.5f; // Check every second
     public TextMeshProUGUI textMeshProUGUI;
 
-    private System.Action<Minis.MidiNoteControl, float> noteOnHandler;
-    private System.Action<Minis.MidiNoteControl> noteOffHandler;
+    // We only care about ONE device:
+    private MidiDevice currentMidiDevice = null;
 
-    private OutputDevice outputDevice;
+    // We'll store these so we can unsubscribe cleanly:
+    private System.Action<MidiNoteControl, float> noteOnHandler;
+    private System.Action<MidiNoteControl> noteOffHandler;
 
-    void Start()
+    void OnEnable()
     {
-    
-        outputDevice = OutputDevice.GetAll().FirstOrDefault();
-        StartCoroutine(CheckForMidiDeviceConnection());
-    }
+        // Subscribe to device change events
+        InputSystem.onDeviceChange += OnDeviceChange;
 
-    IEnumerator CheckForMidiDeviceConnection()
-    {
-        while (true)
+        // If a device is already present at startup, let's attach to it
+        var midiDevice = InputSystem.devices.FirstOrDefault(d => d is MidiDevice) as MidiDevice;
+        if (midiDevice != null)
         {
-            bool isCurrentlyConnected = IsMidiDeviceAvailable();
-
-            if (isCurrentlyConnected && !_midiDeviceConnected)
-            {
-               
-                _midiDeviceConnected = true;
-                Debug.Log("MIDI device connected.");
-                textMeshProUGUI.text = "MIDI device successfully connected";
-
-                EnableMidiListeners();
-
-                // Hide UI after delay
-                yield return new WaitForSeconds(5f);
-                MainThreadDispatcher.Enqueue(() => midiListenerUIObject.SetActive(false));
-            }
-            else if (!isCurrentlyConnected && _midiDeviceConnected)
-            {
-                _midiDeviceConnected = false;
-                midiListenerUIObject.SetActive(true);
-                Debug.LogWarning("MIDI device disconnected.");
-                textMeshProUGUI.text = "MIDI device disconnected.";
-                DisableMidiListeners();
-
-                // Show UI again if needed
-                MainThreadDispatcher.Enqueue(() => midiListenerUIObject.SetActive(true));
-            }
-
-            yield return new WaitForSeconds(CheckInterval); // Check every few seconds
-        }
-    }
-
-
-    public bool IsMidiDeviceAvailable()
-    {
-        foreach (var device in InputSystem.devices)
-        {
-            if (device is Minis.MidiDevice)
-            {
-                return true;
-            }
+            SubscribeToDevice(midiDevice);
         }
 
-        return false;
+        UpdateUI();
     }
 
-    public bool ListenForDevice()
+    void OnDisable()
     {
-        // Get all available MIDI devices
-        var devices = InputSystem.devices;
+        // Unsubscribe from the system event
+        InputSystem.onDeviceChange -= OnDeviceChange;
 
-        // Filter and count MIDI devices only
-        foreach (var device in devices)
-        {
-            if (device is Minis.MidiDevice)
-            {
-                return true; // A MIDI device is connected
-            }
-        }
-
-        Debug.Log("No MIDI devices detected.");
-        return false; // No MIDI device connected
+        // Unsubscribe from our device if it still exists
+        UnsubscribeCurrentDevice();
     }
 
-    void EnableMidiListeners()
+    private void OnDeviceChange(InputDevice device, InputDeviceChange change)
     {
-        foreach (var device in InputSystem.devices)
-        {
-            if (device is Minis.MidiDevice midiDevice)
-            {
-                Debug.Log($"Registering listeners for MIDI device: {midiDevice.description.product}");
+        if (device is not Minis.MidiDevice midiDevice)
+            return; // We only care about MIDI devices
 
-                // Save handlers so we can remove them later
-                noteOnHandler = (note, velocity) =>
+        switch (change)
+        {
+            case InputDeviceChange.Added:
+            case InputDeviceChange.Reconnected:
+                // If we don't have a device yet, use this one
+                if (currentMidiDevice == null)
                 {
-                    Debug.Log($"Note On: {note.noteNumber}, Velocity: {velocity}");
-                    OnNoteOn?.Invoke(note.noteNumber);
-
-                    if (midiFileNoteReader != null)
-                    {
-                        midiFileNoteReader.CheckUserNote(note.noteNumber);
-                    }
-                };
-
-                noteOffHandler = (note) =>
-                {
-                    Debug.Log($"Note Off: {note.noteNumber}");
-                    OnNoteOff?.Invoke(note.noteNumber);
-                };
-
-                midiDevice.onWillNoteOn += noteOnHandler;
-                midiDevice.onWillNoteOff += noteOffHandler;
-
-                Debug.Log("Listeners registered successfully.");
-            }
-        }
-    }
-
-    void DisableMidiListeners()
-    {
-        foreach (var device in InputSystem.devices)
-        {
-            if (device is Minis.MidiDevice midiDevice)
-            {
-                if (noteOnHandler != null)
-                {
-                    midiDevice.onWillNoteOn -= noteOnHandler;
+                    SubscribeToDevice(midiDevice);
                 }
+                break;
 
-                if (noteOffHandler != null)
+            case InputDeviceChange.Removed:
+            case InputDeviceChange.Disconnected:
+                // If this is the device we're using, unsubscribe
+                if (midiDevice == currentMidiDevice)
                 {
-                    midiDevice.onWillNoteOff -= noteOffHandler;
+                    UnsubscribeCurrentDevice();
                 }
-
-                Debug.Log($"Listeners removed for MIDI device: {midiDevice.description.product}");
-            }
+                break;
         }
 
+        UpdateUI();
+    }
+
+    private void SubscribeToDevice(MidiDevice device)
+    {
+        if (currentMidiDevice != null)
+        {
+            // Already have a device; optionally unsubscribe from it
+            // if you truly only want exactly one at a time.
+            UnsubscribeCurrentDevice();
+        }
+
+        currentMidiDevice = device;
+        Debug.Log($"MIDI device connected: {device.description.product}");
+
+        // Define the handlers
+        noteOnHandler = (note, velocity) =>
+        {
+            Debug.Log($"Note On: {note.noteNumber}, Vel: {velocity}");
+            OnNoteOn?.Invoke(note.noteNumber);
+            midiFileNoteReader?.CheckUserNote(note.noteNumber);
+        };
+        noteOffHandler = (note) =>
+        {
+            OnNoteOff?.Invoke(note.noteNumber);
+        };
+
+        // Subscribe
+        currentMidiDevice.onWillNoteOn += noteOnHandler;
+        currentMidiDevice.onWillNoteOff += noteOffHandler;
+    }
+
+    private void UnsubscribeCurrentDevice()
+    {
+        if (currentMidiDevice == null)
+            return;
+
+        Debug.Log($"MIDI device disconnected: {currentMidiDevice.description.product}");
+
+        // Unsubscribe
+        currentMidiDevice.onWillNoteOn -= noteOnHandler;
+        currentMidiDevice.onWillNoteOff -= noteOffHandler;
+
+        // Clear references
+        currentMidiDevice = null;
         noteOnHandler = null;
         noteOffHandler = null;
     }
 
-    public string NoteNameConverter(int midiNote)
+    private void UpdateUI()
     {
-        int octaveNumber = (int)Mathf.Floor((midiNote - 24) / 12)-1;
-        string noteName = noteOrder[(midiNote - 21) % 12].ToString();
-        noteName += octaveNumber;
-        return noteName;
+        bool deviceConnected = (currentMidiDevice != null);
+        midiListenerUIObject.SetActive(!deviceConnected);
+
+        if (deviceConnected)
+            textMeshProUGUI.text = $"MIDI device connected: {currentMidiDevice.description.product}";
+        else
+            textMeshProUGUI.text = "No MIDI device connected";
     }
 }

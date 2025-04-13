@@ -34,6 +34,7 @@ public class MidiFileNoteReader : MonoBehaviour
     public GameObject rewindButton;
     public GameObject restartButton;
     public GameObject scoreBoard;
+    public GameObject mainContent;
     public TextMeshPro songName;
     public TextMeshProUGUI timeText;
     public TextMeshProUGUI speedText;
@@ -41,6 +42,13 @@ public class MidiFileNoteReader : MonoBehaviour
     public TextMeshPro playMelodyButtonText;
     public TextMeshPro colorAccompanimentKeysButtonText;
     public TextMeshPro colorMelodyKeysButtonText;
+
+    public GameObject songNameText;
+    public GameObject accuracyAccompanimentScoreText;
+    public GameObject accuracyMelodyText;
+    public GameObject accuracyOverallText;
+    public GameObject totalImprovisedNotesText;
+    public GameObject wrongImprovisedNotesText;
 
     private TextMeshProUGUI scoringModeTitle;
 
@@ -88,10 +96,6 @@ public class MidiFileNoteReader : MonoBehaviour
 
     private List<MidiNoteData> allAccompanimentNotes = new List<MidiNoteData>();   // All notes for scoring
     private List<MidiNoteData> allMelodyNotes = new List<MidiNoteData>();   // All notes for scoring
-    private float timingWindow = 0.25f; // ±0.25s window to count note as correct
-
-    private int correctLeft = 0;
-    private int correctRight = 0;
 
     #region Setup / Lifecycle
 
@@ -99,8 +103,6 @@ public class MidiFileNoteReader : MonoBehaviour
     {
         httpHandler.scoringManager = scoringManager; // Link scoring logic to HTTP handler
         scoringManager.SetScoringMode(ScoringMode.Melody);
-        LoadNotesForScoring();
-        SongProgressManager.Instance.ResetProgress();
     }
     public void Setup()
     {
@@ -108,7 +110,6 @@ public class MidiFileNoteReader : MonoBehaviour
         if (!slider) slider = GameObject.Find("Slider")?.GetComponent<Slider>();
         if (!timeText) timeText = GameObject.Find("Time")?.GetComponent<TextMeshProUGUI>();
         if (!speedText) speedText = GameObject.Find("Speed")?.GetComponent<TextMeshProUGUI>();
-        if (!scoringModeTitle) scoringModeTitle = GameObject.Find("ScoringModeTitle")?.GetComponent<TextMeshProUGUI>();
     }
 
     void Update()
@@ -147,6 +148,7 @@ public class MidiFileNoteReader : MonoBehaviour
     public void StartFullSongPlayback()
     {
         playbackSpeed = 1;
+        UpdateSpeedTextUI();
         currentMode = PlaybackMode.FullSong;
         scoringManager.ResetScoring();
         scoringManager.SetScoringMode(ScoringMode.Melody);
@@ -326,6 +328,8 @@ public class MidiFileNoteReader : MonoBehaviour
         practiceMode = !practiceMode;
         TextMeshProUGUI dialogTitle = GameObject.Find("PlaybackModeTitle").GetComponent<TextMeshProUGUI>();
         TextMeshProUGUI dialogText = GameObject.Find("PlaybackModeText").GetComponent<TextMeshProUGUI>();
+        StartFullSongPlayback();
+
         if (practiceMode)
         {
             GameObject.Find("PlayModeText").GetComponent<TextMeshPro>().text = "Mode: Practice";
@@ -336,7 +340,6 @@ public class MidiFileNoteReader : MonoBehaviour
             dialogTitle.text = "Classic mode";
             dialogText.text = "In this mode, your playing will be scored. Press play when you feel ready and play the song from start to end. Your score will be visible at the end of the song.";
             GameObject.Find("PlayModeText").GetComponent<TextMeshPro>().text = "Mode: Classic";
-            StartFullSongPlayback();
             scoringManager.StartScoring();
         }
 
@@ -380,7 +383,9 @@ public class MidiFileNoteReader : MonoBehaviour
 
     private void StartPlayback(PlaybackMode mode)
     {
-        if(timesPlayed >= 4)
+        if (!scoringModeTitle) scoringModeTitle = GameObject.Find("ScoringModeTitle")?.GetComponent<TextMeshProUGUI>();
+
+        if (timesPlayed >= 4)
         {
             timesPlayed = 1;
             scoringManager.ResetScoring();
@@ -497,9 +502,9 @@ public class MidiFileNoteReader : MonoBehaviour
         DisposeDevice();
 
         practiceMode = true;
-        LoadNotesForScoring();
         scoringManager.SetScoringMode(ScoringMode.Melody);
         playbackSpeed = 1;
+        UpdateSpeedTextUI();
 
         outputDevice = OutputDevice.GetAll().FirstOrDefault();
         if (outputDevice == null)
@@ -523,6 +528,7 @@ public class MidiFileNoteReader : MonoBehaviour
         melodyPlayback.Speed = playbackSpeed;
 
         ParseAllNotes(accompanimentFile, melodyFile);
+        LoadNotesForScoring();
 
         accompanimentPlayback.Start();
         melodyPlayback.Start();
@@ -558,8 +564,6 @@ public class MidiFileNoteReader : MonoBehaviour
         // Clear old data
         allAccompanimentNotes.Clear();
         allMelodyNotes.Clear();
-        correctLeft = 0;
-        correctRight = 0;
 
         var accompanimentTempoMap = accompanimentMidiFile.GetTempoMap();
         var melodyTempoMap = melodyMidiFile.GetTempoMap();
@@ -595,7 +599,6 @@ public class MidiFileNoteReader : MonoBehaviour
                 WasPlayed = false
             });
         }
-        LoadNotesForScoring();
     }
     #endregion
 
@@ -752,7 +755,6 @@ public class MidiFileNoteReader : MonoBehaviour
             // Second iteration: improvisation
             if (timesPlayed == 2)
             {
-                LoadNotesForScoring();
                 scoringManager.SetScoringMode(ScoringMode.Improvisation);
                 currentTime = new MetricTimeSpan(0, 0, 0);
                 accompanimentPlayback?.MoveToTime(currentTime);
@@ -763,7 +765,6 @@ public class MidiFileNoteReader : MonoBehaviour
             // Third iteration: scoring ON again
             else if (timesPlayed == 3)
             {
-                LoadNotesForScoring();
                 scoringManager.SetScoringMode(ScoringMode.Melody);
                 currentTime = new MetricTimeSpan(0, 0, 0);
                 accompanimentPlayback?.MoveToTime(currentTime);
@@ -804,7 +805,7 @@ public class MidiFileNoteReader : MonoBehaviour
             float rightAccuracy = scoringManager.GetMelodyScore();
             float overallAccuracy = (float)(leftAccuracy + rightAccuracy) / 2;
 
-            Debug.Log($"Song End. LeftAccuracy={leftAccuracy:P2},  {scoringManager.GetMelodyScore()} RightAccuracy={rightAccuracy:P2}, Overall={overallAccuracy:P2}");
+            Debug.Log($"Song End. LeftAccuracy={leftAccuracy:P2},  {scoringManager.GetMelodyScore()} RightAccuracy={rightAccuracy:P2}, Overall={overallAccuracy:P2} total notes: {scoringManager.totalImprovisedNotes} wrong notes: {scoringManager.wrongImprovisedNotes}");
 
             string songId = $"{author}-{fileName}";
 
@@ -820,8 +821,19 @@ public class MidiFileNoteReader : MonoBehaviour
             Image[] images = songRow.GetComponentsInChildren<Image>();
             midiFileManager.SetStarColors(songId, images);
 
-            midiFileManager.ShowScoreBoardWithCurrentData(songId, leftAccuracy, rightAccuracy, overallAccuracy);
+            scoreBoard.SetActive(true);
+            mainContent.SetActive(false);
+
+            songNameText.GetComponent<TextMeshProUGUI>().text = songId;
+            accuracyAccompanimentScoreText.GetComponent<TextMeshProUGUI>().text = $"{(leftAccuracy * 100f).ToString("F1")}%";
+            accuracyMelodyText.GetComponent<TextMeshProUGUI>().text = $"{(rightAccuracy * 100f).ToString("F1")}%";
+            accuracyOverallText.GetComponent<TextMeshProUGUI>().text = $"{(overallAccuracy * 100f).ToString("F1")}%";
+            totalImprovisedNotesText.GetComponent<TextMeshProUGUI>().text = $"{scoringManager.totalImprovisedNotes}";
+            wrongImprovisedNotesText.GetComponent<TextMeshProUGUI>().text = $"{scoringManager.wrongImprovisedNotes}";
+
+            midiFileManager.SetStarColors(songId, GameObject.Find("StarRowScoringFinal").GetComponentsInChildren<Image>());
         });
+
     }
 
     #endregion
