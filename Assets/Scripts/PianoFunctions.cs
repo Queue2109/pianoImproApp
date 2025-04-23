@@ -457,31 +457,10 @@ public class PianoFunctions : MonoBehaviour
     public void BringPianoCloser()
     {
 
-        OVRCameraRig cameraRig = FindAnyObjectByType<OVRCameraRig>();
-        if (cameraRig == null)
-        {
-            Debug.LogError("OVRCameraRig not found in the scene!");
-            return;
-        }
-
-        Transform ovrHand = cameraRig.leftControllerAnchor;
-
-        if (ovrHand == null)
-        {
-            Debug.LogError("Right hand transform not available!");
-            return;
-        }
-
-        // Get the current position of the object and the hand
-        Vector3 currentPosition = gameObject.transform.position;
-        Vector3 handPosition = ovrHand.position;
-
-        // Keep only the desired axis (e.g., Z-axis)
-        currentPosition.z = handPosition.z + 0.5f;
-
-        // Apply the updated position
-        gameObject.transform.position = currentPosition;
+        gameObject.transform.position = new Vector3(-1f, 0.8f, 0.58f);
+        gameObject.transform.rotation = Quaternion.Euler(0, 180, 0);
     }
+
 
     public void SavePianoPropertiesToPlayerPrefs()
     {

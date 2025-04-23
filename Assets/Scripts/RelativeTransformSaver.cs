@@ -22,21 +22,30 @@ public class RelativeTransformSaver : MonoBehaviour
 
     void Start()
     {
-        PlayerPrefs.DeleteKey(PanelPosKey);
-        PlayerPrefs.DeleteKey(PanelRotKey);
+        //Debug.Log($"[Startup Check] defaultLocalEuler = {defaultLocalEuler}");
+        //Debug.Assert(IsVector3Valid(defaultLocalEuler), "defaultLocalEuler contains invalid values!");
+
+        //PlayerPrefs.DeleteKey(PanelPosKey);
+        //PlayerPrefs.DeleteKey(PanelRotKey);
+        PlayerPrefs.DeleteAll();
+    }
+    private bool IsVector3Valid(Vector3 v)
+    {
+        return float.IsFinite(v.x) && float.IsFinite(v.y) && float.IsFinite(v.z);
     }
 
-    void Update()
-    {
-        if (referenceObject != null)
-        {
-            if (referenceObject.transform.position != lastReferencePosition ||
-                referenceObject.transform.rotation != lastReferenceRotation)
-            {
-                UpdatePanelPositionFromPrefs();
-            }
-        }
-    }
+
+    //void Update()
+    //{
+    //    if (referenceObject != null)
+    //    {
+    //        if (referenceObject.transform.position != lastReferencePosition ||
+    //            referenceObject.transform.rotation != lastReferenceRotation)
+    //        {
+    //            UpdatePanelPositionFromPrefs();
+    //        }
+    //    }
+    //}
     public void LoadOnStart()
     {
         if (referenceObject == null)

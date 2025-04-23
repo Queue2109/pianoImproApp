@@ -160,7 +160,7 @@ public class ScoringLogic : MonoBehaviour
         // so it has more of a "major-blues" feel
         int bluesRoot = isMajorChord ? rootNote - 3 : rootNote;
         Debug.Log($"Blues root is {bluesRoot}");
-        bluesScaleText.text = pianoFunctions.NoteNumberToName(bluesRoot);
+        bluesScaleText.text = pianoFunctions.NoteNumberToName(bluesRoot)[..^1];
 
         // These are the semitone offsets from the root
         // (including the major 7 you added at +11)
@@ -219,10 +219,10 @@ public class ScoringLogic : MonoBehaviour
         }
 
         Debug.Log($"🎵 New Chord Set: {currentChordRoot} {(isCurrentChordMajor ? "Major" : "Minor")}");
+        HashSet<int> newScale = GetDynamicBluesScale(currentChordRoot, isCurrentChordMajor);
 
         if (BluesModeActive)
         {
-            HashSet<int> newScale = GetDynamicBluesScale(currentChordRoot, isCurrentChordMajor);
             Debug.Log($"Blues scale is {newScale}");
 
 

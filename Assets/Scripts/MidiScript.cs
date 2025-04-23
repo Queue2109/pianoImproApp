@@ -130,6 +130,6 @@ public class MidiScript : MonoBehaviour
         if (deviceConnected)
             textMeshProUGUI.text = $"MIDI device connected: {currentMidiDevice.description.product}";
         else
-            textMeshProUGUI.text = "No MIDI device connected";
+            textMeshProUGUI.text = "Currently, no MIDI devices are detected. Make sure you have a stable connection between your piano keyboard and computer. \r\nPress a few keys, so that the system detects the device.";
     }
 }

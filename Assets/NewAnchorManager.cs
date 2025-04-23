@@ -228,7 +228,7 @@ public class NewAnchorManager : MonoBehaviour
     /// <summary>
     /// Loads a previously saved anchor UUID from PlayerPrefs.
     /// </summary>
-    private void LoadAnchorUuid()
+    public void LoadAnchorUuid()
     {
         if (PlayerPrefs.HasKey("AnchorUuid"))
         {
