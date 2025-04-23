@@ -9,7 +9,8 @@ public class NewAnchorManager : MonoBehaviour
     public GameObject go;
     public PianoFunctions pianoFunctions;
     public PanelManagerSongList panelManagerSongList;
-    public moveObject moveObjectScript;
+    public RelativeTransformSaver relativeTransformSaver;
+    public RelativeTransformSaver relativeTransformSaver2;
 
     private Guid anchorUuid = Guid.Empty;
     private OVRSpatialAnchor anchor;
@@ -19,32 +20,58 @@ public class NewAnchorManager : MonoBehaviour
 
     private async void Start()
     {
-        // Load any existing UUID from PlayerPrefs
+        await WaitForTrackingAsync();
         pianoFunctions.LoadPianoPropertiesFromPlayerPrefs();
         LoadAnchorUuid();
 
         if (anchorUuid != Guid.Empty)
         {
-            // If we have a saved UUID, attempt to load that anchor
             var anchorsToLoad = new List<Guid> { anchorUuid };
             anchorReady = await LoadAnchorsByUuidAsync(anchorsToLoad);
+
+            if (!anchorReady)
+            {
+                Debug.LogWarning("Anchor UUID existed, but loading or localization failed. Clearing UUID and creating new anchor.");
+                anchorUuid = Guid.Empty;
+                PlayerPrefs.DeleteKey("AnchorUuid");
+            }
         }
-        else
+
+        if (anchorUuid == Guid.Empty)
         {
-            // No previously saved anchor, so create a new one and save it
             pianoFunctions.BringPianoCloser();
-            anchorReady = await CreateSpatialAnchorAsync(); 
+            anchorReady = await CreateSpatialAnchorAsync();
             if (anchorReady)
             {
                 await SaveCurrentAnchorAsync();
             }
         }
+
         pianoFunctions.AdjustColliderPrecisely();
+
         if (anchorReady)
         {
-            moveObjectScript.LoadOnStart();
+            Debug.Log("Anchor is ready okay?");
+            relativeTransformSaver.LoadOnStart();
+            relativeTransformSaver2.LoadOnStart();
+        }
+        else
+        {
+            Debug.LogError("Failed to load or create a valid anchor. UI may not be positioned.");
         }
     }
+
+    private async Task WaitForTrackingAsync()
+    {
+        while (!OVRManager.isHmdPresent || !OVRManager.tracker.isPositionTracked)
+        {
+            Debug.Log("Waiting for headset tracking...");
+            await Task.Delay(500);
+        }
+
+        Debug.Log("Headset position tracking is active.");
+    }
+
 
     /// <summary>
     /// Creates an OVRSpatialAnchor if none exists yet. Waits for creation to complete.

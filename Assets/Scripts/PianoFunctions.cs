@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -157,6 +158,48 @@ public class PianoFunctions : MonoBehaviour
         }
     }
 
+
+    public void HighlightBluesScale(HashSet<int> currentScaleNotes, HashSet<int> newScale)
+    {
+        if (currentScaleNotes == newScale)
+        {
+            Debug.Log($"Blues Scale is still the same");
+            return;
+
+        }
+        // remove colours that are NO LONGER in the scale
+        foreach (int oldNote in currentScaleNotes)
+        {
+            string key = NoteNumberToName(oldNote);
+            ResetKeyColor(key);
+        }
+
+        // add colours that are NEW in the scale
+        foreach (int fresh in newScale)
+        {
+            string key = NoteNumberToName(fresh);
+            ColorKey(key, false);         // false = treat like melody colour
+        }
+    }
+
+    public string NoteNumberToName(int noteNumber)
+    {
+        if (noteNumber < 0 || noteNumber > 127)
+            throw new ArgumentOutOfRangeException(nameof(noteNumber), "Valid MIDI notes are 0‑127.");
+
+        string[] names =
+        {
+            "C",  "C-Sharp", "D",  "D-Sharp",
+            "E",  "F",       "F-Sharp", "G",
+            "G-Sharp", "A",  "A-Sharp", "B"
+        };
+
+        int noteIndex = noteNumber % 12;    // 0 = C, 1 = C# …
+        int octave = noteNumber / 12 - 1; // MIDI C0 (note 12) is octave -1+1 = 0
+
+        return $"{names[noteIndex]}{octave}";
+    }
+
     public string NoteNameToKeyName(string note, string octave)
     {
         // check which note it is
@@ -172,9 +215,9 @@ public class PianoFunctions : MonoBehaviour
     public void SetKeyCount(int keyCount)
     {
         // Validate input
-        if (keyCount != 49 && keyCount != 61 && keyCount != 72 && keyCount != 88)
+        if (keyCount != 49 && keyCount != 61 && keyCount != 76 && keyCount != 88)
         {
-            Debug.LogError("Invalid key count! Please provide 49, 61, 72, or 88.");
+            Debug.LogError("Invalid key count! Please provide 49, 61, 76, or 88.");
             return;
         }
         keyNumber = keyCount;
@@ -183,7 +226,7 @@ public class PianoFunctions : MonoBehaviour
         {
             49 => "C2",
             61 => "C2",
-            72 => "E1",
+            76 => "E1",
             88 => "A0",
             _ => "A0" // Default, though validation prevents reaching here
         };
@@ -404,7 +447,7 @@ public class PianoFunctions : MonoBehaviour
         Vector3 newSize = maxLocal - minLocal;
 
         // Assign the new size to the collider
-        // We do NOT change center � we keep whatever was in boxCol.center
+        // We do NOT change center — we keep whatever was in boxCol.center
         boxCol.size = newSize;
 
         // (Optional) if you want to confirm or log the results:
@@ -434,7 +477,7 @@ public class PianoFunctions : MonoBehaviour
         Vector3 handPosition = ovrHand.position;
 
         // Keep only the desired axis (e.g., Z-axis)
-        currentPosition.z = handPosition.z;
+        currentPosition.z = handPosition.z + 0.5f;
 
         // Apply the updated position
         gameObject.transform.position = currentPosition;

@@ -30,7 +30,7 @@ public class MoveObjectsInFrontOfCamera : MonoBehaviour
             Vector3 panelEulerAngles = obj.transform.eulerAngles;
 
             // Get the Y rotation from the camera's forward directionx
-            float targetYRotation = Quaternion.LookRotation(centerEyeAnchor.forward).eulerAngles.y;
+            float targetYRotation = Quaternion.LookRotation(centerEyeAnchor.forward).eulerAngles.y - 1f;
 
             // Preserve X and Z, but update Y
             Vector3 newRotation = new Vector3(panelEulerAngles.x, targetYRotation, panelEulerAngles.z);

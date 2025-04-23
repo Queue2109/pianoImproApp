@@ -59,6 +59,7 @@ public class PanelManagerSongList : MonoBehaviour
 
     public void UpdateAndShowPLaySongPanel()
     {
+        midiFileNoteReader.countdown = true;
         midiFileNoteReader.StartFullSongPlayback();
         pianoKeyboard.SetActive(true);
     }

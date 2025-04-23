@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using Melanchall.DryWetMidi.Core;
@@ -20,7 +20,8 @@ public class MidiFileNoteReader : MonoBehaviour
     public PanelManagerSongList panelManagerSongList;
     public MidiFileManager midiFileManager;
     private MidiInstrumentChecker instrumentChecker = new MidiInstrumentChecker();
-    private ScoringLogic scoringManager = new ScoringLogic();
+    public ScoringLogic scoringManager;
+    public CountDownTimer countDownTimer;
 
     [Header("UI")]
     public Slider slider;
@@ -50,15 +51,19 @@ public class MidiFileNoteReader : MonoBehaviour
     public GameObject totalImprovisedNotesText;
     public GameObject wrongImprovisedNotesText;
 
+    public bool countdown = false;
+
     private TextMeshProUGUI scoringModeTitle;
 
     private Playback accompanimentPlayback;
     private Playback melodyPlayback;
+    private Playback chordsPlayback;
     private OutputDevice outputDevice;
     private bool isPlaying = false;
     private PlaybackMode currentMode = PlaybackMode.FullSong;
     private float playbackSpeed = 1f;
     private HashSet<int> activeNotes = new HashSet<int>();
+    private HashSet<int> chordNotes = new HashSet<int>();
     private List<int> channelSelections = new List<int>();
     private bool colorAccompaniment = true;
     private bool colorMelody = true;
@@ -70,6 +75,7 @@ public class MidiFileNoteReader : MonoBehaviour
     // Filtered MIDI files for each mode
     private MidiFile accompanimentFile;
     private MidiFile melodyFile;
+    private MidiFile chordsFile;
 
     // Times
     private double totalTime;
@@ -86,7 +92,7 @@ public class MidiFileNoteReader : MonoBehaviour
 
     private bool muteMelodyPlayback = false;
     private bool muteAccompanimentPlayback = false;
-
+    
     private enum PlaybackMode
     {
         FullSong,
@@ -147,7 +153,9 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void StartFullSongPlayback()
     {
-        playbackSpeed = 1;
+        playbackSpeed = 1f;
+        StopPlayback();
+        DisposeDevice();
         UpdateSpeedTextUI();
         currentMode = PlaybackMode.FullSong;
         scoringManager.ResetScoring();
@@ -160,12 +168,12 @@ public class MidiFileNoteReader : MonoBehaviour
     {
         if (currentMode == PlaybackMode.FullSong)
         {
-            StartPlayback(PlaybackMode.Accompaniment);
+            StartCoroutine(StartPlayback(PlaybackMode.Accompaniment));
 
         }
         else if (currentMode == PlaybackMode.Accompaniment)
         {
-            StartPlayback(PlaybackMode.FullSong);
+            StartCoroutine( StartPlayback(PlaybackMode.FullSong));
         }
     }
 
@@ -173,11 +181,11 @@ public class MidiFileNoteReader : MonoBehaviour
     {
         if(currentMode == PlaybackMode.FullSong)
         {
-            StartPlayback(PlaybackMode.Melody);
+           StartCoroutine( StartPlayback(PlaybackMode.Melody));
 
         } else if(currentMode == PlaybackMode.Melody)
         {
-            StartPlayback(PlaybackMode.FullSong);
+           StartCoroutine( StartPlayback(PlaybackMode.FullSong));
         }
     }
 
@@ -186,19 +194,22 @@ public class MidiFileNoteReader : MonoBehaviour
 
         if (accompanimentPlayback == null || melodyPlayback == null)
         {
-            StartPlayback(currentMode);
+            StartCoroutine( StartPlayback(currentMode));
             return;
         }
         if (accompanimentPlayback?.IsRunning == true)
         {
             accompanimentPlayback.Stop();
             melodyPlayback.Stop();
+            chordsPlayback.Stop();
             isPlaying = false;
         }
         else
         {
             accompanimentPlayback.Start();
             melodyPlayback.Start();
+            chordsPlayback.Start();
+
             isPlaying = true;
 
         }
@@ -218,6 +229,7 @@ public class MidiFileNoteReader : MonoBehaviour
         // 10 seconds back
         double newTimeInSec = Math.Max(0, currentTime.TotalSeconds - 10);
         currentTime = new MetricTimeSpan(0, 0, (int)newTimeInSec);
+        chordsPlayback.MoveToTime(currentTime);
         switch(currentMode)
         {
             case PlaybackMode.Accompaniment:
@@ -246,6 +258,8 @@ public class MidiFileNoteReader : MonoBehaviour
         // 10 seconds forward
         double newTimeInSec = Math.Min(totalTime, currentTime.TotalSeconds + 10);
         currentTime = new MetricTimeSpan(0, 0, (int)newTimeInSec);
+        chordsPlayback.MoveToTime(currentTime);
+
         switch (currentMode)
         {
             case PlaybackMode.Accompaniment:
@@ -268,6 +282,8 @@ public class MidiFileNoteReader : MonoBehaviour
     {
         if (accompanimentPlayback == null) return;
         playbackSpeed += 0.1f;
+        chordsPlayback.Speed = playbackSpeed;
+        chordsPlayback.MoveToTime(currentTime);
         switch (currentMode)
         {
             case PlaybackMode.Accompaniment:
@@ -302,6 +318,8 @@ public class MidiFileNoteReader : MonoBehaviour
         if (accompanimentPlayback == null) return;
 
         playbackSpeed = Mathf.Max(0.1f, playbackSpeed - 0.1f);
+        chordsPlayback.MoveToTime(currentTime);
+        chordsPlayback.Speed = playbackSpeed;
         switch (currentMode)
         {
             case PlaybackMode.Accompaniment:
@@ -328,6 +346,7 @@ public class MidiFileNoteReader : MonoBehaviour
         practiceMode = !practiceMode;
         TextMeshProUGUI dialogTitle = GameObject.Find("PlaybackModeTitle").GetComponent<TextMeshProUGUI>();
         TextMeshProUGUI dialogText = GameObject.Find("PlaybackModeText").GetComponent<TextMeshProUGUI>();
+        countdown = true;
         StartFullSongPlayback();
 
         if (practiceMode)
@@ -365,23 +384,27 @@ public class MidiFileNoteReader : MonoBehaviour
 
         accompanimentPlayback = accompanimentFile.GetPlayback();
         melodyPlayback = melodyFile.GetPlayback();
+        chordsPlayback = chordsFile.GetPlayback();
 
         accompanimentPlayback.Speed = playbackSpeed;
         melodyPlayback.Speed = playbackSpeed;
+        chordsPlayback.Speed = playbackSpeed;
 
         accompanimentPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
         accompanimentPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
         melodyPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
         melodyPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
+        chordsPlayback.NotesPlaybackStarted += OnChordsPlaybackNotePlayed;
+        chordsPlayback.NotesPlaybackFinished += OnChordsPlaybackNoteFinished;
 
         SubscribeToMutePlaybacks();
 
         AttachPlaybackCycleEvents();
 
-        StartPlayback(currentMode);
+        StartCoroutine(StartPlayback(currentMode));
     }
 
-    private void StartPlayback(PlaybackMode mode)
+    private IEnumerator StartPlayback(PlaybackMode mode)
     {
         if (!scoringModeTitle) scoringModeTitle = GameObject.Find("ScoringModeTitle")?.GetComponent<TextMeshProUGUI>();
 
@@ -405,7 +428,7 @@ public class MidiFileNoteReader : MonoBehaviour
         {
             Debug.LogError("Both Accompaniment and Melody files are required for FullSong mode.");
             InitializePlaybacks();
-            return;
+            yield break;
         }
 
         songName.text = $"{author}: {fileName}";
@@ -424,8 +447,16 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.Log($"timesPLayed {isPlaying}");
             melodyPlayback.MoveToTime(new MetricTimeSpan(0));
             accompanimentPlayback.MoveToTime(new MetricTimeSpan(0));
+            chordsPlayback.MoveToTime(new MetricTimeSpan(0));
+            if (countdown)
+            {
+                yield return countDownTimer.StartTimer(accompanimentFile.GetTempoMap());
+                countdown = false;
+            }
+
             accompanimentPlayback.Start();
             melodyPlayback.Start();
+            chordsPlayback.Start();
             isPlaying = true;
             isSongReady = true;
         }
@@ -482,6 +513,13 @@ public class MidiFileNoteReader : MonoBehaviour
             if (melodyPlayback.IsRunning) melodyPlayback.Stop();
             melodyPlayback.Dispose();
             melodyPlayback = null;
+        }
+
+        if (chordsPlayback != null)
+        {
+            if (chordsPlayback.IsRunning) chordsPlayback.Stop();
+            chordsPlayback.Dispose();
+            chordsPlayback = null;
         }
 
         isPlaying = false;
@@ -613,6 +651,7 @@ public class MidiFileNoteReader : MonoBehaviour
     {
         string accompanimentPath = FindMidiFile($"Accompaniment{fileName}");
         string melodyPath = FindMidiFile($"Melody{fileName}");
+        string chordsPath = FindMidiFile($"Chords{fileName}");
 
         if (string.IsNullOrEmpty(accompanimentPath) || string.IsNullOrEmpty(melodyPath))
         {
@@ -622,6 +661,7 @@ public class MidiFileNoteReader : MonoBehaviour
 
         accompanimentFile = MidiFile.Read(accompanimentPath);
         melodyFile = MidiFile.Read(melodyPath);
+        chordsFile = MidiFile.Read(chordsPath);
 
         ShiftDrumsToCymbal(accompanimentFile);
         ShiftDrumsToCymbal(melodyFile);
@@ -667,27 +707,20 @@ public class MidiFileNoteReader : MonoBehaviour
 
                 if (channelSelections.Contains(channel))
                 {
-                    if (isAccompanimentNote)
+                    activeNotes.Add(note.NoteNumber);
+                    if (scoringManager.GetScoringMode() == ScoringMode.Melody)
                     {
-                        activeNotes.Add(note.NoteNumber);
 
-                        // ?? Keep only the last 5 notes
-                        if (activeNotes.Count > 5)
+                        if (isAccompanimentNote && colorAccompaniment)
                         {
-                            activeNotes = activeNotes.Skip(activeNotes.Count - 5).ToHashSet();
+                            pianoFunctions.ColorKey(keyName, true);
+                        }
+
+                        if (isMelodyNote && colorMelody)
+                        {
+                            pianoFunctions.ColorKey(keyName, false);
                         }
                     }
-
-                    if (isAccompanimentNote && colorAccompaniment)
-                    {
-                        pianoFunctions.ColorKey(keyName, true);
-                    }
-
-                    if (isMelodyNote && colorMelody)
-                    {
-                        pianoFunctions.ColorKey(keyName, false);
-                    }
-
                     IdentifyCurrentChord();
                 }
             }
@@ -725,20 +758,20 @@ public class MidiFileNoteReader : MonoBehaviour
                 // Only reset if it belongs to a piano instrument
                 if (channelSelections.Contains(channel))
                 {
+                    activeNotes.Remove(note.NoteNumber);
 
-                    if (isAccompanimentNote)
+                    if (scoringManager.GetScoringMode() == ScoringMode.Melody)
                     {
-                        activeNotes.Remove(note.NoteNumber);
-                    }
 
-                    if (isAccompanimentNote && colorAccompaniment)
-                    {
-                        pianoFunctions.ResetKeyColor(keyName);
-                    }
+                        if (isAccompanimentNote && colorAccompaniment)
+                        {
+                            pianoFunctions.ResetKeyColor(keyName);
+                        }
 
-                    if (isMelodyNote && colorMelody)
-                    {
-                        pianoFunctions.ResetKeyColor(keyName);
+                        if (isMelodyNote && colorMelody)
+                        {
+                            pianoFunctions.ResetKeyColor(keyName);
+                        }
                     }
 
                     IdentifyCurrentChord();
@@ -759,8 +792,9 @@ public class MidiFileNoteReader : MonoBehaviour
                 currentTime = new MetricTimeSpan(0, 0, 0);
                 accompanimentPlayback?.MoveToTime(currentTime);
                 melodyPlayback?.MoveToTime(currentTime);
+                chordsPlayback?.MoveToTime(currentTime);
                 isPlaying = false;
-                StartPlayback(currentMode);
+                StartCoroutine(StartPlayback(currentMode));
             }
             // Third iteration: scoring ON again
             else if (timesPlayed == 3)
@@ -769,8 +803,9 @@ public class MidiFileNoteReader : MonoBehaviour
                 currentTime = new MetricTimeSpan(0, 0, 0);
                 accompanimentPlayback?.MoveToTime(currentTime);
                 melodyPlayback?.MoveToTime(currentTime);
+                chordsPlayback?.MoveToTime(currentTime);
                 isPlaying = false;
-                StartPlayback(currentMode);
+                StartCoroutine(StartPlayback(currentMode));
             }
             else
             {
@@ -786,7 +821,7 @@ public class MidiFileNoteReader : MonoBehaviour
     }
     public void IdentifyCurrentChord()
     {
-        var currentNotes = activeNotes.OrderByDescending(n => n).ToList();
+        var currentNotes = chordNotes.OrderByDescending(n => n).ToList();
         scoringManager.SetCurrentChord(currentNotes);
         httpHandler?.getChordName(currentNotes);
     }
@@ -834,6 +869,30 @@ public class MidiFileNoteReader : MonoBehaviour
             midiFileManager.SetStarColors(songId, GameObject.Find("StarRowScoringFinal").GetComponentsInChildren<Image>());
         });
 
+    }
+
+    private void OnChordsPlaybackNotePlayed(object sender, NotesEventArgs e)
+    {
+        MainThreadDispatcher.Enqueue(() =>
+        {
+            foreach (var note in e.Notes)
+            {
+                chordNotes.Add(note.NoteNumber);
+                IdentifyCurrentChord();
+            }
+        });
+    }
+
+    private void OnChordsPlaybackNoteFinished(object sender, NotesEventArgs e)
+    {
+        MainThreadDispatcher.Enqueue(() =>
+        {
+            foreach (var note in e.Notes)
+            {
+                chordNotes.Remove(note.NoteNumber);
+                IdentifyCurrentChord();
+            }
+        });
     }
 
     #endregion
@@ -939,6 +998,23 @@ public class MidiFileNoteReader : MonoBehaviour
     }
     #endregion
 
+    private double BarsToSeconds()
+    {
+        // use the accompaniment file’s tempo & time‑signature at bar 0
+        var tempoMap = melodyFile.GetTempoMap();
+
+        Debug.Log($"Get tempo map is {tempoMap.TimeDivision} {tempoMap} {tempoMap.GetTimeSignatureChanges()}");
+
+        // "bars, beats, ticks" → metric
+        var span = new BarBeatTicksTimeSpan(0, 8, 0);
+        var metric = TimeConverter.ConvertTo<MetricTimeSpan>(span, tempoMap);
+        Debug.Log($"Get tempo map is metric {metric}");
+
+        // honour whatever playback speed you’re about to use
+        return metric.TotalMicroseconds / 1_000_000.0 / playbackSpeed;
+    }
+
+
     #region Public Scoring Method
 
     public void LoadNotesForScoring()
@@ -966,7 +1042,7 @@ public class MidiFileNoteReader : MonoBehaviour
 public class MidiNoteData
 {
     public double StartTimeSeconds;  // exact time (in seconds) when note should begin
-    public int NoteNumber;           // MIDI pitch (0�127)
+    public int NoteNumber;           // MIDI pitch (0–127)
     public bool IsLeftHand;          // true if note < 60 (for example)
     public bool WasPlayed;           // whether user has correctly played it
 }
