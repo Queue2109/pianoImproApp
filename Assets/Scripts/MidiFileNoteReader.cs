@@ -60,7 +60,7 @@ public class MidiFileNoteReader : MonoBehaviour
     private Playback melodyPlayback;
     private Playback chordsPlayback;
     private OutputDevice outputDevice;
-    private bool isPlaying = false;
+    public bool isPlaying = false;
     private PlaybackMode currentMode = PlaybackMode.FullSong;
     private float playbackSpeed = 1f;
     private HashSet<int> activeNotes = new HashSet<int>();

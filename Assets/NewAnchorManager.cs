@@ -15,7 +15,10 @@ public class NewAnchorManager : MonoBehaviour
     private Guid anchorUuid = Guid.Empty;
     private OVRSpatialAnchor anchor;
 
+    private bool isDebugMode = true;
+
     bool anchorReady = false;
+    private bool isAnchorOperationRunning = false;
     private List<OVRSpatialAnchor.UnboundAnchor> _unboundAnchors = new List<OVRSpatialAnchor.UnboundAnchor>();
 
     private async void Start()
@@ -31,13 +34,12 @@ public class NewAnchorManager : MonoBehaviour
 
             if (!anchorReady)
             {
-                Debug.LogWarning("Anchor UUID existed, but loading or localization failed. Clearing UUID and creating new anchor.");
-                anchorUuid = Guid.Empty;
-                PlayerPrefs.DeleteKey("AnchorUuid");
+                LogWarning("Failed to load existing anchor. Clearing UUID and creating a new one.");
+                ClearAnchorUuid();
             }
         }
 
-        if (anchorUuid == Guid.Empty)
+        if (!anchorReady)
         {
             pianoFunctions.BringPianoCloser();
             anchorReady = await CreateSpatialAnchorAsync();
@@ -51,25 +53,31 @@ public class NewAnchorManager : MonoBehaviour
 
         if (anchorReady)
         {
-            Debug.Log("Anchor is ready okay?");
+            Log("Anchor is ready.");
             relativeTransformSaver.LoadOnStart();
             relativeTransformSaver2.LoadOnStart();
         }
         else
         {
-            Debug.LogError("Failed to load or create a valid anchor. UI may not be positioned.");
+            LogError("Failed to load or create a valid anchor. UI may not be positioned.");
         }
+    }
+
+    private void ClearAnchorUuid()
+    {
+        anchorUuid = Guid.Empty;
+        PlayerPrefs.DeleteKey("AnchorUuid");
+        Log("Cleared Anchor UUID from PlayerPrefs.");
     }
 
     private async Task WaitForTrackingAsync()
     {
         while (!OVRManager.isHmdPresent || !OVRManager.tracker.isPositionTracked)
         {
-            Debug.Log("Waiting for headset tracking...");
+            Log("Waiting for headset tracking...");
             await Task.Delay(500);
         }
-
-        Debug.Log("Headset position tracking is active.");
+        Log("Headset position tracking is active.");
     }
 
 
@@ -78,35 +86,36 @@ public class NewAnchorManager : MonoBehaviour
     /// </summary>
     private async Task<bool> CreateSpatialAnchorAsync()
     {
-        // Check if we already have a valid anchor
-        if (anchor != null && anchor.Created)
+        if (isAnchorOperationRunning) return false;
+        isAnchorOperationRunning = true;
+
+        try
         {
-            Debug.Log("Anchor already exists and is created.");
+            if (anchor != null && anchor.Created)
+            {
+                Log("Anchor already exists.");
+                return true;
+            }
+
+            anchor = go.GetComponent<OVRSpatialAnchor>() ?? go.AddComponent<OVRSpatialAnchor>();
+
+            while (!anchor.Created)
+            {
+                await Task.Delay(500);
+            }
+            anchorUuid = anchor.Uuid;
+            Log($"Anchor created with UUID: {anchor.Uuid}");
             return true;
         }
-
-        // Either get or add OVRSpatialAnchor
-        anchor = go.GetComponent<OVRSpatialAnchor>();
-        if (anchor == null)
+        catch (Exception ex)
         {
-            anchor = go.AddComponent<OVRSpatialAnchor>();
-            Debug.Log("Added OVRSpatialAnchor to GameObject.");
+            LogError($"Error creating anchor: {ex.Message}");
+            return false;
         }
-
-        // Wait until OVRSpatialAnchor reports it is created
-        while (!anchor.Created)
+        finally
         {
-            await Task.Delay(500);
+            isAnchorOperationRunning = false;
         }
-
-        if(anchor.Created)
-        {
-            Debug.Log($"Anchor created with UUID: {anchor.Uuid}");
-            return true;
-        }
-
-        return false;
-        
     }
 
     /// <summary>
@@ -114,23 +123,21 @@ public class NewAnchorManager : MonoBehaviour
     /// </summary>
     private async Task SaveCurrentAnchorAsync()
     {
-        if (anchor == null)
+        if (anchor == null || anchor.Uuid == Guid.Empty)
         {
-            Debug.LogError("No anchor to save.");
+            LogError("Invalid anchor, cannot save.");
             return;
         }
 
-        Debug.Log("Attempting to save anchor...");
         var result = await anchor.SaveAnchorAsync();
         if (result.Success)
         {
-            anchorUuid = anchor.Uuid;
             SaveAnchorUuid(anchorUuid);
-            Debug.Log($"Anchor {anchor.Uuid} saved successfully.");
+            Log($"Anchor {anchorUuid} saved successfully.");
         }
         else
         {
-            Debug.LogError($"Anchor {anchor.Uuid} failed to save with error {result.Status}");
+            LogError($"Failed to save anchor: {result.Status}");
         }
     }
 
@@ -145,7 +152,7 @@ public class NewAnchorManager : MonoBehaviour
             return false;
         }
 
-        var result = await OVRSpatialAnchor.LoadUnboundAnchorsAsync(uuids, _unboundAnchors);
+        var result = await LoadUnboundAnchorsAsync(uuids, _unboundAnchors);
         if (result.Success)
         {
             Debug.Log("Anchors loaded successfully.");
@@ -188,32 +195,40 @@ public class NewAnchorManager : MonoBehaviour
     /// <summary>
     /// Erases the current anchor (if any) from the system and clears the UUID.
     /// </summary>
-    public async void OnEraseButtonPressed()
+    /// 
+    public void OnEraseButtonClicked()
+    {
+        OnEraseButtonPressed();
+    }
+    private async void OnEraseButtonPressed()
+    {
+        await OnEraseButtonPressedAsync();
+    }
+    private async Task<bool> OnEraseButtonPressedAsync()
     {
         if (anchor == null)
         {
-            Debug.LogWarning("No anchor to erase. Clearing saved UUID.");
-            anchorUuid = Guid.Empty;
-            PlayerPrefs.DeleteKey("AnchorUuid");
-
-            return;
+            LogWarning("No anchor to erase. Clearing saved UUID.");
+            ClearAnchorUuid();
+            return false;
         }
 
         var result = await anchor.EraseAnchorAsync();
         if (result.Success)
         {
-            
             Destroy(go.GetComponent<OVRSpatialAnchor>());
             anchor = null;
-            anchorUuid = Guid.Empty;
-            PlayerPrefs.DeleteKey("AnchorUuid");
-            Debug.Log("Successfully erased anchor and cleared UUID.");
+            ClearAnchorUuid();
+            Log("Successfully erased anchor and cleared UUID.");
+            return true;
         }
         else
         {
-            Debug.LogError($"Failed to erase anchor {anchor.Uuid} with result {result.Status}");
+            LogError($"Failed to erase anchor {anchorUuid} with result {result.Status}");
+            return false;
         }
     }
+
 
     /// <summary>
     /// Persists the current anchor's UUID in PlayerPrefs.
@@ -250,13 +265,65 @@ public class NewAnchorManager : MonoBehaviour
         }
     }
 
+    public void EraseAndCreateAnchor()
+    {
+        EraseAndCreateAnchorAsync();
+    }
+
+    private async void EraseAndCreateAnchorAsync()
+    {
+        await OnEraseButtonPressedAsync();
+        pianoFunctions.BringPianoCloser();
+        await Task.Delay(500);
+        await OnSaveButtonPressedAsync();
+
+    }
+
+    public void OnSaveButtonCLicked()
+    {
+        OnSaveButtonPressed();
+    }
+    private async void OnSaveButtonPressed()
+    {
+        await OnSaveButtonPressedAsync();
+    }
+
     /// <summary>
     /// Public method to manually create and save an anchor at runtime (e.g., from a UI button).
     /// </summary>
-    public async void OnSaveButtonPressed()
+    private async Task<bool> OnSaveButtonPressedAsync()
     {
-        await CreateSpatialAnchorAsync();
-        await SaveCurrentAnchorAsync();
-        pianoFunctions.SavePianoPropertiesToPlayerPrefs();
+        if (anchor == null)
+        {
+            LogWarning("No anchor exists. Creating a new one before saving.");
+            anchorReady = await CreateSpatialAnchorAsync();
+        }
+
+        if (anchorReady)
+        {
+            await SaveCurrentAnchorAsync();
+            pianoFunctions.SavePianoPropertiesToPlayerPrefs();
+            return true;
+        }
+        else
+        {
+            LogError("Anchor creation failed. Cannot save.");
+            return false;
+        }
+    }
+
+    private void Log(string message)
+    {
+        if (isDebugMode) Debug.Log(message);
+    }
+
+    private void LogError(string message)
+    {
+        if (isDebugMode) Debug.LogError(message);
+    }
+
+    private void LogWarning(string message)
+    {
+        if (isDebugMode) Debug.LogWarning(message);
     }
 }

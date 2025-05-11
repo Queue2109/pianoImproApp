@@ -14,6 +14,9 @@ public class PianoFunctions : MonoBehaviour
     private List<Transform> blackKeys; // Array to hold all the black keys
     private List<Transform> whiteKeys; // Array to hold all the white keys
     private GameObject pianoKeyboard;
+
+    [SerializeField] private RelativeTransformSaver relativeTransformSaverUI;
+    [SerializeField] private RelativeTransformSaver relativeTransformSaverPlayControlPanel;
     public float blackKeyScaleFactor = 1f;
     public float whiteKeyScaleFactor = 1f;
     private int keyNumber = 61;
@@ -459,6 +462,17 @@ public class PianoFunctions : MonoBehaviour
 
         gameObject.transform.position = new Vector3(-1f, 0.8f, 0.58f);
         gameObject.transform.rotation = Quaternion.Euler(0, 180, 0);
+    }
+
+
+
+    public void OnPianoGrab()
+    {
+        if (pianoKeyboard.GetComponentInChildren<OVRSpatialAnchor>() == null)
+        {
+            relativeTransformSaverUI.UpdatePanelPositionFromPrefs();
+            relativeTransformSaverPlayControlPanel.UpdatePanelPositionFromPrefs();
+        }
     }
 
 

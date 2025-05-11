@@ -367,37 +367,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1630179412}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &9151853
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 9151854}
-  m_Layer: 0
-  m_Name: black-square
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &9151854
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9151853}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &10913953
 GameObject:
   m_ObjectHideFlags: 0
@@ -1521,7 +1490,7 @@ GameObject:
   - component: {fileID: 59786923}
   - component: {fileID: 59786925}
   - component: {fileID: 59786924}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8659,37 +8628,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!1 &402783618
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 402783619}
-  m_Layer: 0
-  m_Name: Rectangle 2 (2)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!4 &402783619
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 402783618}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &413808804
 GameObject:
   m_ObjectHideFlags: 0
@@ -9828,8 +9766,7 @@ GameObject:
   - component: {fileID: 435478169}
   - component: {fileID: 435478168}
   - component: {fileID: 435478167}
-  - component: {fileID: 435478166}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Button (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9856,122 +9793,6 @@ RectTransform:
   m_AnchoredPosition: {x: 257, y: -20}
   m_SizeDelta: {x: 158, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &435478166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 435478164}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5626a0b1dc955a43be59ce7ea116678, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _pointableCanvas: {fileID: 7268897199044924717}
-  _suppressWhileDragging: 1
-  _whenBeginHighlight:
-    m_PersistentCalls:
-      m_Calls: []
-  _whenEndHighlight:
-    m_PersistentCalls:
-      m_Calls: []
-  _whenSelectedHovered:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 459841555}
-        m_TargetAssemblyTypeName: NewAnchorManager, Assembly-CSharp
-        m_MethodName: OnEraseButtonPressed
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1964558739}
-        m_TargetAssemblyTypeName: PianoFunctions, Assembly-CSharp
-        m_MethodName: BringPianoCloser
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1678109210}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1764352163}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 2146127999}
-        m_TargetAssemblyTypeName: RelativeTransformSaver, Assembly-CSharp
-        m_MethodName: UpdatePanelPositionFromPrefs
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1764352167}
-        m_TargetAssemblyTypeName: RelativeTransformSaver, Assembly-CSharp
-        m_MethodName: UpdatePanelPositionFromPrefs
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 459841555}
-        m_TargetAssemblyTypeName: NewAnchorManager, Assembly-CSharp
-        m_MethodName: OnSaveButtonPressed
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-  _whenSelectedEmpty:
-    m_PersistentCalls:
-      m_Calls: []
-  _whenUnselectedHovered:
-    m_PersistentCalls:
-      m_Calls: []
-  _whenUnselectedEmpty:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &435478167
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10015,7 +9836,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 435478168}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1678109214}
+        m_TargetAssemblyTypeName: ResetPianoPositionDialogHandler, Assembly-CSharp
+        m_MethodName: OnConfirmButtonPressed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &435478168
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16022,7 +15855,7 @@ GameObject:
   - component: {fileID: 683162580}
   - component: {fileID: 683162582}
   - component: {fileID: 683162581}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -21872,7 +21705,6 @@ GameObject:
   - component: {fileID: 982349270}
   - component: {fileID: 982349273}
   - component: {fileID: 982349272}
-  - component: {fileID: 982349271}
   - component: {fileID: 982349274}
   - component: {fileID: 982349275}
   m_Layer: 0
@@ -21897,29 +21729,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1964558729}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &982349271
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 982349269}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5a1bc992571301d4a9602ac95ef4c71a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _interactorFilters: []
-  _maxInteractors: -1
-  _maxSelectingInteractors: -1
-  _data: {fileID: 0}
-  _pointableElement: {fileID: 982349273}
-  _rigidbody: {fileID: 1964558736}
-  _grabSource: {fileID: 0}
-  _useClosestPointAsGrabSource: 0
-  _releaseDistance: 0
-  _resetGrabOnGrabsUpdated: 1
-  _physicsGrabbable: {fileID: 0}
 --- !u!114 &982349272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22070,9 +21879,9 @@ MonoBehaviour:
   _whenUnselect:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1764352167}
-        m_TargetAssemblyTypeName: RelativeTransformSaver, Assembly-CSharp
-        m_MethodName: UpdatePanelPositionFromPrefs
+      - m_Target: {fileID: 1964558739}
+        m_TargetAssemblyTypeName: PianoFunctions, Assembly-CSharp
+        m_MethodName: OnPianoGrab
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -26216,6 +26025,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 344427588}
     - target: {fileID: 2859147190566827368, guid: b16424dcc3deba241b1457370a8e5b5e, type: 3}
+      propertyPath: m_SortingOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2859147190566827368, guid: b16424dcc3deba241b1457370a8e5b5e, type: 3}
       propertyPath: m_VertexColorAlwaysGammaSpace
       value: 1
       objectReference: {fileID: 0}
@@ -26688,7 +26501,6 @@ GameObject:
   - component: {fileID: 1181690006}
   - component: {fileID: 1181690005}
   - component: {fileID: 1181690009}
-  - component: {fileID: 1181690010}
   m_Layer: 0
   m_Name: BunnyRight
   m_TagString: Untagged
@@ -26756,33 +26568,9 @@ MonoBehaviour:
   _whenSelected:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1678109210}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-      - m_Target: {fileID: 1764352163}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1181690010}
-        m_TargetAssemblyTypeName: BunnuLogic, Assembly-CSharp
-        m_MethodName: CheckIfPianoSettingsIsActive
+      - m_Target: {fileID: 1678109214}
+        m_TargetAssemblyTypeName: ResetPianoPositionDialogHandler, Assembly-CSharp
+        m_MethodName: OnBunnyPoseDetected
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -26833,20 +26621,6 @@ MonoBehaviour:
   - Finger: 4
     StateThresholds: {fileID: 11400000, guid: 7fb4d48082c414349b2a79e6cc55dcde, type: 2}
   _disableProactiveEvaluation: 0
---- !u!114 &1181690010
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1181690000}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: feba838d10f970e46b8a51f68cc2bf75, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pianoSettings: {fileID: 1723949819}
-  anchorManager: {fileID: 459841555}
 --- !u!1 &1197453754
 GameObject:
   m_ObjectHideFlags: 0
@@ -31509,8 +31283,7 @@ GameObject:
   - component: {fileID: 1409128459}
   - component: {fileID: 1409128458}
   - component: {fileID: 1409128457}
-  - component: {fileID: 1409128460}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -31580,7 +31353,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1409128458}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1678109214}
+        m_TargetAssemblyTypeName: ResetPianoPositionDialogHandler, Assembly-CSharp
+        m_MethodName: OnCancelButtonPressed
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1409128458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31619,62 +31404,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1409128454}
   m_CullTransparentMesh: 1
---- !u!114 &1409128460
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1409128454}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f5626a0b1dc955a43be59ce7ea116678, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _pointableCanvas: {fileID: 7268897199044924717}
-  _suppressWhileDragging: 1
-  _whenBeginHighlight:
-    m_PersistentCalls:
-      m_Calls: []
-  _whenEndHighlight:
-    m_PersistentCalls:
-      m_Calls: []
-  _whenSelectedHovered:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 1678109210}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 1764352163}
-        m_TargetAssemblyTypeName: UnityEngine.GameObject, UnityEngine
-        m_MethodName: SetActive
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 1
-        m_CallState: 2
-  _whenSelectedEmpty:
-    m_PersistentCalls:
-      m_Calls: []
-  _whenUnselectedHovered:
-    m_PersistentCalls:
-      m_Calls: []
-  _whenUnselectedEmpty:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &1410079548
 GameObject:
   m_ObjectHideFlags: 0
@@ -37157,6 +36886,7 @@ GameObject:
   - component: {fileID: 1678109213}
   - component: {fileID: 1678109212}
   - component: {fileID: 1678109211}
+  - component: {fileID: 1678109214}
   m_Layer: 0
   m_Name: ResetPianoPositionDialog
   m_TagString: Untagged
@@ -37208,6 +36938,29 @@ Transform:
   - {fileID: 6570971039586176158}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1678109214
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1678109210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04388272cc2c3e74b97e4d5dc9a1cdfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  anchorManager: {fileID: 459841555}
+  pianoFunctions: {fileID: 1964558739}
+  resetPianoPositionDialog: {fileID: 1678109210}
+  UI: {fileID: 1764352163}
+  pianoKeyboard: {fileID: 1964558728}
+  relativeTransformSaverUI: {fileID: 1764352167}
+  relativeTransformSaverPlayControlPanel: {fileID: 2146127999}
+  playControlPanel: {fileID: 9086217884341228585}
+  pianoSettingsButton: {fileID: 1888555800}
+  pianoSettingsPanel: {fileID: 1723949819}
+  midiFileNoteReader: {fileID: 1844287184}
 --- !u!1 &1680909426
 GameObject:
   m_ObjectHideFlags: 0
@@ -37999,7 +37752,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1723949820
 Transform:
   m_ObjectHideFlags: 0
@@ -41693,6 +41446,7 @@ MonoBehaviour:
   wrongImprovisedNotesText: {fileID: 170455956}
   countdown: 0
   playModeText: {fileID: 1296403359}
+  isPlaying: 0
   fileName: 
   author: 
   playMode: 0
@@ -45455,6 +45209,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69ce6f2ca70cd944f82e24ebb1db6769, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  relativeTransformSaverUI: {fileID: 1764352167}
+  relativeTransformSaverPlayControlPanel: {fileID: 2146127999}
   blackKeyScaleFactor: 1
   whiteKeyScaleFactor: 1
   whiteKeyDefaultColor: {r: 1, g: 1, b: 1, a: 0.2784314}
@@ -51706,7 +51462,7 @@ GameObject:
   - component: {fileID: 1115746156728130807}
   - component: {fileID: 645777904908960542}
   - component: {fileID: 1031414131715386823}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -52943,7 +52699,7 @@ GameObject:
   - component: {fileID: 1323404793452324144}
   - component: {fileID: 9202562698730796971}
   - component: {fileID: 694489307032268503}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Background
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -57599,7 +57355,7 @@ GameObject:
   - component: {fileID: 6124627590888371414}
   - component: {fileID: 7780157265172028040}
   - component: {fileID: 8360525909396795576}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Scrim
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -57963,7 +57719,7 @@ GameObject:
   - component: {fileID: 1727678748768535233}
   - component: {fileID: 8135733491352009810}
   - component: {fileID: 2633246554755896318}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Header
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -58144,7 +57900,7 @@ GameObject:
   - component: {fileID: 3864957553089644126}
   - component: {fileID: 5499804692225284925}
   - component: {fileID: 867669624124604440}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -59952,7 +59708,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!1 &6415343595245871640
 GameObject:
@@ -60177,7 +59933,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _canvasRenderTexture: {fileID: 3864957553089644126}
   _meshRenderer: {fileID: 7136603337369921697}
-  _renderingMode: 101
+  _renderingMode: 100
   _useAlphaToMask: 1
   _alphaCutoutThreshold: 0.5
   _canvasMesh: {fileID: 4655634074454139111}
@@ -60285,18 +60041,18 @@ Canvas:
   m_Enabled: 1
   serializedVersion: 3
   m_RenderMode: 2
-  m_Camera: {fileID: 0}
+  m_Camera: {fileID: 344427588}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!114 &6977884630562291897
 MonoBehaviour:
@@ -61520,7 +61276,7 @@ GameObject:
   - component: {fileID: 1158108057421699925}
   - component: {fileID: 4388818050576497324}
   - component: {fileID: 315254416825024380}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: Body
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -62902,5 +62658,3 @@ SceneRoots:
   - {fileID: 10913954}
   - {fileID: 1319401571}
   - {fileID: 1678109213}
-  - {fileID: 402783619}
-  - {fileID: 9151854}
