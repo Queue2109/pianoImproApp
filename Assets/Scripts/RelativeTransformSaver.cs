@@ -27,7 +27,7 @@ public class RelativeTransformSaver : MonoBehaviour
 
         //PlayerPrefs.DeleteKey(PanelPosKey);
         //PlayerPrefs.DeleteKey(PanelRotKey);
-        PlayerPrefs.DeleteAll();
+        //PlayerPrefs.DeleteAll();
     }
     private bool IsVector3Valid(Vector3 v)
     {

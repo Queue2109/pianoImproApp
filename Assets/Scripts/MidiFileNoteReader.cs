@@ -54,6 +54,7 @@ public class MidiFileNoteReader : MonoBehaviour
     public bool countdown = false;
 
     private TextMeshProUGUI scoringModeTitle;
+    public TextMeshPro playModeText;
 
     private Playback accompanimentPlayback;
     private Playback melodyPlayback;
@@ -88,7 +89,7 @@ public class MidiFileNoteReader : MonoBehaviour
 
     private bool isSongReady = false;
     private int timesPlayed = 0;
-    public bool practiceMode = true;
+    public PlayMode playMode = PlayMode.PracticeMode;
 
     private bool muteMelodyPlayback = false;
     private bool muteAccompanimentPlayback = false;
@@ -159,7 +160,13 @@ public class MidiFileNoteReader : MonoBehaviour
         UpdateSpeedTextUI();
         currentMode = PlaybackMode.FullSong;
         scoringManager.ResetScoring();
-        scoringManager.SetScoringMode(ScoringMode.Melody);
+        if (playMode != PlayMode.ImprovisationMode)
+        {
+            scoringManager.SetScoringMode(ScoringMode.Melody);
+        } else
+        {
+            scoringManager.SetScoringMode(ScoringMode.Improvisation);
+        }
         timesPlayed = 1;
         InitializePlaybacks();
         ColorAllKeys();
@@ -343,31 +350,45 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void TogglePracticeMode()
     {
-        practiceMode = !practiceMode;
+        if (playMode == PlayMode.PracticeMode)
+        {
+            playMode = PlayMode.ImprovisationMode;
+        } else if (playMode == PlayMode.ImprovisationMode)
+        {
+            playMode = PlayMode.ScoringMode;
+        } else {
+            playMode = PlayMode.PracticeMode;
+        }
         TextMeshProUGUI dialogTitle = GameObject.Find("PlaybackModeTitle").GetComponent<TextMeshProUGUI>();
         TextMeshProUGUI dialogText = GameObject.Find("PlaybackModeText").GetComponent<TextMeshProUGUI>();
         countdown = true;
         StartFullSongPlayback();
 
-        if (practiceMode)
+        if (playMode == PlayMode.PracticeMode)
         {
-            GameObject.Find("PlayModeText").GetComponent<TextMeshPro>().text = "Mode: Practice";
+            playModeText.text = "Mode: Practice";
             dialogTitle.text = "Practice mode";
-            dialogText.text = "In this mode, scoring system is disabled. You can focus on practicing the song and switch to classic mode when you feel ready.";
+            dialogText.text = "In this mode, scoring system is disabled. You can focus on practicing the song and switch to another mode when you feel ready.";
             scoringManager.StopScoring();
-        } else {
+        } else if (playMode == PlayMode.ScoringMode) {
             dialogTitle.text = "Classic mode";
             dialogText.text = "In this mode, your playing will be scored. Press play when you feel ready and play the song from start to end. Your score will be visible at the end of the song.";
-            GameObject.Find("PlayModeText").GetComponent<TextMeshPro>().text = "Mode: Classic";
+            playModeText.text = "Mode: Classic";
             scoringManager.StartScoring();
+        } else
+        {
+            playModeText.text = "Mode: Improvisation";
+            dialogTitle.text = "Improvisation mode";
+            dialogText.text = "In this mode, scoring system is disabled. You can focus on the improvising and switch to another mode when you feel ready.";
+            scoringManager.StopScoring();
         }
 
 
-        restartButton.SetActive(!practiceMode);
-        slowDownButton.SetActive(practiceMode);
-        speedUpButton.SetActive(practiceMode);
-        rewindButton.SetActive(practiceMode);
-        fastForwardButton.SetActive(practiceMode);
+        restartButton.SetActive(playMode == PlayMode.ScoringMode);
+        slowDownButton.SetActive(playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode);
+        speedUpButton.SetActive(playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode);
+        rewindButton.SetActive(playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode);
+        fastForwardButton.SetActive(playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode);
     }
 
     private void InitializePlaybacks()
@@ -415,13 +436,13 @@ public class MidiFileNoteReader : MonoBehaviour
             InitializePlaybacks();
         }
 
-        if(practiceMode && slowDownButton.activeSelf == false)
+        if((playMode == PlayMode.PracticeMode || playMode == PlayMode.ImprovisationMode) && slowDownButton.activeSelf == false)
         {
-            restartButton.SetActive(!practiceMode);
-            slowDownButton.SetActive(practiceMode);
-            speedUpButton.SetActive(practiceMode);
-            rewindButton.SetActive(practiceMode);
-            fastForwardButton.SetActive(practiceMode);
+            restartButton.SetActive(playMode == PlayMode.ScoringMode);
+            slowDownButton.SetActive(playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode);
+            speedUpButton.SetActive(playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode);
+            rewindButton.SetActive(playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode);
+            fastForwardButton.SetActive(playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode);
         }
         currentMode = mode;
         if (accompanimentPlayback == null || melodyPlayback == null)
@@ -539,7 +560,7 @@ public class MidiFileNoteReader : MonoBehaviour
         StopPlayback();
         DisposeDevice();
 
-        practiceMode = true;
+        playMode = PlayMode.PracticeMode;
         scoringManager.SetScoringMode(ScoringMode.Melody);
         playbackSpeed = 1;
         UpdateSpeedTextUI();
@@ -799,7 +820,13 @@ public class MidiFileNoteReader : MonoBehaviour
             // Third iteration: scoring ON again
             else if (timesPlayed == 3)
             {
-                scoringManager.SetScoringMode(ScoringMode.Melody);
+                if (playMode != PlayMode.ImprovisationMode)
+                {
+                    scoringManager.SetScoringMode(ScoringMode.Melody);
+                } else
+                {
+                    scoringManager.SetScoringMode(ScoringMode.Improvisation);
+                }
                 currentTime = new MetricTimeSpan(0, 0, 0);
                 accompanimentPlayback?.MoveToTime(currentTime);
                 melodyPlayback?.MoveToTime(currentTime);
@@ -832,7 +859,7 @@ public class MidiFileNoteReader : MonoBehaviour
             Debug.Log("Playback reached the end. Stopping.");
 
             StopPlayback();
-            if (practiceMode)
+            if (playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode)
                 return;
 
             // calculate accuracy
@@ -920,8 +947,8 @@ public class MidiFileNoteReader : MonoBehaviour
         logoPlay.SetActive(!isPlaying);
         logoPause.SetActive(isPlaying);
 
-        pianoSettingsUI?.SetActive(!isPlaying);
-        songChoiceUI?.SetActive(!isPlaying);
+        pianoSettingsUI.SetActive(!isPlaying);
+        songChoiceUI.SetActive(!isPlaying);
     }
 
     private void UpdateSpeedTextUI()
@@ -1045,4 +1072,11 @@ public class MidiNoteData
     public int NoteNumber;           // MIDI pitch (0–127)
     public bool IsLeftHand;          // true if note < 60 (for example)
     public bool WasPlayed;           // whether user has correctly played it
+}
+
+public enum PlayMode
+{
+    PracticeMode,
+    ImprovisationMode,
+    ScoringMode
 }

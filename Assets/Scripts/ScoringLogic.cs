@@ -18,6 +18,7 @@ public class ScoringLogic : MonoBehaviour
     private ChronologicalNoteList melodyChronoList;
     public PianoFunctions pianoFunctions;
     public TextMeshProUGUI bluesScaleText;
+    public TextMeshPro colorBluesScaleButtonText;
 
     private HashSet<int> currentScaleNotes = new HashSet<int>();   // which notes are lit now
     private bool BluesModeActive => currentScoringMode == ScoringMode.Improvisation;
@@ -35,6 +36,7 @@ public class ScoringLogic : MonoBehaviour
     public int totalImprovisedNotes = 0;
     public int wrongImprovisedNotes = 0;
     private bool isScoringActive = false;
+    bool colorBluesScaleKeys = true;
 
     public void SetScoringMode(ScoringMode mode)
     {
@@ -225,8 +227,10 @@ public class ScoringLogic : MonoBehaviour
         {
             Debug.Log($"Blues scale is {newScale}");
 
-
-            pianoFunctions.HighlightBluesScale(currentScaleNotes, newScale);
+            if (colorBluesScaleKeys)
+            {
+                pianoFunctions.HighlightBluesScale(currentScaleNotes, newScale);
+            }
             currentScaleNotes = newScale;
         }
     }
@@ -391,4 +395,16 @@ public class ScoringLogic : MonoBehaviour
         public List<MidiNoteData> GetAllNotes() => sortedNotes;
     }
 
+    public void ColorBluesScaleKeys()
+    {
+        if (currentScoringMode == ScoringMode.Improvisation)    
+        {
+            pianoFunctions.ResetAllKeysToDefaultColor();
+        }
+        colorBluesScaleKeys = !colorBluesScaleKeys;
+        if (colorBluesScaleKeys)
+            colorBluesScaleButtonText.text = "Color blues scale keys:\nON";
+        else
+            colorBluesScaleButtonText.text = "Color blues scale keys:\nOFF";
+    }
 }
