@@ -19,7 +19,7 @@ public class ScoringLogic : MonoBehaviour
     public PianoFunctions pianoFunctions;
     public TextMeshProUGUI bluesScaleText;
     public TextMeshPro colorBluesScaleButtonText;
-
+    public HttpHandler httpHandler;
     private HashSet<int> currentScaleNotes = new HashSet<int>();   // which notes are lit now
     private bool BluesModeActive => currentScoringMode == ScoringMode.Improvisation;
 
@@ -37,6 +37,15 @@ public class ScoringLogic : MonoBehaviour
     public int wrongImprovisedNotes = 0;
     private bool isScoringActive = false;
     bool colorBluesScaleKeys = true;
+
+    void Start()
+    {
+        // Reference your HttpHandler instance (make sure it is properly assigned)
+        if (httpHandler != null)
+        {
+            httpHandler.OnChordDetected += UpdateCurrentChord;
+        }
+    }
 
     public void SetScoringMode(ScoringMode mode)
     {
@@ -70,8 +79,7 @@ public class ScoringLogic : MonoBehaviour
         {
             totalImprovisedNotes++;
 
-            HashSet<int> dynamicBluesScale = GetDynamicBluesScale(currentChordRoot, isCurrentChordMajor);
-            if (dynamicBluesScale.Contains(noteNumber))
+            if (currentScaleNotes.Contains(noteNumber))
             {
                 Debug.Log($"🎷 Improvisation: Correct note={noteNumber} (Blues Scale)");
             }
@@ -186,53 +194,28 @@ public class ScoringLogic : MonoBehaviour
             }
         }
 
-        Debug.Log($"Improvisation for blues {bluesRoot}");
+        Debug.Log($"Improvisation for blues {pianoFunctions.NoteNumberToName(bluesRoot)}");
 
         return fullRangeSet;
     }
 
-    public void SetCurrentChord(List<int> notes)
+    private void UpdateCurrentChord(int rootNote, string chordType)
     {
-        if (notes == null || notes.Count < 3)
-        {
-            Debug.Log("SetCurrentChord requires at least 3 notes to determine the chord type.");
-            return;
-        }
+        currentChordRoot = rootNote;
+        isCurrentChordMajor = chordType == "Major";
+        Debug.Log($"Chord updated: {rootNote} {chordType}");
 
-        notes.Sort(); // Ensure ascending order
-        currentChordRoot = notes[0];
-
-        int interval1 = notes[1] - notes[0];
-        int interval2 = notes[2] - notes[0];
-
-        // Detect major or minor based on intervals
-        if (interval1 == 4 && interval2 == 7)
-        {
-            isCurrentChordMajor = true;
-        }
-        else if (interval1 == 3 && interval2 == 7)
-        {
-            isCurrentChordMajor = false;
-        }
-        else
-        {
-            Debug.Log("Chord type could not be confidently determined.");
-            isCurrentChordMajor = true; // fallback default
-        }
-
-        Debug.Log($"🎵 New Chord Set: {currentChordRoot} {(isCurrentChordMajor ? "Major" : "Minor")}");
-        HashSet<int> newScale = GetDynamicBluesScale(currentChordRoot, isCurrentChordMajor);
-
+        // Update the scale
+        HashSet<int> newScale = GetDynamicBluesScale(rootNote, isCurrentChordMajor);
+        Debug.Log("New scale is" + newScale);
         if (BluesModeActive)
         {
-            Debug.Log($"Blues scale is {newScale}");
-
             if (colorBluesScaleKeys)
             {
                 pianoFunctions.HighlightBluesScale(currentScaleNotes, newScale);
             }
-            currentScaleNotes = newScale;
         }
+        currentScaleNotes = newScale;
     }
 
     public float GetAccompanimentScore()

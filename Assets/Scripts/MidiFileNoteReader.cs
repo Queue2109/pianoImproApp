@@ -51,7 +51,7 @@ public class MidiFileNoteReader : MonoBehaviour
     public GameObject totalImprovisedNotesText;
     public GameObject wrongImprovisedNotesText;
 
-    public bool countdown = false;
+    public bool countdown = true;
 
     private TextMeshProUGUI scoringModeTitle;
     public TextMeshPro playModeText;
@@ -742,7 +742,6 @@ public class MidiFileNoteReader : MonoBehaviour
                             pianoFunctions.ColorKey(keyName, false);
                         }
                     }
-                    IdentifyCurrentChord();
                 }
             }
         });
@@ -794,8 +793,6 @@ public class MidiFileNoteReader : MonoBehaviour
                             pianoFunctions.ResetKeyColor(keyName);
                         }
                     }
-
-                    IdentifyCurrentChord();
                 }
             }
         });
@@ -848,9 +845,7 @@ public class MidiFileNoteReader : MonoBehaviour
     }
     public void IdentifyCurrentChord()
     {
-        var currentNotes = chordNotes.OrderByDescending(n => n).ToList();
-        scoringManager.SetCurrentChord(currentNotes);
-        httpHandler?.getChordName(currentNotes);
+        httpHandler?.getChordName(chordNotes.ToList());
     }
     private void OnPlaybackFinished()
     {
@@ -905,6 +900,7 @@ public class MidiFileNoteReader : MonoBehaviour
             foreach (var note in e.Notes)
             {
                 chordNotes.Add(note.NoteNumber);
+                Debug.Log("Chord notes areeeee" + note);
                 IdentifyCurrentChord();
             }
         });
@@ -917,7 +913,6 @@ public class MidiFileNoteReader : MonoBehaviour
             foreach (var note in e.Notes)
             {
                 chordNotes.Remove(note.NoteNumber);
-                IdentifyCurrentChord();
             }
         });
     }

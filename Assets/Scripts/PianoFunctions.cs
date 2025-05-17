@@ -203,6 +203,19 @@ public class PianoFunctions : MonoBehaviour
         return $"{names[noteIndex]}{octave}";
     }
 
+    public string ConvertFlatToSharp(string flatNote)
+    {
+        return flatNote switch
+        {
+            "D-" => "C-Sharp",
+            "E-" => "D-Sharp",
+            "G-" => "F-Sharp",
+            "A-" => "G-Sharp",
+            "B-" => "A-Sharp",
+            _ => flatNote
+        };
+    }
+
     public string NoteNameToKeyName(string note, string octave)
     {
         // check which note it is

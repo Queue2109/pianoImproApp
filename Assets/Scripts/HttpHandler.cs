@@ -7,6 +7,9 @@ using System;
 using TMPro;
 using System.Threading;
 using System.Globalization;
+using System.Threading.Tasks;
+using System.Net;
+using System.Net.Http;
 
 public class HttpHandler : MonoBehaviour
 {
@@ -16,6 +19,15 @@ public class HttpHandler : MonoBehaviour
     public TextMeshProUGUI text;
     Dictionary<string, string> chordDictionary;
     public ScoringLogic scoringManager;
+    public PianoFunctions pianoFunctions;
+    private bool requestInProgress = false;
+    static readonly TimeSpan minInterval = TimeSpan.FromMilliseconds(250); // 4 req / s max
+    static readonly TimeSpan hardTimeout = TimeSpan.FromSeconds(1);        // socket timeout
+    static readonly HttpClient client = new HttpClient { Timeout = hardTimeout };
+
+    // ─── mutable state ─────────────────────────────────────────────────────────────
+    CancellationTokenSource currentCts;   // used to abort a request in flight
+    DateTime lastRequestEnded = DateTime.MinValue;
     void Start()
     {
         chordDictionary = new Dictionary<string, string>
@@ -61,58 +73,88 @@ public class HttpHandler : MonoBehaviour
        // text = GameObject.Find("ChordName").GetComponent<TMP_Text>();
         
     }
+
+    public event Action<int, string> OnChordDetected;
+
+    bool requestInFlight = false;                  // gate against spam
+
     public void getChordName(List<int> notes)
     {
-        if(notes.Count < 3)
-        {
-            return;
-        }
-        StartCoroutine(PostRequest(notes));
+        if (notes.Count < 3) return;
+
+        // cancel the previous HTTP call (if any) so we never queue them up
+        currentCts?.Cancel();
+
+        // throttle: too soon since last attempt? skip this batch
+        if (DateTime.UtcNow - lastRequestEnded < minInterval) return;
+
+        currentCts = new CancellationTokenSource();
+        _ = SendChordRequestAsync(notes, currentCts.Token);  
     }
-    IEnumerator PostRequest(List<int> notes)
+
+  async Task SendChordRequestAsync(List<int> notes, CancellationToken ct)
+{
+    try
     {
-        string notesToJson = JsonUtility.ToJson(new NotesData { notes = notes.ToArray() });
+        string json = JsonUtility.ToJson(new NotesData { notes = notes.ToArray() });
+        var resp = await client.PostAsync(url,
+                                          new StringContent(json, Encoding.UTF8, "application/json"),
+                                          ct)
+                               .ConfigureAwait(false);
 
-        using UnityWebRequest webRequest = new UnityWebRequest(url, "POST");
-        webRequest.SetRequestHeader("Content-Type", "application/json");
-        byte[] bytes = Encoding.UTF8.GetBytes(notesToJson);
-        webRequest.uploadHandler = new UploadHandlerRaw(bytes);
-        webRequest.downloadHandler = new DownloadHandlerBuffer();
-        yield return webRequest.SendWebRequest();
-
-        if (webRequest.result != UnityWebRequest.Result.Success)
+        // fast-fail HTTP status (400/500…) – no body parse, no UI work
+        if (!resp.IsSuccessStatusCode)
         {
-            Debug.LogError("Error: " + webRequest.error);
+            Debug.LogWarning($"Chord API { (int)resp.StatusCode } { resp.ReasonPhrase }");
+            return;                         // just drop it – no dispatcher call
         }
-        else
+
+        string body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        // hop to Unity main-thread exactly once
+        UnityMainThreadDispatcher.Enqueue(() => HandleSuccessfulBody(body, notes));
+    }
+    catch (OperationCanceledException)   // either hardTimeout or manual cancel
+    {
+        // silent – this is expected during normal gameplay
+    }
+    catch (Exception ex)
+    {
+        Debug.LogError($"Chord API failure: {ex.Message}");
+    }
+    finally
+    {
+        lastRequestEnded = DateTime.UtcNow;   // for throttle
+        currentCts?.Dispose();
+        currentCts = null;
+    }
+}
+    void HandleSuccessfulBody(string json, List<int> notes)
+    {
+        ResponseData data;
+        try { data = JsonUtility.FromJson<ResponseData>(json); }
+        catch (Exception e) { Debug.LogError($"Bad JSON: {e.Message}"); return; }
+
+        if (!chordDictionary.TryGetValue(data.result, out var symbol))
         {
-            string responseText = webRequest.downloadHandler.text;
-            var responseData = JsonUtility.FromJson<ResponseData>(responseText);
-
-            if (chordDictionary.ContainsKey(responseData.result))
-            {
-                string chordSymbol = chordDictionary[responseData.result];
-
-                // Ensure proper formatting for minor chords
-                if (chordSymbol == "m")
-                {
-                    text.text = responseData.rootNote + "m";  // "Em" instead of "E-"
-                }
-                else
-                {
-                    text.text = responseData.rootNote + chordSymbol;
-                }
-            }
-            else
-            {
-                Debug.LogWarning($"Unknown chord: {responseData.rootNote} {responseData.result}");
-            }
-
-            Debug.Log("Detected Chord: " + responseData.rootNote + " " + responseData.result);
+            Debug.LogWarning($"Unknown chord: {data.result}"); return;
         }
+
+        bool major = symbol == "" || symbol.Contains("maj") || symbol == "aug";
+        string root = data.rootNote.EndsWith("-")
+                        ? pianoFunctions.ConvertFlatToSharp(data.rootNote)
+                        : data.rootNote;
+
+        text.text = data.rootNote + symbol;
+
+        foreach (int n in notes)
+            if (pianoFunctions.NoteNumberToName(n)[0] == root[0])
+                OnChordDetected?.Invoke(n, major ? "Major" : "Minor");
+
+        Debug.Log($"Detected chord: {data.rootNote} {data.result}");
     }
 
-    [System.Serializable]
+[System.Serializable]
     public class ResponseData
     {
         public string result;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using UnityEngine;
 using static OVRSpatialAnchor;
@@ -53,6 +54,7 @@ public class NewAnchorManager : MonoBehaviour
 
         if (anchorReady)
         {
+            await Task.Delay(1000);
             Log("Anchor is ready.");
             relativeTransformSaver.LoadOnStart();
             relativeTransformSaver2.LoadOnStart();
