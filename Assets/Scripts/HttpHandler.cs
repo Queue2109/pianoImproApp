@@ -20,7 +20,6 @@ public class HttpHandler : MonoBehaviour
     Dictionary<string, string> chordDictionary;
     public ScoringLogic scoringManager;
     public PianoFunctions pianoFunctions;
-    private bool requestInProgress = false;
     static readonly TimeSpan minInterval = TimeSpan.FromMilliseconds(250); // 4 req / s max
     static readonly TimeSpan hardTimeout = TimeSpan.FromSeconds(1);        // socket timeout
     static readonly HttpClient client = new HttpClient { Timeout = hardTimeout };
@@ -85,52 +84,61 @@ public class HttpHandler : MonoBehaviour
         // cancel the previous HTTP call (if any) so we never queue them up
         currentCts?.Cancel();
 
+        Debug.Log("Did not ccancel previous HTTP request");
+
         // throttle: too soon since last attempt? skip this batch
         if (DateTime.UtcNow - lastRequestEnded < minInterval) return;
+
+        Debug.Log("Did not ccancel previous HTTP request2");
 
         currentCts = new CancellationTokenSource();
         _ = SendChordRequestAsync(notes, currentCts.Token);  
     }
 
-  async Task SendChordRequestAsync(List<int> notes, CancellationToken ct)
-{
-    try
+    async Task SendChordRequestAsync(List<int> notes, CancellationToken ct)
     {
-        string json = JsonUtility.ToJson(new NotesData { notes = notes.ToArray() });
-        var resp = await client.PostAsync(url,
-                                          new StringContent(json, Encoding.UTF8, "application/json"),
-                                          ct)
-                               .ConfigureAwait(false);
-
-        // fast-fail HTTP status (400/500…) – no body parse, no UI work
-        if (!resp.IsSuccessStatusCode)
+        try
         {
-            Debug.LogWarning($"Chord API { (int)resp.StatusCode } { resp.ReasonPhrase }");
-            return;                         // just drop it – no dispatcher call
+            string json = JsonUtility.ToJson(new NotesData { notes = notes.ToArray() });
+            var resp = await client.PostAsync(url,
+                                              new StringContent(json, Encoding.UTF8, "application/json"),
+                                              ct)
+                                   .ConfigureAwait(false);
+
+            // fast-fail HTTP status (400/500…) – no body parse, no UI work
+            if (!resp.IsSuccessStatusCode)
+            {
+                Debug.LogWarning($"Chord API { (int)resp.StatusCode } { resp.ReasonPhrase }");
+                return;                         // just drop it – no dispatcher call
+            }
+            Debug.Log("Did not ccancel previous HTTP request3");
+
+            string body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+            Debug.Log("Did not ccancel previous HTTP request4");
+
+            // hop to Unity main-thread exactly once
+            HandleSuccessfulBody(body, notes);
         }
+        catch (OperationCanceledException)   // either hardTimeout or manual cancel
+        {
+            // silent – this is expected during normal gameplay
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Chord API failure: {ex.Message}");
+        }
+        finally
+        {
+            lastRequestEnded = DateTime.UtcNow;   // for throttle
+            currentCts?.Dispose();
+            currentCts = null;
+        }
+    }
 
-        string body = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
-
-        // hop to Unity main-thread exactly once
-        UnityMainThreadDispatcher.Enqueue(() => HandleSuccessfulBody(body, notes));
-    }
-    catch (OperationCanceledException)   // either hardTimeout or manual cancel
-    {
-        // silent – this is expected during normal gameplay
-    }
-    catch (Exception ex)
-    {
-        Debug.LogError($"Chord API failure: {ex.Message}");
-    }
-    finally
-    {
-        lastRequestEnded = DateTime.UtcNow;   // for throttle
-        currentCts?.Dispose();
-        currentCts = null;
-    }
-}
     void HandleSuccessfulBody(string json, List<int> notes)
     {
+        Debug.Log($"HTTP 4");
+
         ResponseData data;
         try { data = JsonUtility.FromJson<ResponseData>(json); }
         catch (Exception e) { Debug.LogError($"Bad JSON: {e.Message}"); return; }
@@ -139,17 +147,29 @@ public class HttpHandler : MonoBehaviour
         {
             Debug.LogWarning($"Unknown chord: {data.result}"); return;
         }
+        Debug.Log($"HTTP 5");
 
         bool major = symbol == "" || symbol.Contains("maj") || symbol == "aug";
         string root = data.rootNote.EndsWith("-")
                         ? pianoFunctions.ConvertFlatToSharp(data.rootNote)
                         : data.rootNote;
+        Debug.Log($"HTTP 6");
+        UnityMainThreadDispatcher.Enqueue(() =>
+        {
+            Debug.Log("UI update on thread " + Thread.CurrentThread.ManagedThreadId);
+            text.text = $"{root}{symbol}";
+        });
 
-        text.text = data.rootNote + symbol;
+
 
         foreach (int n in notes)
             if (pianoFunctions.NoteNumberToName(n)[0] == root[0])
-                OnChordDetected?.Invoke(n, major ? "Major" : "Minor");
+            {
+                UnityMainThreadDispatcher.Enqueue(() =>
+                {
+                    OnChordDetected?.Invoke(n, major ? "Major" : "Minor");
+                });
+            }
 
         Debug.Log($"Detected chord: {data.rootNote} {data.result}");
     }

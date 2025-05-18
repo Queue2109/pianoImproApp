@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using Melanchall.DryWetMidi.Common;
 using System.Collections;
 using UnityEditor;
+using System.Text.RegularExpressions;
 
 public class MidiFileNoteReader : MonoBehaviour
 {
@@ -36,9 +37,16 @@ public class MidiFileNoteReader : MonoBehaviour
     public GameObject restartButton;
     public GameObject scoreBoard;
     public GameObject mainContent;
+    public GameObject bpmPreview;
     public TextMeshPro songName;
     public TextMeshProUGUI timeText;
     public TextMeshProUGUI speedText;
+    public TextMeshProUGUI songTitleOnBpmPreview;
+    public TextMeshProUGUI modeTitleOnBpmPreview;
+    public TextMeshProUGUI modeDescriptionOnBpmPreview;
+    public TextMeshProUGUI bpmValue;
+    public TextMeshProUGUI dialogTitle;
+    public TextMeshProUGUI dialogText;
     public TextMeshPro playAccompanimentButtonText;
     public TextMeshPro playMelodyButtonText;
     public TextMeshPro colorAccompanimentKeysButtonText;
@@ -53,7 +61,7 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public bool countdown = true;
 
-    private TextMeshProUGUI scoringModeTitle;
+    public TextMeshProUGUI scoringModeTitle;
     public TextMeshPro playModeText;
 
     private Playback accompanimentPlayback;
@@ -62,7 +70,8 @@ public class MidiFileNoteReader : MonoBehaviour
     private OutputDevice outputDevice;
     public bool isPlaying = false;
     private PlaybackMode currentMode = PlaybackMode.FullSong;
-    private float playbackSpeed = 1f;
+    double originalBpm = 0;
+    double userSetBpm = 0;
     private HashSet<int> activeNotes = new HashSet<int>();
     private HashSet<int> chordNotes = new HashSet<int>();
     private List<int> channelSelections = new List<int>();
@@ -154,7 +163,6 @@ public class MidiFileNoteReader : MonoBehaviour
 
     public void StartFullSongPlayback()
     {
-        playbackSpeed = 1f;
         StopPlayback();
         DisposeDevice();
         UpdateSpeedTextUI();
@@ -222,7 +230,7 @@ public class MidiFileNoteReader : MonoBehaviour
         }
         Debug.Log($"Song ready {isSongReady} isPlaying {isPlaying}");
         midiFileManager.LoadLastPlayedSong();
-
+        songChoiceUI.SetActive(!isPlaying);
         UpdatePlayPauseButtons();
     }
 
@@ -288,23 +296,23 @@ public class MidiFileNoteReader : MonoBehaviour
     public void SpeedUp()
     {
         if (accompanimentPlayback == null) return;
-        playbackSpeed += 0.1f;
-        chordsPlayback.Speed = playbackSpeed;
+        userSetBpm += 5;
+        chordsPlayback.Speed = userSetBpm / originalBpm;
         chordsPlayback.MoveToTime(currentTime);
         switch (currentMode)
         {
             case PlaybackMode.Accompaniment:
-                accompanimentPlayback.Speed = playbackSpeed;
+                accompanimentPlayback.Speed = userSetBpm / originalBpm;
                 accompanimentPlayback.MoveToTime(currentTime);
                 break;
             case PlaybackMode.Melody:
-                melodyPlayback.Speed = playbackSpeed;
+                melodyPlayback.Speed = userSetBpm / originalBpm;
                 melodyPlayback.MoveToTime(currentTime);
                     break;
             case PlaybackMode.FullSong:
-                melodyPlayback.Speed = playbackSpeed;
+                melodyPlayback.Speed = userSetBpm / originalBpm;
                 melodyPlayback.MoveToTime(currentTime);
-                accompanimentPlayback.Speed = playbackSpeed;
+                accompanimentPlayback.Speed = userSetBpm / originalBpm;
                 accompanimentPlayback.MoveToTime(currentTime);
                 break;
         }
@@ -324,23 +332,23 @@ public class MidiFileNoteReader : MonoBehaviour
     {
         if (accompanimentPlayback == null) return;
 
-        playbackSpeed = Mathf.Max(0.1f, playbackSpeed - 0.1f);
+        userSetBpm = Math.Max(10, (userSetBpm - 5));
         chordsPlayback.MoveToTime(currentTime);
-        chordsPlayback.Speed = playbackSpeed;
+        chordsPlayback.Speed = userSetBpm / originalBpm;
         switch (currentMode)
         {
             case PlaybackMode.Accompaniment:
-                accompanimentPlayback.Speed = playbackSpeed;
+                accompanimentPlayback.Speed = userSetBpm / originalBpm;
                 accompanimentPlayback.MoveToTime(currentTime);
                 break;
             case PlaybackMode.Melody:
-                melodyPlayback.Speed = playbackSpeed;
+                melodyPlayback.Speed = userSetBpm / originalBpm;
                 melodyPlayback.MoveToTime(currentTime);
                 break;
             case PlaybackMode.FullSong:
-                melodyPlayback.Speed = playbackSpeed;
+                melodyPlayback.Speed = userSetBpm / originalBpm;
                 melodyPlayback.MoveToTime(currentTime);
-                accompanimentPlayback.Speed = playbackSpeed;
+                accompanimentPlayback.Speed = userSetBpm / originalBpm;
                 accompanimentPlayback.MoveToTime(currentTime);
                 break;
         }
@@ -356,33 +364,39 @@ public class MidiFileNoteReader : MonoBehaviour
         } else if (playMode == PlayMode.ImprovisationMode)
         {
             playMode = PlayMode.ScoringMode;
+            userSetBpm = originalBpm;
         } else {
             playMode = PlayMode.PracticeMode;
         }
-        TextMeshProUGUI dialogTitle = GameObject.Find("PlaybackModeTitle").GetComponent<TextMeshProUGUI>();
-        TextMeshProUGUI dialogText = GameObject.Find("PlaybackModeText").GetComponent<TextMeshProUGUI>();
-        countdown = true;
-        StartFullSongPlayback();
+      
+        //PlaybackPreview();
+        OnModePreviewUI();
+        mainContent.SetActive(false);
+    }
 
+    public void UpdatePracticeModeUI()
+    {
         if (playMode == PlayMode.PracticeMode)
         {
             playModeText.text = "Mode: Practice";
             dialogTitle.text = "Practice mode";
             dialogText.text = "In this mode, scoring system is disabled. You can focus on practicing the song and switch to another mode when you feel ready.";
             scoringManager.StopScoring();
-        } else if (playMode == PlayMode.ScoringMode) {
+        }
+        else if (playMode == PlayMode.ScoringMode)
+        {
             dialogTitle.text = "Classic mode";
             dialogText.text = "In this mode, your playing will be scored. Press play when you feel ready and play the song from start to end. Your score will be visible at the end of the song.";
             playModeText.text = "Mode: Classic";
             scoringManager.StartScoring();
-        } else
+        }
+        else
         {
             playModeText.text = "Mode: Improvisation";
             dialogTitle.text = "Improvisation mode";
             dialogText.text = "In this mode, scoring system is disabled. You can focus on the improvising and switch to another mode when you feel ready.";
             scoringManager.StopScoring();
         }
-
 
         restartButton.SetActive(playMode == PlayMode.ScoringMode);
         slowDownButton.SetActive(playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode);
@@ -407,9 +421,9 @@ public class MidiFileNoteReader : MonoBehaviour
         melodyPlayback = melodyFile.GetPlayback();
         chordsPlayback = chordsFile.GetPlayback();
 
-        accompanimentPlayback.Speed = playbackSpeed;
-        melodyPlayback.Speed = playbackSpeed;
-        chordsPlayback.Speed = playbackSpeed;
+        accompanimentPlayback.Speed = userSetBpm / originalBpm;
+        melodyPlayback.Speed = userSetBpm / originalBpm;
+        chordsPlayback.Speed = userSetBpm / originalBpm;
 
         accompanimentPlayback.NotesPlaybackStarted += OnNotesPlaybackStarted;
         accompanimentPlayback.NotesPlaybackFinished += OnNotesPlaybackFinished;
@@ -452,9 +466,6 @@ public class MidiFileNoteReader : MonoBehaviour
             yield break;
         }
 
-        songName.text = $"{author}: {fileName}";
-        scoringModeTitle.text = $"{(scoringManager.GetScoringMode() == ScoringMode.Melody ? "Play melody and accompaniment" : "Time to improvise!")}";
-
         muteAccompanimentPlayback = (mode == PlaybackMode.Melody);
         muteMelodyPlayback = (mode == PlaybackMode.Accompaniment || scoringManager.GetScoringMode() == ScoringMode.Improvisation);
 
@@ -471,7 +482,7 @@ public class MidiFileNoteReader : MonoBehaviour
             chordsPlayback.MoveToTime(new MetricTimeSpan(0));
             if (countdown)
             {
-                yield return countDownTimer.StartTimer(accompanimentFile.GetTempoMap());
+                yield return countDownTimer.StartTimer(accompanimentFile.GetTempoMap(), userSetBpm / originalBpm);
                 countdown = false;
             }
 
@@ -482,7 +493,10 @@ public class MidiFileNoteReader : MonoBehaviour
             isSongReady = true;
         }
         Debug.Log($"timesPLayed {isPlaying}");
-
+        
+            
+        songName.text = $"{author}: {fileName}";
+        scoringModeTitle.text = $"{(scoringManager.GetScoringMode() == ScoringMode.Melody ? "Play melody and accompaniment" : "Time to improvise!")}";
 
         totalTime = accompanimentPlayback?.GetDuration<MetricTimeSpan>().TotalSeconds ?? melodyPlayback.GetDuration<MetricTimeSpan>().TotalSeconds;
         totalDuration = accompanimentPlayback?.GetDuration<MetricTimeSpan>() ?? melodyPlayback.GetDuration<MetricTimeSpan>();
@@ -562,7 +576,6 @@ public class MidiFileNoteReader : MonoBehaviour
 
         playMode = PlayMode.PracticeMode;
         scoringManager.SetScoringMode(ScoringMode.Melody);
-        playbackSpeed = 1;
         UpdateSpeedTextUI();
 
         outputDevice = OutputDevice.GetAll().FirstOrDefault();
@@ -583,8 +596,15 @@ public class MidiFileNoteReader : MonoBehaviour
         accompanimentPlayback = accompanimentFile.GetPlayback(outputDevice);
         melodyPlayback = melodyFile.GetPlayback(outputDevice);
 
-        accompanimentPlayback.Speed = playbackSpeed;
-        melodyPlayback.Speed = playbackSpeed;
+
+        var tempoMap = accompanimentPlayback.TempoMap;
+        originalBpm = tempoMap
+            .GetTempoAtTime((MidiTimeSpan)0)
+            .BeatsPerMinute;
+
+        userSetBpm = originalBpm;
+        accompanimentPlayback.Speed = userSetBpm / originalBpm;
+        melodyPlayback.Speed = userSetBpm / originalBpm;
 
         ParseAllNotes(accompanimentFile, melodyFile);
         LoadNotesForScoring();
@@ -852,7 +872,7 @@ public class MidiFileNoteReader : MonoBehaviour
         MainThreadDispatcher.Enqueue(() =>
         {
             Debug.Log("Playback reached the end. Stopping.");
-
+            songChoiceUI.SetActive(true);
             StopPlayback();
             if (playMode == PlayMode.ImprovisationMode || playMode == PlayMode.PracticeMode)
                 return;
@@ -889,6 +909,7 @@ public class MidiFileNoteReader : MonoBehaviour
             wrongImprovisedNotesText.GetComponent<TextMeshProUGUI>().text = $"{scoringManager.wrongImprovisedNotes}";
 
             midiFileManager.SetStarColors(songId, GameObject.Find("StarRowScoringFinal").GetComponentsInChildren<Image>());
+           
         });
 
     }
@@ -935,6 +956,35 @@ public class MidiFileNoteReader : MonoBehaviour
         }
     }
 
+    public void OnModePreviewUI()
+    {
+        bpmPreview.SetActive(true);
+        songTitleOnBpmPreview.text = $"{author}: {fileName}";
+        modeTitleOnBpmPreview.text = playMode.ToString();
+        string description = "";
+        if (playMode == PlayMode.ImprovisationMode)
+        {
+            description = "Explore and experiment—no points, just creativity.\nNo Scoring: Freedom to try ideas without penalty.\nFocus Points:\nListen carefully to the chords.\nKeep an eye on the displayed blues scale.\nImagine lines before you play and let them flow onto the keyboard.\n";
+        } else if (playMode == PlayMode.ScoringMode)
+        {
+            description = "Sharpen your skills under pressure.\nScored Performance – Your playing is evaluated in real time.\nThree-Pass Structure\nTheme 1: Play the written melody with its accompaniment.\nImprovise: Create your own solo over the chord progression.\nTheme 2: Return to the melody with accompaniment to close the piece.";
+        } else
+        {
+            description = "Reinforce the form at your own pace.\nNot Scored: Pure practice environment.\nThree-Pass Structure (identical to Classic Mode)\nTheme 1: Melody + accompaniment\nImprovise: Free solo\nTheme 2: Melody + accompaniment";
+        }
+        modeDescriptionOnBpmPreview.text = description;
+        bpmValue.text = $"{(int) userSetBpm} BPM";
+    }
+
+    public void OnBpmButtonClick(int value)
+    {
+        userSetBpm += value;
+        bpmValue.text = $"{(int) userSetBpm} BPM";
+
+        accompanimentPlayback.Speed = userSetBpm / originalBpm;
+        melodyPlayback.Speed = userSetBpm / originalBpm;
+    }   
+
     private void UpdatePlayPauseButtons()
     {
         if (!logoPlay || !logoPause) return;
@@ -943,13 +993,12 @@ public class MidiFileNoteReader : MonoBehaviour
         logoPause.SetActive(isPlaying);
 
         pianoSettingsUI.SetActive(!isPlaying);
-        songChoiceUI.SetActive(!isPlaying);
     }
 
     private void UpdateSpeedTextUI()
     {
         if (speedText != null)
-            speedText.text = $"Speed: {playbackSpeed:0.0}x";
+            speedText.text = $"Speed: {(int) userSetBpm} BPM";
     }
 
     private string FormatTime(MetricTimeSpan mts)
@@ -1019,23 +1068,6 @@ public class MidiFileNoteReader : MonoBehaviour
         }
     }
     #endregion
-
-    private double BarsToSeconds()
-    {
-        // use the accompaniment file’s tempo & time‑signature at bar 0
-        var tempoMap = melodyFile.GetTempoMap();
-
-        Debug.Log($"Get tempo map is {tempoMap.TimeDivision} {tempoMap} {tempoMap.GetTimeSignatureChanges()}");
-
-        // "bars, beats, ticks" → metric
-        var span = new BarBeatTicksTimeSpan(0, 8, 0);
-        var metric = TimeConverter.ConvertTo<MetricTimeSpan>(span, tempoMap);
-        Debug.Log($"Get tempo map is metric {metric}");
-
-        // honour whatever playback speed you’re about to use
-        return metric.TotalMicroseconds / 1_000_000.0 / playbackSpeed;
-    }
-
 
     #region Public Scoring Method
 

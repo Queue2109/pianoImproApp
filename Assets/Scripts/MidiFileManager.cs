@@ -202,6 +202,7 @@ public class MidiFileManager : MonoBehaviour
 
     public void OnStartPlayingClicked()
     {
+        if (blinkRoutine == null) return;
         StopCoroutine(blinkRoutine);
         blinkRoutine = null;
     }
