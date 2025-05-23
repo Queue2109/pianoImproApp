@@ -64,7 +64,7 @@ public class MidiFileNoteReader : MonoBehaviour
     public TextMeshProUGUI scoringModeTitle;
     public TextMeshPro playModeText;
 
-    private Playback accompanimentPlayback;
+    public Playback accompanimentPlayback;
     private Playback melodyPlayback;
     private Playback chordsPlayback;
     private OutputDevice outputDevice;
@@ -964,13 +964,13 @@ public class MidiFileNoteReader : MonoBehaviour
         string description = "";
         if (playMode == PlayMode.ImprovisationMode)
         {
-            description = "Explore and experiment—no points, just creativity.\nNo Scoring: Freedom to try ideas without penalty.\nFocus Points:\nListen carefully to the chords.\nKeep an eye on the displayed blues scale.\nImagine lines before you play and let them flow onto the keyboard.\n";
+            description = "Sharpen your improvisation skills: as the song repeats three times playing only the accompaniment, you have the perfect chance to practice just the improvisation.";
         } else if (playMode == PlayMode.ScoringMode)
         {
-            description = "Sharpen your skills under pressure.\nScored Performance – Your playing is evaluated in real time.\nThree-Pass Structure\nTheme 1: Play the written melody with its accompaniment.\nImprovise: Create your own solo over the chord progression.\nTheme 2: Return to the melody with accompaniment to close the piece.";
+            description = "Your performance will be scored. The song repeats three times - during the first and third repeats, play the accompaniment and melody. On the second repeat, improvise using the displayed blues scale.";
         } else
         {
-            description = "Reinforce the form at your own pace.\nNot Scored: Pure practice environment.\nThree-Pass Structure (identical to Classic Mode)\nTheme 1: Melody + accompaniment\nImprovise: Free solo\nTheme 2: Melody + accompaniment";
+            description = "Time to practice! The song repeats three times - during the first and third repeats, play the accompaniment and melody. On the second repeat, improvise using the displayed blues scale.";
         }
         modeDescriptionOnBpmPreview.text = description;
         bpmValue.text = $"{(int) userSetBpm} BPM";

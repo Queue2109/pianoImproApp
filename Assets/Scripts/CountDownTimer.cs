@@ -42,7 +42,7 @@ public class CountDownTimer : MonoBehaviour
             yield return new WaitForSecondsRealtime((float)beatSec);
         }
 
-        CountdownFinished();
+        CountdownFinished();    
     }
 
     private void CountdownFinished()

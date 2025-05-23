@@ -9,6 +9,13 @@ using Melanchall.DryWetMidi.Core;
 
 public class MidiFileManager : MonoBehaviour
 {
+    public RelativeTransformSaver relativeTransformSaver;
+    public GameObject playControlPanel;
+    public GameObject ui;
+    public GameObject setupForGameDialog;
+    public GameObject mainContent;
+
+
     public GameObject lastPlayedSongContainer;
     public GameObject lastPlayedSongGameObject;
     public GameObject songContainerPrefab; // A UI prefab containing NoteImage, SongAuthor, and SongTitle
@@ -260,5 +267,16 @@ public class MidiFileManager : MonoBehaviour
         midiPlayer.fileName = songName;
         midiPlayer.author = author;
         midiPlayer.PlaybackPreview();
+    }
+
+    public void OnPlayButtonClick()
+    {
+        if (!midiPlayer.accompanimentPlayback.IsRunning) return;
+        relativeTransformSaver.UpdatePanelPositionFromPrefs();
+        playControlPanel.SetActive(true);
+        ui.SetActive(false);
+        setupForGameDialog.SetActive(true);
+        midiPlayer.OnModePreviewUI();
+        mainContent.SetActive(false);
     }
 }
