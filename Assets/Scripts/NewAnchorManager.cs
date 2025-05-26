@@ -305,6 +305,8 @@ public class NewAnchorManager : MonoBehaviour
         {
             await SaveCurrentAnchorAsync();
             pianoFunctions.SavePianoPropertiesToPlayerPrefs();
+            go.GetComponent<OVRSpatialAnchor>().enabled = false;
+
             return true;
         }
         else

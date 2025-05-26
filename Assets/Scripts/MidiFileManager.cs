@@ -27,6 +27,7 @@ public class MidiFileManager : MonoBehaviour
     public GameObject accuracyOverallText;
     public GameObject totalImprovisedNotesText;
     public GameObject wrongImprovisedNotesText;
+    public GameObject finalScorePanel;
 
     public PanelManagerSongList panelManagerSongList;
 
@@ -278,5 +279,6 @@ public class MidiFileManager : MonoBehaviour
         setupForGameDialog.SetActive(true);
         midiPlayer.OnModePreviewUI();
         mainContent.SetActive(false);
+        finalScorePanel.SetActive(false);
     }
 }

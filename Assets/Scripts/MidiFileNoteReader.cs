@@ -1009,11 +1009,11 @@ public class MidiFileNoteReader : MonoBehaviour
     private void ColorAllKeys()
     {
         pianoFunctions.ResetAllKeysToDefaultColor();
-        colorAccompaniment = true;
-        colorMelody = true;
+        //colorAccompaniment = true;
+        //colorMelody = true;
 
-        colorAccompanimentKeysButtonText.text = "Accompaniment key coloring: ON";
-        colorMelodyKeysButtonText.text = "Melody key coloring: ON";
+        //colorAccompanimentKeysButtonText.text = "Accompaniment key coloring: ON";
+        //colorMelodyKeysButtonText.text = "Melody key coloring: ON";
 
         ReplayActiveNotes();
 

@@ -15,6 +15,7 @@ public class ResetPianoPositionDialogHandler : MonoBehaviour
     [SerializeField] private GameObject pianoSettingsButton;
     [SerializeField] private GameObject pianoSettingsPanel;
     [SerializeField] private MidiFileNoteReader midiFileNoteReader;
+    [SerializeField] private GameObject handGrabInteraction;
 
     bool isUIActive = false;
     bool isPlayControlPanelActive = false;
@@ -52,12 +53,13 @@ public class ResetPianoPositionDialogHandler : MonoBehaviour
         relativeTransformSaverPlayControlPanel.UpdatePanelPositionFromPrefs();
         UI.SetActive(isUIActive);
         playControlPanel.SetActive(isPlayControlPanelActive);
+        handGrabInteraction.SetActive(false);
         
     }
 
     public void OnCancelButtonPressed()
     {
-        Debug.Log("Pressed cancel");
+        Debug.Log("Pressed cancel");    
         resetPianoPositionDialog.SetActive(false);
         UI.SetActive(isUIActive);
         playControlPanel.SetActive(isPlayControlPanelActive);
