@@ -503,7 +503,7 @@ public class MidiFileNoteReader : MonoBehaviour
         pianoFunctions.ResetAllKeysToDefaultColor();
 
         UpdatePlayPauseButtons();
-        UpdateUI();
+        //UpdateUI();
 
         Debug.Log($"Started playback in {mode} mode.");
     }
@@ -941,7 +941,7 @@ public class MidiFileNoteReader : MonoBehaviour
     #endregion
 
 
-    #region Utilities
+    #region Utilities   
     private void UpdateUI()
     {
         pianoFunctions.ResetSelectedKeysToDefaultColors(activeNotes);

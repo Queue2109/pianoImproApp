@@ -46677,7 +46677,7 @@ MonoBehaviour:
   relativeTransformSaverPlayControlPanel: {fileID: 2146127999}
   blackKeyScaleFactor: 1
   whiteKeyScaleFactor: 1
-  whiteKeyDefaultColor: {r: 1, g: 1, b: 1, a: 0.2784314}
+  whiteKeyDefaultColor: {r: 1, g: 1, b: 1, a: 0.18431373}
   blackKeyDefaultColor: {r: 0, g: 0, b: 0, a: 0.56078434}
   whiteKeyHighlightColorRight: {r: 0.20311682, g: 0.29338774, b: 0.81761, a: 0.4862745}
   blackKeyHighlightColorRight: {r: 0.042917553, g: 0.09408069, b: 0.38993704, a: 0.8}
@@ -46797,7 +46797,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Selena Gomez mjau mjau
+  m_text: 
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: dda8d4d183f898241969906ee2a03d81, type: 2}
   m_sharedMaterial: {fileID: 7032093815205813286, guid: dda8d4d183f898241969906ee2a03d81, type: 2}

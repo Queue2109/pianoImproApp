@@ -22,6 +22,11 @@ public class ResetPianoPositionDialogHandler : MonoBehaviour
 
     public void OnBunnyPoseDetected()
     {
+
+        if (midiFileNoteReader.isPlaying)
+        {
+            return;
+        }
         resetPianoPositionDialog.SetActive(true);
         isUIActive = UI.activeSelf;
         UI.SetActive(false);
@@ -33,11 +38,6 @@ public class ResetPianoPositionDialogHandler : MonoBehaviour
             anchorManager.OnSaveButtonCLicked();
             pianoSettingsPanel.SetActive(false);
             pianoSettingsButton.SetActive(true);
-        }
-
-        if (midiFileNoteReader.isPlaying)
-        {
-            midiFileNoteReader.TogglePlayPause();
         }
 
     }

@@ -145,7 +145,13 @@ public class HttpHandler : MonoBehaviour
 
         if (!chordDictionary.TryGetValue(data.result, out var symbol))
         {
-            Debug.LogWarning($"Unknown chord: {data.result}"); return;
+            //if (data.result.Contains("major")) { symbol = "maj"; }
+            //else if (data.result.Contains("minor")) { symbol = "m"; }
+            //else
+            //{
+            //    Debug.LogWarning($"Unknown chord: {data.result}"); return;
+            //}
+            return;
         }
         Debug.Log($"HTTP 5");
 
